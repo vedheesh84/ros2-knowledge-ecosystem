@@ -136,9 +136,11 @@ ros2 node list
 # Step 2: Inspect node connectivity and endpoints
 ros2 node info /faulty_node
 
-# Step 3: Check topic publishing rate and verify message content
-ros2 topic echo /debug_stream
-ros2 topic hz /debug_stream
+# Step 3: Check topic publishing rate and inspect discovered topic
+ros2 topic list
+# Inspect the active topic (notice the intentional typo: /data_outptu)
+ros2 topic echo /data_outptu
+ros2 topic hz /data_outptu
 
 # Step 4: Run system diagnostic auditor
 ros2 doctor --report
