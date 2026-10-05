@@ -42,7 +42,8 @@ class SimTimeNode(Node):
     def __init__(self):
         super().__init__('sim_time_demo')
 
-        self.declare_parameter('use_sim_time', False)
+        if not self.has_parameter('use_sim_time'):
+            self.declare_parameter('use_sim_time', False)
         use_sim = self.get_parameter('use_sim_time').value
 
         self.get_logger().info('=' * 50)
