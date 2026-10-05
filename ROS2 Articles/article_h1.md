@@ -225,7 +225,22 @@ To execute a complete integrated system where perception, state arbitration, and
 - **Advanced Mobile Manipulation Reference:** [`Mobile_Manipulator_ws/gripper_car_ws/`](../Mobile_Manipulator_ws/gripper_car_ws/README.md)
   - `src/bringup/robot_bringup/launch/pick_and_place.launch.py` — 6-DOF arm MoveIt2 planning, Nav2 localization, and QR routing.
 
-#### 1. Launch the Level 1 Capstone System
+#### 1. Launch the Fundamentals Integration System
+```bash
+cd "Ros2 learning kits/ROS2_kits_ws"
+source install/setup.bash
+
+# Launch full system (sensor fusion, command executor, and robot brain)
+ros2 launch learning_integration full_system.launch.py
+
+# In another terminal, observe state transitions
+ros2 topic echo /robot_status
+
+# Observe sensor data stream
+ros2 topic echo /sensor_data
+```
+
+#### 2. Launch the Level 1 Capstone System
 ```bash
 cd "02 — Domains/ROS2/AMR_ws/turtlebot3_ws"
 source install/setup.bash
@@ -235,7 +250,7 @@ export TURTLEBOT3_MODEL=burger
 ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
 ```
 
-#### 2. Execute Action-Driven Autonomous Patrol
+#### 3. Execute Action-Driven Autonomous Patrol
 In a second terminal:
 
 ```bash
