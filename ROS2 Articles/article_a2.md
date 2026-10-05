@@ -290,7 +290,7 @@ In a separate terminal:
 rqt_graph
 
 # 2. Query node connectivity via CLI
-ros2 node info /graph_introspector_node
+ros2 node info /graph_introspector
 
 # 3. Inspect topic endpoints and subscriber counts
 ros2 topic list -v

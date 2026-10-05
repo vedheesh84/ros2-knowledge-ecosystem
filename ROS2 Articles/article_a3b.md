@@ -299,7 +299,7 @@ To run a fully parameterized node and dynamically reconfigure it at runtime:
 ```bash
 cd ROS2_kits_ws
 source install/setup.bash
-ros2 run learning_core parameter_echo_node --ros-args -p echo_prefix:="[ROBOT_CORE]"
+ros2 run learning_core parameter_echo_node --ros-args -p 'greeting_message:="System Ready"'
 ```
 
 #### 2. Inspect and Dynamically Reconfigure Parameters
@@ -307,13 +307,13 @@ In a second terminal:
 
 ```bash
 # 1. List active declared parameters
-ros2 param list /parameter_echo_node
+ros2 param list /parameter_echo
 
 # 2. Query parameter value and description
-ros2 param get /parameter_echo_node echo_prefix
+ros2 param get /parameter_echo greeting_message
 
 # 3. Dynamically reconfigure without restarting the node process
-ros2 param set /parameter_echo_node echo_prefix "[UPDATED_PREFIX]"
+ros2 param set /parameter_echo greeting_message "Mission Started"
 ```
 
 ---
