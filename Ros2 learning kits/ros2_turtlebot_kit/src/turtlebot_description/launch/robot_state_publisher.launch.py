@@ -17,6 +17,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration, Command
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
@@ -29,6 +30,7 @@ def generate_launch_description():
     # Launch arguments
     sim_mode = LaunchConfiguration('sim_mode')
     use_sim_time = LaunchConfiguration('use_sim_time')
+    serial_port = LaunchConfiguration('serial_port')
 
     return LaunchDescription([
         # ========================================
@@ -44,6 +46,11 @@ def generate_launch_description():
             default_value='false',
             description='Use simulation time'
         ),
+        DeclareLaunchArgument(
+            'serial_port',
+            default_value='/dev/ttyACM0',
+            description='Serial port for Arduino hardware interface'
+        ),
 
         # ========================================
         # ROBOT STATE PUBLISHER
@@ -54,9 +61,10 @@ def generate_launch_description():
             name='robot_state_publisher',
             output='screen',
             parameters=[{
-                'robot_description': Command([
-                    'xacro ', urdf_file, ' sim_mode:=', sim_mode
-                ]),
+                'robot_description': ParameterValue(
+                    Command(['xacro ', urdf_file, ' sim_mode:=', sim_mode, ' serial_port:=', serial_port]),
+                    value_type=str
+                ),
                 'use_sim_time': use_sim_time,
             }]
         ),

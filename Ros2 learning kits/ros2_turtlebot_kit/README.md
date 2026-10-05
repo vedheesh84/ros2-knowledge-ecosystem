@@ -90,13 +90,29 @@ ros2 run turtlebot_demos break_odom --mode drift
 ros2 run turtlebot_demos break_costmap --mode phantom_obstacles
 ```
 
-## Hardware Interface
+## Hardware Interface & Arduino Firmware
 
 The `turtlebot_hardware` package implements a minimal C++ ros2_control plugin:
 
-- **Protocol**: Serial communication with `VEL,<left>,<right>` commands
-- **Feedback**: Encoder data via `ENC,<left>,<right>`
+- **Protocol**: Serial communication at 115200 baud with `VEL,<left>,<right>\n` commands
+- **Feedback**: Encoder data stream at 50 Hz via `ENC,<left>,<right>\n`
 - **Lifecycle**: Full lifecycle support (configure, activate, deactivate)
+
+### Arduino Firmware
+Flashing the physical microcontroller (Arduino Uno / Mega / ESP32 / Teensy):
+- Source file: [`arduino/turtlebot_motor_controller/turtlebot_motor_controller.ino`](arduino/turtlebot_motor_controller/turtlebot_motor_controller.ino)
+- Supports dual DC motor drivers (PWM/DIR), quadrature encoder interrupts, and a 50 Hz PID control loop.
+- Built-in test emulation mode: send `TEST,ON\n` over serial (or enable `#define SIMULATION_TEST_MODE`) to test hardware communication without physical motors connected.
+
+### Pseudo-Hardware Serial Emulator (Hardware-in-the-Loop Mock)
+For automated testing or desktop development without physical microcontrollers:
+```bash
+# Start pseudo-hardware emulator (creates virtual serial port /tmp/tty_turtlebot_fake)
+python3 scripts/pseudo_arduino_emulator.py --port /tmp/tty_turtlebot_fake
+
+# In another terminal, launch hardware bringup connected to virtual port
+ros2 launch turtlebot_bringup hardware.launch.py serial_port:=/tmp/tty_turtlebot_fake
+```
 
 ## Simulation vs Hardware
 
@@ -104,8 +120,8 @@ The `turtlebot_hardware` package implements a minimal C++ ros2_control plugin:
 # Simulation (Gazebo)
 ros2 launch turtlebot_bringup simulation.launch.py
 
-# Hardware (real robot)
-ros2 launch turtlebot_bringup hardware.launch.py
+# Hardware (real robot or pseudo-hardware emulator)
+ros2 launch turtlebot_bringup hardware.launch.py serial_port:=/dev/ttyACM0
 ```
 
 The URDF uses `sim_mode` argument to switch between simulation plugins and real hardware interface.

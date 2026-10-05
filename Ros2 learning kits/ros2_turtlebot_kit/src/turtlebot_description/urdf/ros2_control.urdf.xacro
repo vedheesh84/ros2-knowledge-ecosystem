@@ -48,6 +48,7 @@
 
   <!-- Argument to switch between hardware and simulation -->
   <xacro:arg name="sim_mode" default="false"/>
+  <xacro:arg name="serial_port" default="/dev/ttyACM0"/>
 
   <!-- ========================================== -->
   <!-- HARDWARE MODE (Real Robot)                  -->
@@ -68,7 +69,7 @@
       <hardware>
         <plugin>turtlebot_hardware/TurtlebotHardwareInterface</plugin>
         <!-- Serial port configuration -->
-        <param name="serial_port">/dev/ttyACM0</param>
+        <param name="serial_port">$(arg serial_port)</param>
         <param name="baud_rate">115200</param>
         <!-- Robot physical parameters -->
         <param name="wheel_radius">0.05</param>

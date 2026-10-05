@@ -1,42 +1,15 @@
 #!/usr/bin/env python3
 """
-Demo 02: ros2_control Deep Dive
-================================
+TurtleBot AMR - Hardware Bringup Launch
+=======================================
 
-BUILDS ON: ROS2_kits_ws/learning_lifecycle
-
-LEARNING OBJECTIVES:
-- Understand controller_manager architecture
-- See hardware interface lifecycle
-- Learn controller configuration
-
-WHAT YOU'LL DO:
-1. Launch robot with ros2_control
-2. Inspect controller states
-3. Load/unload controllers manually
-4. Understand resource management
-
-COMMANDS TO TRY:
-    # List all controllers
-    ros2 control list_controllers
-
-    # List hardware interfaces
-    ros2 control list_hardware_interfaces
-
-    # Check controller manager state
-    ros2 service list | grep controller_manager
-
-    # Manually switch controllers
-    ros2 control switch_controllers --stop diff_drive_controller
-    ros2 control switch_controllers --start diff_drive_controller
-
-    # Load a new controller
-    ros2 control load_controller joint_state_broadcaster
-
-CONTROLLER LIFECYCLE:
-    unconfigured -> inactive -> active
-    (loaded)       (configured) (running)
+Launches the physical (or pseudo-hardware emulated) robot system:
+1. Robot State Publisher with URDF (sim_mode=false, serial_port configured)
+2. Controller Manager (ros2_control_node)
+3. Spawns joint_state_broadcaster and diff_drive_controller
+4. Optional RViz visualization
 """
+
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
@@ -50,9 +23,11 @@ from launch_ros.parameter_descriptions import ParameterValue
 def generate_launch_description():
     pkg_description = get_package_share_directory('turtlebot_description')
     pkg_hardware = get_package_share_directory('turtlebot_hardware')
+    pkg_bringup = get_package_share_directory('turtlebot_bringup')
 
-    controller_config = os.path.join(pkg_hardware, 'config', 'ros2_controllers.yaml')
     urdf_file = os.path.join(pkg_description, 'urdf', 'turtlebot.urdf.xacro')
+    controllers_file = os.path.join(pkg_hardware, 'config', 'ros2_controllers.yaml')
+    rviz_config = os.path.join(pkg_bringup, 'rviz', 'simulation.rviz')
 
     serial_port = LaunchConfiguration('serial_port')
     use_rviz = LaunchConfiguration('use_rviz')
@@ -65,13 +40,13 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument(
             'serial_port',
-            default_value='/tmp/tty_turtlebot_fake',
-            description='Serial port for Arduino hardware interface'
+            default_value='/dev/ttyACM0',
+            description='Serial port for Arduino / microcontroller hardware interface'
         ),
         DeclareLaunchArgument(
             'use_rviz',
             default_value='false',
-            description='Launch RViz'
+            description='Launch RViz for visualization'
         ),
 
         # Robot State Publisher
@@ -86,18 +61,18 @@ def generate_launch_description():
             }]
         ),
 
-        # Controller Manager (ros2_control_node)
+        # ros2_control controller manager
         Node(
             package='controller_manager',
             executable='ros2_control_node',
             parameters=[
                 {'robot_description': robot_description},
-                controller_config,
+                controllers_file,
             ],
             output='screen',
         ),
 
-        # Joint State Broadcaster (publishes /joint_states)
+        # Joint State Broadcaster Spawner
         TimerAction(
             period=2.0,
             actions=[
@@ -110,7 +85,7 @@ def generate_launch_description():
             ],
         ),
 
-        # Diff Drive Controller
+        # Diff Drive Controller Spawner
         TimerAction(
             period=3.0,
             actions=[
@@ -123,7 +98,7 @@ def generate_launch_description():
             ],
         ),
 
-        # RViz
+        # RViz (Conditional)
         TimerAction(
             period=4.0,
             actions=[
@@ -131,8 +106,7 @@ def generate_launch_description():
                     package='rviz2',
                     executable='rviz2',
                     name='rviz2',
-                    arguments=['-d', os.path.join(pkg_description, 'rviz', 'display.rviz')],
-                    parameters=[{'use_sim_time': False}],
+                    arguments=['-d', rviz_config],
                     condition=IfCondition(use_rviz),
                 ),
             ],

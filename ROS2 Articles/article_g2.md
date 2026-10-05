@@ -125,7 +125,7 @@ To diagnose graph bottlenecks, missing topics, and circular message topologies:
 
 #### 1. Analyze Full System Graph Topology
 ```bash
-cd ros2_turtlebot_kit
+cd "Ros2 learning kits/ros2_turtlebot_kit"
 source install/setup.bash
 ros2 launch turtlebot_bringup simulation.launch.py
 ```
@@ -142,6 +142,12 @@ ros2 topic info /scan -v
 
 # 3. Detect unadvertised service or action server endpoints
 ros2 service list -t
+```
+
+#### 3. Inject Conflicting TF Transform & Diagnose Loop/Flicker
+```bash
+# Inject conflicting TF transform to observe graph disconnection/flicker
+ros2 run turtlebot_demos break_tf --mode duplicate
 ```
 
 ---

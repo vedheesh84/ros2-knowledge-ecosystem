@@ -31,16 +31,17 @@ import math
 
 
 class CostmapBreaker(Node):
-    def __init__(self, mode: str):
+    def __init__(self, cli_mode: str = 'phantom_obstacles'):
         super().__init__('costmap_breaker')
-        self.mode = mode
+        self.declare_parameter('mode', cli_mode)
+        self.mode = self.get_parameter('mode').get_parameter_value().string_value
 
         self.get_logger().warn('=' * 50)
         self.get_logger().warn('COSTMAP BREAKER ACTIVE - LEARNING MODE')
-        self.get_logger().warn(f'Mode: {mode}')
+        self.get_logger().warn(f'Mode: {self.mode}')
         self.get_logger().warn('=' * 50)
 
-        if mode == 'phantom_obstacles':
+        if self.mode == 'phantom_obstacles':
             # Publish fake laser scan with obstacles everywhere
             self.pub = self.create_publisher(LaserScan, '/scan_fake', 10)
             self.timer = self.create_timer(0.1, self.publish_phantom)
@@ -51,7 +52,7 @@ class CostmapBreaker(Node):
                 'To see effect, add /scan_fake to costmap observation_sources'
             )
 
-        elif mode == 'clear_obstacles':
+        elif self.mode == 'clear_obstacles':
             # Subscribe to real scan, publish cleared version
             self.sub = self.create_subscription(
                 LaserScan, '/scan', self.clear_callback, 10
@@ -64,7 +65,7 @@ class CostmapBreaker(Node):
                 'Robot will not see any obstacles!'
             )
 
-        elif mode == 'close_obstacles':
+        elif self.mode == 'close_obstacles':
             # Make all obstacles appear very close
             self.sub = self.create_subscription(
                 LaserScan, '/scan', self.close_callback, 10
@@ -147,7 +148,7 @@ def main():
         default='phantom_obstacles',
         help='Type of costmap corruption'
     )
-    args = parser.parse_args()
+    args, _ = parser.parse_known_args()
 
     rclpy.init()
     node = CostmapBreaker(args.mode)

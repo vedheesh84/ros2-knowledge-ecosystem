@@ -110,7 +110,7 @@ def main():
     parser.add_argument('--x', type=float, default=1.0, help='Goal X position')
     parser.add_argument('--y', type=float, default=0.0, help='Goal Y position')
     parser.add_argument('--yaw', type=float, default=0.0, help='Goal yaw (radians)')
-    args = parser.parse_args()
+    args, _ = parser.parse_known_args()
 
     rclpy.init()
     node = GoalSender()

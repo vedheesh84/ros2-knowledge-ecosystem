@@ -38,8 +38,10 @@ EXPECTED TF TREE:
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, TimerAction
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, TimerAction
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
@@ -47,7 +49,21 @@ def generate_launch_description():
     pkg_description = get_package_share_directory('turtlebot_description')
     pkg_bringup = get_package_share_directory('turtlebot_bringup')
 
+    use_rviz = LaunchConfiguration('use_rviz')
+    use_teleop = LaunchConfiguration('use_teleop')
+
     return LaunchDescription([
+        DeclareLaunchArgument(
+            'use_rviz',
+            default_value='true',
+            description='Launch RViz for visualization'
+        ),
+        DeclareLaunchArgument(
+            'use_teleop',
+            default_value='true',
+            description='Launch teleop keyboard terminal'
+        ),
+
         # Robot State Publisher
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
@@ -66,6 +82,7 @@ def generate_launch_description():
                     name='rviz2',
                     arguments=['-d', os.path.join(pkg_description, 'rviz', 'display.rviz')],
                     parameters=[{'use_sim_time': True}],
+                    condition=IfCondition(use_rviz),
                 ),
             ],
         ),
@@ -81,6 +98,7 @@ def generate_launch_description():
                     output='screen',
                     prefix='xterm -e',
                     remappings=[('/cmd_vel', '/cmd_vel')],
+                    condition=IfCondition(use_teleop),
                 ),
             ],
         ),

@@ -32,16 +32,18 @@ from nav_msgs.msg import Odometry
 
 
 class OdomBreaker(Node):
-    def __init__(self, mode: str, magnitude: float):
+    def __init__(self, cli_mode: str = 'drift', cli_magnitude: float = 0.1):
         super().__init__('odom_breaker')
-        self.mode = mode
-        self.magnitude = magnitude
+        self.declare_parameter('mode', cli_mode)
+        self.declare_parameter('magnitude', cli_magnitude)
+        self.mode = self.get_parameter('mode').get_parameter_value().string_value
+        self.magnitude = self.get_parameter('magnitude').get_parameter_value().double_value
         self.drift_x = 0.0
         self.drift_y = 0.0
 
         self.get_logger().warn('=' * 50)
         self.get_logger().warn('ODOMETRY BREAKER ACTIVE - LEARNING MODE')
-        self.get_logger().warn(f'Mode: {mode}, Magnitude: {magnitude}')
+        self.get_logger().warn(f'Mode: {self.mode}, Magnitude: {self.magnitude}')
         self.get_logger().warn('=' * 50)
 
         # Subscribe to real odom, publish corrupted version
@@ -132,7 +134,7 @@ def main():
         default=0.1,
         help='Magnitude of corruption'
     )
-    args = parser.parse_args()
+    args, _ = parser.parse_known_args()
 
     rclpy.init()
     node = OdomBreaker(args.mode, args.magnitude)

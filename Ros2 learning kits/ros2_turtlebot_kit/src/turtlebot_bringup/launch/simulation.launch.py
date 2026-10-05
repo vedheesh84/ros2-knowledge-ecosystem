@@ -59,6 +59,7 @@ from launch.substitutions import (
     PythonExpression,
 )
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 
 
@@ -91,7 +92,10 @@ def generate_launch_description():
     world = LaunchConfiguration('world')
 
     # Process URDF with xacro (simulation mode)
-    robot_description = Command(['xacro ', urdf_file, ' sim_mode:=true'])
+    robot_description = ParameterValue(
+        Command(['xacro ', urdf_file, ' sim_mode:=true']),
+        value_type=str
+    )
 
     return LaunchDescription([
         # ========================================

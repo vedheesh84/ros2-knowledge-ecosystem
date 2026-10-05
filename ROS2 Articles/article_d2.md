@@ -124,14 +124,12 @@ ros2 launch learning_debugging debug_demo.launch.py
 ```
 
 #### 2. Run Failure Injection Breaker
-In an AMR simulation environment:
-
 ```bash
-cd ros2_turtlebot_kit
+cd "Ros2 learning kits/ros2_turtlebot_kit"
 source install/setup.bash
 
 # Run odometry breaker to simulate encoder slip/failure
-ros2 run turtlebot_demos break_odom.py --ros-args -p mode:=drift
+ros2 run turtlebot_demos break_odom --mode drift
 
 # Observe how EKF localization degrades vs total collapse
 ros2 topic echo /odometry/filtered

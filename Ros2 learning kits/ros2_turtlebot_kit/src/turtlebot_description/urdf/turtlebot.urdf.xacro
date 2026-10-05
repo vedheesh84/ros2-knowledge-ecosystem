@@ -63,6 +63,8 @@
 
   <!-- Simulation mode switch -->
   <xacro:arg name="sim_mode" default="false"/>
+  <!-- Serial port for physical or pseudo-hardware microcontroller -->
+  <xacro:arg name="serial_port" default="/dev/ttyACM0"/>
 
   <!-- ========================================== -->
   <!-- INCLUDE COMPONENT FILES                     -->

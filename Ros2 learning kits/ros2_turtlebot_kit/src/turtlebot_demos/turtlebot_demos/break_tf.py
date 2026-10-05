@@ -33,17 +33,18 @@ import time
 
 
 class TFBreaker(Node):
-    def __init__(self, mode: str):
+    def __init__(self, cli_mode: str = 'duplicate'):
         super().__init__('tf_breaker')
-        self.mode = mode
+        self.declare_parameter('mode', cli_mode)
+        self.mode = self.get_parameter('mode').get_parameter_value().string_value
         self.br = TransformBroadcaster(self)
 
         self.get_logger().warn('=' * 50)
         self.get_logger().warn('TF BREAKER ACTIVE - LEARNING MODE')
-        self.get_logger().warn(f'Mode: {mode}')
+        self.get_logger().warn(f'Mode: {self.mode}')
         self.get_logger().warn('=' * 50)
 
-        if mode == 'wrong_parent':
+        if self.mode == 'wrong_parent':
             self.timer = self.create_timer(0.02, self.publish_wrong_parent)
             self.get_logger().error(
                 'Publishing odom->base_link with WRONG parent (base_link->odom)'
@@ -51,7 +52,7 @@ class TFBreaker(Node):
             self.get_logger().info(
                 'SYMPTOM: TF tree will have a loop or disconnection'
             )
-        elif mode == 'stale':
+        elif self.mode == 'stale':
             self.timer = self.create_timer(0.02, self.publish_stale)
             self.get_logger().error(
                 'Publishing odom->base_link with 5 SECOND DELAY'
@@ -59,7 +60,7 @@ class TFBreaker(Node):
             self.get_logger().info(
                 'SYMPTOM: Extrapolation errors, robot appears in wrong place'
             )
-        elif mode == 'duplicate':
+        elif self.mode == 'duplicate':
             self.timer = self.create_timer(0.02, self.publish_duplicate)
             self.get_logger().error(
                 'Publishing DUPLICATE odom->base_link (conflicts with EKF)'
@@ -113,7 +114,7 @@ def main():
         default='duplicate',
         help='Type of TF breakage to inject'
     )
-    args = parser.parse_args()
+    args, _ = parser.parse_known_args()
 
     rclpy.init()
     node = TFBreaker(args.mode)

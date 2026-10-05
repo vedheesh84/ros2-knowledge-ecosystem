@@ -28,10 +28,15 @@ setup(
     entry_points={
         'console_scripts': [
             'break_tf = turtlebot_demos.break_tf:main',
+            'break_tf.py = turtlebot_demos.break_tf:main',
             'break_odom = turtlebot_demos.break_odom:main',
+            'break_odom.py = turtlebot_demos.break_odom:main',
             'break_costmap = turtlebot_demos.break_costmap:main',
+            'break_costmap.py = turtlebot_demos.break_costmap:main',
             'goal_sender = turtlebot_demos.goal_sender:main',
+            'goal_sender.py = turtlebot_demos.goal_sender:main',
             'odom_drift_visualizer = turtlebot_demos.odom_drift_visualizer:main',
+            'odom_drift_visualizer.py = turtlebot_demos.odom_drift_visualizer:main',
         ],
     },
 )

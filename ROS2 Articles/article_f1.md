@@ -83,7 +83,7 @@ ros2 launch learning_simulation sim_demo.launch.py
 
 #### 2. Launch Full Gazebo Robot Simulation
 ```bash
-cd ros2_turtlebot_kit
+cd "Ros2 learning kits/ros2_turtlebot_kit"
 source install/setup.bash
 ros2 launch turtlebot_bringup simulation.launch.py
 ```
