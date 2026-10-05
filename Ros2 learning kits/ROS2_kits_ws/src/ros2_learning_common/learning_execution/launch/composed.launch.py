@@ -45,7 +45,6 @@ def generate_launch_description():
     composed = Node(
         package='learning_execution',
         executable='composed_node',
-        name='composed_demo',
         output='screen',
     )
 

@@ -184,14 +184,14 @@ To explore declarative launch file parameterization and conditional node executi
 cd ROS2_kits_ws
 source install/setup.bash
 
-# Launch with customized publishing frequency
-ros2 launch learning_execution parameterized.launch.py publish_frequency:=5.0
+# Launch with customized publishing rate
+ros2 launch learning_execution parameterized.launch.py rate:=5.0
 ```
 
 #### 2. Execute Conditional Subsystem Startups
 ```bash
 # Launch only Node A, conditionally suppressing Node B
-ros2 launch learning_execution conditional.launch.py enable_node_b:=false
+ros2 launch learning_execution conditional.launch.py enable_b:=false
 
 # In another terminal, verify Node B was not spawned
 ros2 node list

@@ -215,6 +215,7 @@ Creates three internal components in one process.
 | `composed.launch.py` | Composition | One process, multiple nodes |
 | `conditional.launch.py` | Conditions | Enable/disable nodes with args |
 | `parameterized.launch.py` | Parameters | Pass config to nodes |
+| `multi_robot.launch.py` | Namespaces & Scaling | PushRosNamespace multi-instance isolation |
 
 ---
 

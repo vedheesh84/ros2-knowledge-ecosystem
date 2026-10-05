@@ -203,7 +203,9 @@ Problem: Code is brittle. Hard to scale. Hard to remap.
 To explore namespace isolation, multi-instance instantiation, and topic remapping:
 
 - **Workspace Path:** [`ROS2_kits_ws/src/ros2_learning_common/learning_execution/`](../Ros2%20learning%20kits/ROS2_kits_ws/src/ros2_learning_common/learning_execution/README.md)
-- **Launch Orchestration to Inspect:** `launch/remapped.launch.py` — Uses `PushRosNamespace` and `remappings=[('/old_topic', '/new_topic')]`
+- **Launch Orchestration to Inspect:**
+  - `launch/multi_robot.launch.py` — Uses `PushRosNamespace` and remappings for multi-robot isolation
+  - `launch/remapped.launch.py` — Demonstrates connecting decoupled topics via `remappings=[('/data_in', '/data_out')]`
 
 #### 1. Launch Multi-Robot Namespaced Instances
 ```bash
@@ -211,7 +213,7 @@ cd ROS2_kits_ws
 source install/setup.bash
 
 # Launch multiple namespaced node instances
-ros2 launch learning_execution remapped.launch.py
+ros2 launch learning_execution multi_robot.launch.py
 ```
 
 #### 2. Verify Namespace Isolation via CLI
