@@ -1,0 +1,304 @@
+<?xml version="1.0"?>
+<robot name="freecad_drone">
+  <material name="body_blue">
+    <color rgba="0.12 0.40 0.95 1.0"/>
+  </material>
+  <material name="arm_dark">
+    <color rgba="0.12 0.12 0.14 1.0"/>
+  </material>
+  <material name="motor_black">
+    <color rgba="0.05 0.05 0.06 1.0"/>
+  </material>
+  <material name="propeller_orange">
+    <color rgba="0.95 0.45 0.05 1.0"/>
+  </material>
+  <material name="skid_silver">
+    <color rgba="0.82 0.82 0.86 1.0"/>
+  </material>
+  <material name="camera_yellow">
+    <color rgba="0.95 0.82 0.12 1.0"/>
+  </material>
+
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1.8"/>
+      <inertia ixx="0.05" ixy="0" ixz="0" iyy="0.05" iyz="0" izz="0.08"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://drone_pkg/meshes/body.stl"/>
+      </geometry>
+      <material name="body_blue"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://drone_pkg/meshes/arm_x.stl"/>
+      </geometry>
+      <material name="arm_dark"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://drone_pkg/meshes/arm_y.stl"/>
+      </geometry>
+      <material name="arm_dark"/>
+    </visual>
+    <visual>
+      <origin xyz="0.32 0.32 0.075" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://drone_pkg/meshes/motor_hub.stl"/>
+      </geometry>
+      <material name="motor_black"/>
+    </visual>
+    <collision>
+      <origin xyz="0.32 0.32 0.075" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.06" length="0.09"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0.32 -0.32 0.075" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://drone_pkg/meshes/motor_hub.stl"/>
+      </geometry>
+      <material name="motor_black"/>
+    </visual>
+    <collision>
+      <origin xyz="0.32 -0.32 0.075" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.06" length="0.09"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="-0.32 0.32 0.075" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://drone_pkg/meshes/motor_hub.stl"/>
+      </geometry>
+      <material name="motor_black"/>
+    </visual>
+    <collision>
+      <origin xyz="-0.32 0.32 0.075" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.06" length="0.09"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="-0.32 -0.32 0.075" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://drone_pkg/meshes/motor_hub.stl"/>
+      </geometry>
+      <material name="motor_black"/>
+    </visual>
+    <collision>
+      <origin xyz="-0.32 -0.32 0.075" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.06" length="0.09"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0.16 -0.08" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://drone_pkg/meshes/landing_skid.stl"/>
+      </geometry>
+      <material name="skid_silver"/>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.16 -0.08" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://drone_pkg/meshes/landing_skid.stl"/>
+      </geometry>
+      <material name="skid_silver"/>
+    </visual>
+    <visual>
+      <origin xyz="0.29 0 -0.02" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://drone_pkg/meshes/camera_block.stl"/>
+      </geometry>
+      <material name="camera_yellow"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.50 0.24 0.14"/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0.015" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.95 0.08 0.06"/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0.015" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.08 0.95 0.06"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="front_left_propeller">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.02"/>
+      <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="2e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://drone_pkg/meshes/propeller.stl"/>
+      </geometry>
+      <material name="propeller_orange"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.16" length="0.02"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_left_propeller_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="front_left_propeller"/>
+    <origin xyz="0.32 0.32 0.105" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <link name="front_right_propeller">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.02"/>
+      <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="2e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://drone_pkg/meshes/propeller.stl"/>
+      </geometry>
+      <material name="propeller_orange"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.16" length="0.02"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_right_propeller_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="front_right_propeller"/>
+    <origin xyz="0.32 -0.32 0.105" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <link name="rear_left_propeller">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.02"/>
+      <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="2e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://drone_pkg/meshes/propeller.stl"/>
+      </geometry>
+      <material name="propeller_orange"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.16" length="0.02"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_left_propeller_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="rear_left_propeller"/>
+    <origin xyz="-0.32 0.32 0.105" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <link name="rear_right_propeller">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.02"/>
+      <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="2e-5"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://drone_pkg/meshes/propeller.stl"/>
+      </geometry>
+      <material name="propeller_orange"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.16" length="0.02"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_right_propeller_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="rear_right_propeller"/>
+    <origin xyz="-0.32 -0.32 0.105" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <gazebo reference="base_link">
+    <gravity>false</gravity>
+    <visual>
+      <material>
+        <ambient>0.05 0.20 0.70 1.0</ambient>
+        <diffuse>0.12 0.40 0.95 1.0</diffuse>
+      </material>
+    </visual>
+    <material>Gazebo/Blue</material>
+  </gazebo>
+  <gazebo reference="front_left_propeller">
+    <gravity>false</gravity>
+    <kinematic>true</kinematic>
+    <visual>
+      <material>
+        <ambient>0.70 0.30 0.02 1.0</ambient>
+        <diffuse>0.95 0.45 0.05 1.0</diffuse>
+      </material>
+    </visual>
+    <material>Gazebo/Orange</material>
+  </gazebo>
+  <gazebo reference="front_right_propeller">
+    <gravity>false</gravity>
+    <kinematic>true</kinematic>
+    <visual>
+      <material>
+        <ambient>0.70 0.30 0.02 1.0</ambient>
+        <diffuse>0.95 0.45 0.05 1.0</diffuse>
+      </material>
+    </visual>
+    <material>Gazebo/Orange</material>
+  </gazebo>
+  <gazebo reference="rear_left_propeller">
+    <gravity>false</gravity>
+    <kinematic>true</kinematic>
+    <visual>
+      <material>
+        <ambient>0.70 0.30 0.02 1.0</ambient>
+        <diffuse>0.95 0.45 0.05 1.0</diffuse>
+      </material>
+    </visual>
+    <material>Gazebo/Orange</material>
+  </gazebo>
+  <gazebo reference="rear_right_propeller">
+    <gravity>false</gravity>
+    <kinematic>true</kinematic>
+    <visual>
+      <material>
+        <ambient>0.70 0.30 0.02 1.0</ambient>
+        <diffuse>0.95 0.45 0.05 1.0</diffuse>
+      </material>
+    </visual>
+    <material>Gazebo/Orange</material>
+  </gazebo>
+
+  <gazebo>
+    <plugin name="gazebo_ros_joint_pose_trajectory" filename="libgazebo_ros_joint_pose_trajectory.so">
+      <ros></ros>
+      <update_rate>50</update_rate>
+    </plugin>
+  </gazebo>
+</robot>

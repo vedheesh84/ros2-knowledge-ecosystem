@@ -1,0 +1,48 @@
+# Reef Drone Control Configuration
+# ==================================
+
+thruster_allocator:
+  ros__parameters:
+    max_thrust: 50.0  # N per thruster
+
+depth_controller:
+  ros__parameters:
+    kp: 50.0          # N/m
+    ki: 5.0           # N/(m·s)
+    kd: 20.0          # N·s/m
+    max_force: 100.0  # N
+    integral_limit: 20.0  # m·s
+
+heading_controller:
+  ros__parameters:
+    kp: 10.0          # N·m/rad
+    kd: 5.0           # N·m·s/rad
+    max_torque: 20.0  # N·m
+
+velocity_controller:
+  ros__parameters:
+    kp: 30.0          # N/(m/s)
+    ki: 3.0           # N/m
+    max_force: 150.0  # N
+    integral_limit: 10.0  # m
+    drag_x: 20.0      # N·s²/m² (feedforward)
+    drag_y: 40.0
+    drag_z: 40.0
+
+station_keeping:
+  ros__parameters:
+    # Position loop
+    kp_pos: 2.0           # 1/s (velocity per meter error)
+    max_velocity: 0.5     # m/s
+
+    # Velocity loop
+    kp_vel: 30.0          # N/(m/s)
+    ki_vel: 3.0           # N/m
+
+    # Heading loop
+    kp_heading: 10.0      # N·m/rad
+    kd_heading: 5.0       # N·m·s/rad
+
+    # Limits
+    max_force: 100.0      # N
+    max_torque: 20.0      # N·m

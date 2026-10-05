@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>learning_debugging</name>
+  <version>1.0.0</version>
+  <description>ROS2 Learning: Debugging and introspection tools</description>
+  <maintainer email="learner@ros2.org">ROS2 Learner</maintainer>
+  <license>MIT</license>
+  <buildtool_depend>ament_python</buildtool_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <export><build_type>ament_python</build_type></export>
+</package>

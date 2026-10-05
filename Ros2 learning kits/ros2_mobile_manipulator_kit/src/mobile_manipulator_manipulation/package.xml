@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>mobile_manipulator_manipulation</name>
+  <version>0.1.0</version>
+  <description>
+    Pick-and-place state machine for mobile manipulator.
+
+    LEARNING OBJECTIVES:
+    - Understand state machine patterns for robotics
+    - See coordination of perception + arm control
+    - Learn error handling and recovery
+    - Practice safe manipulation sequences
+
+    STATE MACHINE:
+    IDLE → DETECTING → PRE_GRASP → GRASPING → POST_GRASP
+         → TRANSPORTING → PRE_PLACE → PLACING → RETRACTING → IDLE
+
+    KEY FILES:
+    - pick_place_state_machine.py: Main state machine
+    - grasp_planner.py: Grasp pose computation
+    - manipulation_node.py: ROS2 node wrapper
+  </description>
+  <maintainer email="learning@ros2kit.dev">ROS2 Learning Kit</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>tf2_ros</depend>
+  <depend>tf2_geometry_msgs</depend>
+
+  <exec_depend>mobile_manipulator_arm_control</exec_depend>
+  <exec_depend>mobile_manipulator_perception</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

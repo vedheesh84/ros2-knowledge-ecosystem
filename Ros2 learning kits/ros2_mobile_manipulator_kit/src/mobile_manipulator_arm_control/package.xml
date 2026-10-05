@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>mobile_manipulator_arm_control</name>
+  <version>0.1.0</version>
+  <description>
+    MoveIt2 integration for mobile manipulator arm.
+
+    LEARNING OBJECTIVES:
+    - Understand MoveIt2 configuration (SRDF, kinematics, joint limits)
+    - See MoveGroupInterface usage patterns
+    - Learn planning group and end effector concepts
+    - Practice named poses and trajectory execution
+
+    KEY FILES:
+    - config/mobile_manipulator.srdf: Semantic robot description
+    - config/kinematics.yaml: IK solver configuration
+    - config/joint_limits.yaml: Motion limits for planning
+    - scripts/arm_interface.py: Python wrapper for MoveIt
+  </description>
+  <maintainer email="learning@ros2kit.dev">ROS2 Learning Kit</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+
+  <depend>rclpy</depend>
+  <depend>moveit_ros_planning_interface</depend>
+  <depend>moveit_ros_move_group</depend>
+  <depend>moveit_kinematics</depend>
+  <depend>moveit_planners_ompl</depend>
+  <depend>moveit_simple_controller_manager</depend>
+  <depend>tf2_ros</depend>
+  <depend>geometry_msgs</depend>
+
+  <exec_depend>mobile_manipulator_description</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

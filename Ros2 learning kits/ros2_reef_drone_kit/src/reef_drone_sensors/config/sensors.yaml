@@ -1,0 +1,27 @@
+# Reef Drone Sensor Configuration
+# ================================
+
+dvl_simulator:
+  ros__parameters:
+    update_rate: 10.0         # Hz (typical DVL rate)
+    noise_stddev: 0.01        # m/s velocity noise
+    seafloor_depth: -20.0     # m (Z coordinate of seafloor)
+    max_range: 100.0          # m (max bottom lock range)
+    min_range: 0.5            # m (min bottom lock range)
+
+depth_sensor:
+  ros__parameters:
+    update_rate: 20.0         # Hz (pressure sensors are fast)
+    noise_stddev: 0.005       # m (~0.5 cm depth noise)
+    bias: 0.0                 # m (static calibration offset)
+    surface_z: 0.0            # m (Z coordinate of water surface)
+    water_density: 1025.0     # kg/m³ (seawater)
+
+magnetometer:
+  ros__parameters:
+    update_rate: 20.0         # Hz
+    noise_stddev: 0.5         # μT (microtesla)
+    declination: 0.0          # rad (magnetic declination)
+    field_north: 20.0         # μT (horizontal component)
+    field_east: 0.0           # μT
+    field_down: 40.0          # μT (vertical component)

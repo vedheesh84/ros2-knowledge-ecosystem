@@ -1,0 +1,23 @@
+<class_libraries>
+  <library path="base_hardware_interface">
+    <class name="mobile_manipulator_hardware/BaseHardwareInterface"
+           type="mobile_manipulator_hardware::BaseHardwareInterface"
+           base_class_type="hardware_interface::SystemInterface">
+      <description>
+        Mobile base hardware interface for 4-wheel differential drive.
+        Controls wheels via serial communication with Arduino.
+      </description>
+    </class>
+  </library>
+
+  <library path="arm_hardware_interface">
+    <class name="mobile_manipulator_hardware/ArmHardwareInterface"
+           type="mobile_manipulator_hardware::ArmHardwareInterface"
+           base_class_type="hardware_interface::SystemInterface">
+      <description>
+        Arm hardware interface for 5-DOF manipulator + gripper.
+        Controls servos via serial communication with Arduino/PCA9685.
+      </description>
+    </class>
+  </library>
+</class_libraries>

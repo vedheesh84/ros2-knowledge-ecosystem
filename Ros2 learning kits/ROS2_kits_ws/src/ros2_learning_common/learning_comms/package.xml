@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>learning_comms</name>
+  <version>1.0.0</version>
+  <description>
+    ROS2 Learning Package: Communication Primitives
+
+    This package teaches the three communication patterns in ROS2:
+    - Topics: One-to-many streaming data
+    - Services: Request-response for quick operations
+    - Actions: Long-running tasks with feedback
+
+    Master these and you understand 90% of ROS2 communication!
+  </description>
+
+  <maintainer email="learner@ros2.org">ROS2 Learner</maintainer>
+  <license>MIT</license>
+
+  <!-- Build system - using ament_cmake for custom action definition -->
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>rosidl_default_generators</buildtool_depend>
+
+  <!-- Runtime dependencies -->
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
+  <exec_depend>rosidl_default_runtime</exec_depend>
+
+  <!-- Interface generation group membership -->
+  <member_of_group>rosidl_interface_packages</member_of_group>
+
+  <!-- Testing -->
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

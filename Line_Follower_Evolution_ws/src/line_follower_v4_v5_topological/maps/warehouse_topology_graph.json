@@ -1,0 +1,9 @@
+{
+  "nodes": {
+    "N1": {"label": "Loading_Dock", "x": 0.0, "y": 0.0, "neighbors": ["N2", "N3"]},
+    "N2": {"label": "Assembly_Station_A", "x": 2.0, "y": 0.0, "neighbors": ["N1", "N4"]},
+    "N3": {"label": "Inspection_Bay", "x": 0.0, "y": 2.0, "neighbors": ["N1", "N4"]},
+    "N4": {"label": "Packaging_Hub", "x": 2.0, "y": 2.0, "neighbors": ["N2", "N3", "N5"]},
+    "N5": {"label": "Storage_Rack_1", "x": 4.0, "y": 2.0, "neighbors": ["N4"]}
+  }
+}

@@ -1,0 +1,155 @@
+<?xml version="1.0"?>
+<!--
+  ros2_control Hardware Interface Configuration
+
+  LEARNING OBJECTIVES:
+  - Understand hardware_interface tags in URDF
+  - See multi-system configuration (base + arm)
+  - Learn command/state interface exports
+
+  ARCHITECTURE:
+  This defines TWO hardware systems:
+  1. base_system: Controls 4 wheel joints (velocity interface)
+  2. arm_system: Controls 5 arm joints + gripper (position interface)
+
+  The controller_manager loads controllers that claim these interfaces.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Only load hardware interfaces in non-sim mode -->
+  <xacro:unless value="${sim_mode}">
+
+    <!-- ===================== BASE HARDWARE SYSTEM ===================== -->
+    <!--
+      LEARNING: This defines the mobile base hardware interface.
+      - 4 wheel joints with velocity command/state
+      - Communicates with Arduino via serial
+    -->
+    <ros2_control name="base_system" type="system">
+      <hardware>
+        <plugin>mobile_manipulator_hardware/BaseHardwareInterface</plugin>
+        <param name="serial_port">/dev/ttyACM0</param>
+        <param name="baud_rate">115200</param>
+        <param name="wheel_radius">0.075</param>
+        <param name="wheel_separation">0.35</param>
+        <param name="encoder_cpr">360</param>
+      </hardware>
+
+      <!-- Front Left Wheel -->
+      <joint name="front_left_joint">
+        <command_interface name="velocity">
+          <param name="min">-10</param>
+          <param name="max">10</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <!-- Front Right Wheel -->
+      <joint name="front_right_joint">
+        <command_interface name="velocity">
+          <param name="min">-10</param>
+          <param name="max">10</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <!-- Back Left Wheel -->
+      <joint name="back_left_joint">
+        <command_interface name="velocity">
+          <param name="min">-10</param>
+          <param name="max">10</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <!-- Back Right Wheel -->
+      <joint name="back_right_joint">
+        <command_interface name="velocity">
+          <param name="min">-10</param>
+          <param name="max">10</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+    </ros2_control>
+
+    <!-- ===================== ARM HARDWARE SYSTEM ===================== -->
+    <!--
+      LEARNING: This defines the arm hardware interface.
+      - 5 arm joints + 1 gripper joint with position command/state
+      - Communicates with Arduino/PCA9685 via serial
+    -->
+    <ros2_control name="arm_system" type="system">
+      <hardware>
+        <plugin>mobile_manipulator_hardware/ArmHardwareInterface</plugin>
+        <param name="serial_port">/dev/ttyACM1</param>
+        <param name="baud_rate">115200</param>
+      </hardware>
+
+      <!-- Joint 1: Base Rotation -->
+      <joint name="joint_1">
+        <command_interface name="position">
+          <param name="min">-3.14159</param>
+          <param name="max">3.14159</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <!-- Joint 2: Shoulder -->
+      <joint name="joint_2">
+        <command_interface name="position">
+          <param name="min">-1.5708</param>
+          <param name="max">1.5708</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <!-- Joint 3: Elbow -->
+      <joint name="joint_3">
+        <command_interface name="position">
+          <param name="min">-1.5708</param>
+          <param name="max">1.5708</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <!-- Joint 4: Wrist Pitch -->
+      <joint name="joint_4">
+        <command_interface name="position">
+          <param name="min">-1.5708</param>
+          <param name="max">1.5708</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <!-- Gripper Base: Wrist Rotation -->
+      <joint name="gripper_base_joint">
+        <command_interface name="position">
+          <param name="min">-3.14159</param>
+          <param name="max">3.14159</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <!-- Gripper: Left Gear (actuated finger) -->
+      <joint name="left_gear_joint">
+        <command_interface name="position">
+          <param name="min">0</param>
+          <param name="max">1.0</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+    </ros2_control>
+
+  </xacro:unless>
+
+</robot>

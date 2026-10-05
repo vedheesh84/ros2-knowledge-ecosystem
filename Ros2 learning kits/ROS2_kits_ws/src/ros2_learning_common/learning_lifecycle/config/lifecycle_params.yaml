@@ -1,0 +1,4 @@
+# Lifecycle node parameters
+lifecycle_sensor:
+  ros__parameters:
+    sensor_rate: 1.0

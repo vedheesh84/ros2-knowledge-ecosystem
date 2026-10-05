@@ -1,0 +1,17 @@
+# =============================================================================
+# Parameters for Node A (simple_node_a)
+# =============================================================================
+#
+# This file demonstrates loading parameters from YAML.
+# Notice the structure: node_name → ros__parameters → actual params
+#
+# =============================================================================
+
+# Parameters when running as 'node_a_yaml'
+node_a_yaml:
+  ros__parameters:
+    # Publishing rate in Hz
+    publish_rate: 2.0
+
+    # Prefix for messages
+    message_prefix: "Data from YAML config"

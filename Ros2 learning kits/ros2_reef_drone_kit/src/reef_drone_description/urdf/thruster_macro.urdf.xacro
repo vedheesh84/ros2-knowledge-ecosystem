@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<!--
+  thruster_macro.urdf.xacro - Reusable Thruster Macro for Reef Drone AUV
+
+  THRUSTER PHYSICS:
+  =================
+  Marine thrusters work by accelerating water:
+    F = rho * A * Ve * (Ve - V0)
+
+  Where:
+    F   = Thrust force (N)
+    rho = Water density (1025 kg/m³ seawater)
+    A   = Propeller disk area (m²)
+    Ve  = Exit velocity (m/s)
+    V0  = Inlet velocity (m/s)
+
+  For simplicity, we model thrust as:
+    F = Kt * |n| * n
+
+  Where Kt is the thrust coefficient and n is propeller RPM.
+  This captures the quadratic thrust-RPM relationship.
+
+  THRUSTER DYNAMICS:
+  ==================
+  Thrusters don't respond instantly. First-order dynamics:
+    T_actual = T_cmd * (1 - e^(-t/tau))
+
+  Where tau is the time constant (~0.1s for small thrusters).
+  This creates realistic response lag.
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Thruster properties -->
+  <xacro:property name="thruster_radius" value="0.02"/>
+  <xacro:property name="thruster_length" value="0.05"/>
+  <xacro:property name="thruster_mass" value="0.3"/>
+
+  <!--
+    Thruster Macro
+
+    Parameters:
+      name    - Unique thruster identifier (e.g., thruster_1)
+      parent  - Parent link to attach to
+      xyz     - Position relative to parent [x, y, z]
+      rpy     - Orientation relative to parent [roll, pitch, yaw]
+
+    The thruster axis is along +X in the thruster frame.
+    Positive thrust pushes the robot in the -X direction (Newton's 3rd law).
+  -->
+  <xacro:macro name="thruster" params="name parent xyz rpy">
+
+    <!-- Thruster link (the physical propeller housing) -->
+    <link name="${name}_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 ${pi/2} 0"/>
+        <geometry>
+          <cylinder radius="${thruster_radius}" length="${thruster_length}"/>
+        </geometry>
+        <material name="thruster_gray">
+          <color rgba="0.3 0.3 0.3 1.0"/>
+        </material>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 ${pi/2} 0"/>
+        <geometry>
+          <cylinder radius="${thruster_radius}" length="${thruster_length}"/>
+        </geometry>
+      </collision>
+
+      <inertial>
+        <mass value="${thruster_mass}"/>
+        <!-- Cylinder inertia: Ixx=Iyy=m(3r²+h²)/12, Izz=mr²/2 -->
+        <inertia
+          ixx="${thruster_mass * (3*thruster_radius*thruster_radius + thruster_length*thruster_length) / 12}"
+          ixy="0" ixz="0"
+          iyy="${thruster_mass * (3*thruster_radius*thruster_radius + thruster_length*thruster_length) / 12}"
+          iyz="0"
+          izz="${thruster_mass * thruster_radius * thruster_radius / 2}"/>
+      </inertial>
+    </link>
+
+    <!-- Fixed joint connecting thruster to parent -->
+    <joint name="${name}_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${name}_link"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+
+    <!-- Gazebo visual properties -->
+    <gazebo reference="${name}_link">
+      <material>Gazebo/DarkGrey</material>
+    </gazebo>
+
+  </xacro:macro>
+
+</robot>

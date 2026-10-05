@@ -1,0 +1,16 @@
+qos_profiles:
+  sensors:
+    history: keep_last
+    depth: 1
+    reliability: best_effort
+    durability: volatile
+  commands:
+    history: keep_last
+    depth: 10
+    reliability: reliable
+    durability: transient_local
+  maps:
+    history: keep_last
+    depth: 1
+    reliability: reliable
+    durability: transient_local

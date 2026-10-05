@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>mobile_manipulator_hardware</name>
+  <version>1.0.0</version>
+  <description>
+    C++ ros2_control hardware interfaces for Mobile Manipulator.
+
+    LEARNING OBJECTIVES:
+    - Understand ros2_control hardware_interface::SystemInterface
+    - See lifecycle callbacks in C++ (on_init, on_configure, on_activate, etc.)
+    - Learn command/state interface exports
+    - Practice serial communication patterns
+
+    CONTAINS TWO HARDWARE PLUGINS:
+    1. BaseHardwareInterface - 4-wheel velocity control
+    2. ArmHardwareInterface - 6-joint position control
+  </description>
+  <maintainer email="learner@ros2kit.local">ROS2 Kit Learner</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>hardware_interface</depend>
+  <depend>pluginlib</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

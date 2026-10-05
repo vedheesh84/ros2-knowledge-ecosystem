@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>mobile_manipulator_demos</name>
+  <version>0.1.0</version>
+  <description>
+    Progressive demos and failure injection for mobile manipulator learning.
+
+    LEARNING OBJECTIVES:
+    - See complete manipulation pipeline in action
+    - Practice debugging with intentional failures
+    - Build skills progressively from simple to complex
+    - Learn common failure modes and fixes
+
+    DEMO PROGRESSION:
+    01: Arm-Only Joint Control (ros2_control basics)
+    02: Gripper Control (action servers)
+    03: Camera TF Alignment (optical frame conventions)
+    04: Object Detection (OpenCV, pose estimation)
+    05: Pick-Place Static (full manipulation)
+    06: Pick-Place Mobile (navigation + manipulation)
+
+    FAILURE INJECTION (breakers/):
+    - break_camera_tf.py: TF offset/rotation/stale
+    - break_grasp_frame.py: Wrong grasp pose
+    - break_controller.py: Controller conflicts
+    - break_ik.py: IK failures
+    - break_vision.py: Detection noise
+  </description>
+  <maintainer email="learning@ros2kit.dev">ROS2 Learning Kit</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+
+  <exec_depend>mobile_manipulator_description</exec_depend>
+  <exec_depend>mobile_manipulator_bringup</exec_depend>
+  <exec_depend>mobile_manipulator_arm_control</exec_depend>
+  <exec_depend>mobile_manipulator_perception</exec_depend>
+  <exec_depend>mobile_manipulator_manipulation</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

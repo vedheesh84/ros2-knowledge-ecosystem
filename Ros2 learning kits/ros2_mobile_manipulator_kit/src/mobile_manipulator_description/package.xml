@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>mobile_manipulator_description</name>
+  <version>1.0.0</version>
+  <description>
+    Mobile Manipulator URDF, ros2_control configuration, and TF tree.
+
+    LEARNING OBJECTIVES:
+    - Understand combined mobile base + arm kinematic chain
+    - See multi-hardware ros2_control configuration
+    - Learn TF explosion for manipulation (base -> arm -> gripper -> tool_frame)
+    - Practice camera optical frame convention
+  </description>
+  <maintainer email="learner@ros2kit.local">ROS2 Kit Learner</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>urdf</depend>
+  <depend>xacro</depend>
+  <depend>robot_state_publisher</depend>
+  <depend>joint_state_publisher</depend>
+  <depend>joint_state_publisher_gui</depend>
+
+  <!-- ros2_control -->
+  <depend>ros2_control</depend>
+  <depend>controller_manager</depend>
+  <depend>joint_state_broadcaster</depend>
+  <depend>diff_drive_controller</depend>
+  <depend>joint_trajectory_controller</depend>
+
+  <!-- Reference packages (for URDF includes) -->
+  <exec_depend>arm_description</exec_depend>
+  <exec_depend>mobile_base_description</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

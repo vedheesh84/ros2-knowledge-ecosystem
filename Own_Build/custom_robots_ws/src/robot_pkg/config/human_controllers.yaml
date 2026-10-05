@@ -1,0 +1,26 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    human_joint_controller:
+      type: position_controllers/JointGroupPositionController
+
+human_joint_controller:
+  ros__parameters:
+    joints:
+      - torso_to_left_shoulder
+      - left_elbow
+      - torso_to_right_shoulder
+      - right_elbow
+      - left_hip
+      - left_knee
+      - right_hip
+      - right_knee
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity

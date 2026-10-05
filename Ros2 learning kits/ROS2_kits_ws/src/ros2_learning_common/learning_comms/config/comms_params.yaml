@@ -1,0 +1,50 @@
+# =============================================================================
+# Communication Parameters Configuration
+# =============================================================================
+#
+# This file demonstrates how parameters could be used to configure
+# communication behavior. Currently, the nodes use defaults, but you
+# could extend them to use these parameters.
+#
+# CHALLENGE: Modify the talker/listener nodes to use these parameters!
+#
+# =============================================================================
+
+# Parameters for the talker node
+talker:
+  ros__parameters:
+    # How often to publish (Hz)
+    publish_rate: 1.0
+
+    # Prefix for messages
+    message_prefix: "Hello from talker"
+
+    # QoS settings (advanced)
+    qos_depth: 10
+
+# Parameters for the listener node
+listener:
+  ros__parameters:
+    # Whether to log received messages
+    log_messages: true
+
+    # Maximum messages to track
+    max_message_count: 1000
+
+# Parameters for the service server
+service_server:
+  ros__parameters:
+    # Initial counter value
+    initial_count: 0
+
+    # Maximum count value (wrap around)
+    max_count: 1000
+
+# Parameters for the action server
+action_server:
+  ros__parameters:
+    # Maximum target number allowed
+    max_target: 100
+
+    # Minimum delay between counts
+    min_delay: 0.1

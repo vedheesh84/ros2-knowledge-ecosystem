@@ -1,0 +1,315 @@
+<?xml version="1.0"?>
+<!--
+  companion_head.urdf.xacro - Companion Head Robot Description
+
+  ROBOT OVERVIEW:
+  ===============
+  A social companion robot head designed for human-robot interaction.
+
+  Physical Properties:
+    Mass: ~1.5 kg (head assembly)
+    Dimensions: 0.15m × 0.12m × 0.15m (W × D × H)
+
+  KINEMATIC STRUCTURE:
+  ====================
+  2-DOF Pan/Tilt Neck:
+    - Pan (yaw): ±90° horizontal rotation
+    - Tilt (pitch): -30° to +45° vertical rotation
+
+  This allows the head to look at users anywhere in a 180° frontal arc.
+
+  SENSOR SUITE:
+  =============
+    - Camera: 640x480 RGB for face detection
+    - Microphone: Audio input for speech
+    - Display: LCD face screen (simulated in RViz)
+
+  TF TREE:
+  ========
+  base_link (fixed pedestal)
+  └── neck_pan_link (yaw rotation)
+      └── neck_tilt_link (pitch rotation)
+          └── head_link (main head frame)
+              ├── display_link (face screen)
+              ├── camera_link (vision sensor)
+              │   └── camera_optical_link
+              └── microphone_link (audio sensor)
+-->
+<robot name="companion_head" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ==================== ARGUMENTS ==================== -->
+  <xacro:arg name="use_sim" default="false"/>
+  <xacro:arg name="use_fake_hardware" default="true"/>
+
+  <!-- ==================== PROPERTIES ==================== -->
+  <!-- Base/Pedestal -->
+  <xacro:property name="base_height" value="0.05"/>
+  <xacro:property name="base_radius" value="0.08"/>
+  <xacro:property name="base_mass" value="0.5"/>
+
+  <!-- Neck -->
+  <xacro:property name="neck_length" value="0.06"/>
+  <xacro:property name="neck_radius" value="0.025"/>
+  <xacro:property name="neck_mass" value="0.2"/>
+
+  <!-- Head -->
+  <xacro:property name="head_width" value="0.15"/>
+  <xacro:property name="head_depth" value="0.12"/>
+  <xacro:property name="head_height" value="0.15"/>
+  <xacro:property name="head_mass" value="0.8"/>
+
+  <!-- Joint limits -->
+  <xacro:property name="pan_limit" value="${pi/2}"/>     <!-- ±90 degrees -->
+  <xacro:property name="tilt_lower" value="${-pi/6}"/>   <!-- -30 degrees -->
+  <xacro:property name="tilt_upper" value="${pi/4}"/>    <!-- +45 degrees -->
+  <xacro:property name="max_velocity" value="2.0"/>      <!-- rad/s -->
+  <xacro:property name="max_effort" value="5.0"/>        <!-- N·m -->
+
+  <!-- ==================== MATERIALS ==================== -->
+  <material name="white">
+    <color rgba="0.95 0.95 0.95 1.0"/>
+  </material>
+  <material name="dark_gray">
+    <color rgba="0.2 0.2 0.2 1.0"/>
+  </material>
+  <material name="light_blue">
+    <color rgba="0.6 0.8 1.0 1.0"/>
+  </material>
+  <material name="screen_black">
+    <color rgba="0.05 0.05 0.1 1.0"/>
+  </material>
+
+  <!-- ==================== INERTIA MACROS ==================== -->
+  <xacro:macro name="cylinder_inertia" params="m r h">
+    <inertia
+      ixx="${m*(3*r*r + h*h)/12}" ixy="0" ixz="0"
+      iyy="${m*(3*r*r + h*h)/12}" iyz="0"
+      izz="${m*r*r/2}"/>
+  </xacro:macro>
+
+  <xacro:macro name="box_inertia" params="m x y z">
+    <inertia
+      ixx="${m*(y*y + z*z)/12}" ixy="0" ixz="0"
+      iyy="${m*(x*x + z*z)/12}" iyz="0"
+      izz="${m*(x*x + y*y)/12}"/>
+  </xacro:macro>
+
+  <!-- ==================== BASE LINK ==================== -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder radius="${base_radius}" length="${base_height}"/>
+      </geometry>
+      <origin xyz="0 0 ${base_height/2}" rpy="0 0 0"/>
+      <material name="dark_gray"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="${base_radius}" length="${base_height}"/>
+      </geometry>
+      <origin xyz="0 0 ${base_height/2}" rpy="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="${base_mass}"/>
+      <origin xyz="0 0 ${base_height/2}" rpy="0 0 0"/>
+      <xacro:cylinder_inertia m="${base_mass}" r="${base_radius}" h="${base_height}"/>
+    </inertial>
+  </link>
+
+  <!-- ==================== NECK PAN JOINT ==================== -->
+  <!--
+    PAN JOINT (Yaw):
+    Allows horizontal rotation to look left/right.
+    Range: -90° to +90° (π/2 radians each way)
+  -->
+  <joint name="neck_pan_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="neck_pan_link"/>
+    <origin xyz="0 0 ${base_height}" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="${-pan_limit}" upper="${pan_limit}"
+           velocity="${max_velocity}" effort="${max_effort}"/>
+    <dynamics damping="0.5" friction="0.1"/>
+  </joint>
+
+  <link name="neck_pan_link">
+    <visual>
+      <geometry>
+        <cylinder radius="${neck_radius}" length="${neck_length/2}"/>
+      </geometry>
+      <origin xyz="0 0 ${neck_length/4}" rpy="0 0 0"/>
+      <material name="dark_gray"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="${neck_radius}" length="${neck_length/2}"/>
+      </geometry>
+      <origin xyz="0 0 ${neck_length/4}" rpy="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="${neck_mass/2}"/>
+      <origin xyz="0 0 ${neck_length/4}" rpy="0 0 0"/>
+      <xacro:cylinder_inertia m="${neck_mass/2}" r="${neck_radius}" h="${neck_length/2}"/>
+    </inertial>
+  </link>
+
+  <!-- ==================== NECK TILT JOINT ==================== -->
+  <!--
+    TILT JOINT (Pitch):
+    Allows vertical rotation to look up/down.
+    Range: -30° (look down) to +45° (look up)
+  -->
+  <joint name="neck_tilt_joint" type="revolute">
+    <parent link="neck_pan_link"/>
+    <child link="neck_tilt_link"/>
+    <origin xyz="0 0 ${neck_length/2}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="${tilt_lower}" upper="${tilt_upper}"
+           velocity="${max_velocity}" effort="${max_effort}"/>
+    <dynamics damping="0.5" friction="0.1"/>
+  </joint>
+
+  <link name="neck_tilt_link">
+    <visual>
+      <geometry>
+        <cylinder radius="${neck_radius}" length="${neck_length/2}"/>
+      </geometry>
+      <origin xyz="0 0 ${neck_length/4}" rpy="0 0 0"/>
+      <material name="dark_gray"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="${neck_radius}" length="${neck_length/2}"/>
+      </geometry>
+      <origin xyz="0 0 ${neck_length/4}" rpy="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="${neck_mass/2}"/>
+      <origin xyz="0 0 ${neck_length/4}" rpy="0 0 0"/>
+      <xacro:cylinder_inertia m="${neck_mass/2}" r="${neck_radius}" h="${neck_length/2}"/>
+    </inertial>
+  </link>
+
+  <!-- ==================== HEAD LINK ==================== -->
+  <joint name="head_joint" type="fixed">
+    <parent link="neck_tilt_link"/>
+    <child link="head_link"/>
+    <origin xyz="0 0 ${neck_length/2 + head_height/2}" rpy="0 0 0"/>
+  </joint>
+
+  <link name="head_link">
+    <visual>
+      <geometry>
+        <box size="${head_width} ${head_depth} ${head_height}"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <material name="white"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${head_width} ${head_depth} ${head_height}"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="${head_mass}"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <xacro:box_inertia m="${head_mass}" x="${head_width}" y="${head_depth}" z="${head_height}"/>
+    </inertial>
+  </link>
+
+  <!-- ==================== DISPLAY LINK ==================== -->
+  <!--
+    DISPLAY (Face Screen):
+    The front-facing LCD/OLED display that shows animated expressions.
+    In simulation, this is represented by a flat panel.
+    The actual face rendering is done in RViz via ImageDisplay.
+  -->
+  <joint name="display_joint" type="fixed">
+    <parent link="head_link"/>
+    <child link="display_link"/>
+    <origin xyz="0 ${-head_depth/2 - 0.001} 0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="display_link">
+    <visual>
+      <geometry>
+        <box size="${head_width*0.9} 0.005 ${head_height*0.8}"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <material name="screen_black"/>
+    </visual>
+  </link>
+
+  <!-- ==================== CAMERA LINK ==================== -->
+  <!--
+    CAMERA:
+    RGB camera for face detection and emotion recognition.
+    Mounted behind the display looking outward.
+  -->
+  <joint name="camera_joint" type="fixed">
+    <parent link="head_link"/>
+    <child link="camera_link"/>
+    <origin xyz="0 ${-head_depth/2 + 0.01} ${head_height*0.2}" rpy="0 0 0"/>
+  </joint>
+
+  <link name="camera_link">
+    <visual>
+      <geometry>
+        <box size="0.02 0.02 0.02"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <material name="dark_gray"/>
+    </visual>
+    <inertial>
+      <mass value="0.05"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
+    </inertial>
+  </link>
+
+  <!-- Camera optical frame (Z forward, X right, Y down - ROS convention) -->
+  <joint name="camera_optical_joint" type="fixed">
+    <parent link="camera_link"/>
+    <child link="camera_optical_link"/>
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+  </joint>
+
+  <link name="camera_optical_link"/>
+
+  <!-- ==================== MICROPHONE LINK ==================== -->
+  <!--
+    MICROPHONE:
+    Audio input sensor for speech recognition.
+    Mounted on top of the head.
+  -->
+  <joint name="microphone_joint" type="fixed">
+    <parent link="head_link"/>
+    <child link="microphone_link"/>
+    <origin xyz="0 0 ${head_height/2 + 0.01}" rpy="0 0 0"/>
+  </joint>
+
+  <link name="microphone_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.015" length="0.01"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <material name="dark_gray"/>
+    </visual>
+    <inertial>
+      <mass value="0.02"/>
+      <origin xyz="0 0 0"/>
+      <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+    </inertial>
+  </link>
+
+  <!-- ==================== ROS2 CONTROL ==================== -->
+  <xacro:include filename="$(find companion_head_description)/urdf/ros2_control.urdf.xacro"/>
+
+  <!-- ==================== GAZEBO PLUGINS ==================== -->
+  <xacro:if value="$(arg use_sim)">
+    <xacro:include filename="$(find companion_head_description)/urdf/gazebo.urdf.xacro"/>
+  </xacro:if>
+
+</robot>

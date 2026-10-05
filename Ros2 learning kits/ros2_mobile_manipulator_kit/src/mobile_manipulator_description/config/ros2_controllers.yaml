@@ -1,0 +1,136 @@
+# ros2_control Multi-Controller Configuration
+# ============================================
+#
+# LEARNING OBJECTIVES:
+# - Understand multi-controller architecture
+# - See controller lifecycle ordering
+# - Learn joint resource claiming
+#
+# ARCHITECTURE:
+#   controller_manager
+#        |
+#        +-- joint_state_broadcaster (ALL joints -> /joint_states)
+#        |
+#        +-- diff_drive_controller (wheel velocity)
+#        |
+#        +-- arm_controller (arm trajectory)
+#        |
+#        +-- gripper_controller (gripper position)
+#
+# RESOURCE CLAIMING:
+# Each controller claims specific joints. No overlap allowed.
+
+controller_manager:
+  ros__parameters:
+    update_rate: 100  # Hz
+
+    # Declare controllers
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    diff_drive_controller:
+      type: diff_drive_controller/DiffDriveController
+
+    arm_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    gripper_controller:
+      type: position_controllers/GripperActionController
+
+# ================================================
+# JOINT STATE BROADCASTER
+# ================================================
+# Publishes ALL joint states to /joint_states
+# Required by robot_state_publisher for TF
+joint_state_broadcaster:
+  ros__parameters:
+    # No additional config needed - publishes all joints
+
+# ================================================
+# DIFFERENTIAL DRIVE CONTROLLER
+# ================================================
+# Controls mobile base via cmd_vel
+# Publishes odometry (but NOT odom->base_link TF - EKF does that)
+diff_drive_controller:
+  ros__parameters:
+    # Wheel configuration (4-wheel skid steer)
+    left_wheel_names: ["front_left_joint", "back_left_joint"]
+    right_wheel_names: ["front_right_joint", "back_right_joint"]
+
+    # Kinematics
+    wheel_separation: 0.35
+    wheel_radius: 0.075
+
+    # Publish settings
+    publish_rate: 50.0
+    odom_frame_id: odom
+    base_frame_id: body_link
+
+    # CRITICAL: Don't publish TF, let EKF do it
+    enable_odom_tf: false
+
+    # Velocity limits
+    linear.x.has_velocity_limits: true
+    linear.x.max_velocity: 0.5
+    linear.x.min_velocity: -0.5
+    angular.z.has_velocity_limits: true
+    angular.z.max_velocity: 2.0
+    angular.z.min_velocity: -2.0
+
+    # Acceleration limits
+    linear.x.has_acceleration_limits: true
+    linear.x.max_acceleration: 1.0
+    angular.z.has_acceleration_limits: true
+    angular.z.max_acceleration: 2.0
+
+    # Timeout
+    cmd_vel_timeout: 0.5
+
+# ================================================
+# ARM TRAJECTORY CONTROLLER
+# ================================================
+# Executes joint trajectories from MoveIt
+arm_controller:
+  ros__parameters:
+    # Joints controlled (5-DOF arm)
+    joints:
+      - joint_1
+      - joint_2
+      - joint_3
+      - joint_4
+      - gripper_base_joint
+
+    # Interfaces
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+
+    # Action server settings
+    state_publish_rate: 50.0
+    action_monitor_rate: 20.0
+
+    # Trajectory execution
+    allow_partial_joints_goal: false
+    constraints:
+      stopped_velocity_tolerance: 0.01
+      goal_time: 0.0  # 0 = no timeout
+
+# ================================================
+# GRIPPER CONTROLLER
+# ================================================
+# Controls gripper open/close via action
+gripper_controller:
+  ros__parameters:
+    # Single actuated joint
+    joint: left_gear_joint
+
+    # Action parameters
+    goal_tolerance: 0.01
+    max_effort: 100.0
+
+    # Stall detection (detects blocked gripper)
+    allow_stalling: true
+    stall_velocity_threshold: 0.01
+    stall_timeout: 2.0

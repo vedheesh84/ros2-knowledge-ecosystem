@@ -1,0 +1,25 @@
+# Kinematics Configuration
+# =========================
+#
+# LEARNING OBJECTIVES:
+# - Understand IK solver selection
+# - See solver parameters effect on performance
+# - Learn when to use different solvers
+#
+# SOLVER OPTIONS:
+# - KDL: Simple, works for most arms (default)
+# - TRAC-IK: Better for difficult configurations
+# - IKFast: Fastest, requires generated solver
+#
+# PARAMETERS:
+# - search_resolution: Step size for joint search (smaller = slower but better)
+# - timeout: Max time to find solution (increase for complex poses)
+
+arm:
+  kinematics_solver: kdl_kinematics_plugin/KDLKinematicsPlugin
+  kinematics_solver_search_resolution: 0.005
+  kinematics_solver_timeout: 0.5
+
+# Gripper doesn't need IK - it's position controlled directly
+# gripper:
+#   No IK solver needed

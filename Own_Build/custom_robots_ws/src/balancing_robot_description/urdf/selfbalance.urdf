@@ -1,0 +1,311 @@
+<?xml version="1.0"?>
+<robot name="selfbalance">
+  <material name="body_dark">
+    <color rgba="0.12 0.38 0.88 1.0"/>
+  </material>
+  <material name="body_light">
+    <color rgba="0.25 0.82 0.90 1.0"/>
+  </material>
+  <material name="tire_black">
+    <color rgba="0.05 0.05 0.06 1.0"/>
+  </material>
+  <material name="neck_black">
+    <color rgba="0.10 0.14 0.22 1.0"/>
+  </material>
+  <material name="accent_yellow">
+    <color rgba="1.0 0.85 0.10 1.0"/>
+  </material>
+
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0 0 0.0600" rpy="0 0 0"/>
+      <mass value="1.2"/>
+      <inertia ixx="0.004" ixy="0" ixz="0" iyy="0.0045" iyz="0" izz="0.003"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://balancing_robot_description/meshes/base_sphere.stl"/>
+      </geometry>
+      <material name="body_dark"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://balancing_robot_description/meshes/torso_mid.stl"/>
+      </geometry>
+      <material name="body_light"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://balancing_robot_description/meshes/torso_upper.stl"/>
+      </geometry>
+      <material name="body_dark"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://balancing_robot_description/meshes/neck.stl"/>
+      </geometry>
+      <material name="neck_black"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://balancing_robot_description/meshes/head.stl"/>
+      </geometry>
+      <material name="body_dark"/>
+    </visual>
+    <visual>
+      <origin xyz="0.0644 0 0.0800" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://balancing_robot_description/meshes/power_button.stl"/>
+      </geometry>
+      <material name="accent_yellow"/>
+    </visual>
+
+    <visual>
+      <origin xyz="0.0522 0.0200 0.1265" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://balancing_robot_description/meshes/accent_bar.stl"/>
+      </geometry>
+      <material name="accent_yellow"/>
+    </visual>
+    <visual>
+      <origin xyz="0.0495 -0.0180 0.1185" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://balancing_robot_description/meshes/accent_bar.stl"/>
+      </geometry>
+      <material name="accent_yellow"/>
+    </visual>
+    <visual>
+      <origin xyz="0.0456 0.0120 0.1475" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://balancing_robot_description/meshes/accent_bar.stl"/>
+      </geometry>
+      <material name="accent_yellow"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0.0800" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.0574"/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0.1475" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.0550" length="0.0680"/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0.2197" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.0320"/>
+      </geometry>
+    </collision>
+    <!-- Thin foot keeps two-wheel model upright for manual teleop -->
+    <collision>
+      <origin xyz="0 0 0.005" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.08 0.10 0.008"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="left_wheel">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.12"/>
+      <inertia ixx="0.00018" ixy="0" ixz="0" iyy="0.00032" iyz="0" izz="0.00018"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://balancing_robot_description/meshes/wheel.stl"/>
+      </geometry>
+      <material name="tire_black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.0600" length="0.0450"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_wheel"/>
+    <origin xyz="0 0.0800 0.0600" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="12" velocity="25"/>
+    <dynamics damping="0.1" friction="0.2"/>
+  </joint>
+
+  <link name="right_wheel">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.12"/>
+      <inertia ixx="0.00018" ixy="0" ixz="0" iyy="0.00032" iyz="0" izz="0.00018"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://balancing_robot_description/meshes/wheel.stl"/>
+      </geometry>
+      <material name="tire_black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.0600" length="0.0450"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_wheel"/>
+    <origin xyz="0 -0.0800 0.0600" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="12" velocity="25"/>
+    <dynamics damping="0.1" friction="0.2"/>
+  </joint>
+
+  <!-- Gazebo Classic primitive visuals -->
+  <gazebo reference="base_link">
+    <visual name="gz_base">
+      <pose>0 0 0.0700 0 0 0</pose>
+      <geometry><sphere><radius>0.0700</radius></sphere></geometry>
+      <material>
+        <ambient>0.08 0.25 0.65 1</ambient>
+        <diffuse>0.12 0.38 0.88 1</diffuse>
+        <specular>0.20 0.40 0.80 1</specular>
+      </material>
+    </visual>
+    <visual name="gz_mid1">
+      <pose>0 0 0.1225 0 0 0</pose>
+      <geometry><cylinder><radius>0.0550</radius><length>0.0280</length></cylinder></geometry>
+      <material>
+        <ambient>0.15 0.55 0.65 1</ambient>
+        <diffuse>0.25 0.82 0.90 1</diffuse>
+        <specular>0.30 0.70 0.80 1</specular>
+      </material>
+    </visual>
+    <visual name="gz_mid2">
+      <pose>0 0 0.1475 0 0 0</pose>
+      <geometry><cylinder><radius>0.0480</radius><length>0.0220</length></cylinder></geometry>
+      <material>
+        <ambient>0.15 0.55 0.65 1</ambient>
+        <diffuse>0.25 0.82 0.90 1</diffuse>
+        <specular>0.30 0.70 0.80 1</specular>
+      </material>
+    </visual>
+    <visual name="gz_mid3">
+      <pose>0 0 0.1675 0 0 0</pose>
+      <geometry><cylinder><radius>0.0400</radius><length>0.0180</length></cylinder></geometry>
+      <material>
+        <ambient>0.15 0.55 0.65 1</ambient>
+        <diffuse>0.25 0.82 0.90 1</diffuse>
+        <specular>0.30 0.70 0.80 1</specular>
+      </material>
+    </visual>
+    <visual name="gz_neck">
+      <pose>0 0 0.1845 0 0 0</pose>
+      <geometry><cylinder><radius>0.0110</radius><length>0.0160</length></cylinder></geometry>
+      <material>
+        <ambient>0.08 0.10 0.16 1</ambient>
+        <diffuse>0.10 0.14 0.22 1</diffuse>
+      </material>
+    </visual>
+    <visual name="gz_head">
+      <pose>0 0 0.2197 0 0 0</pose>
+      <geometry><sphere><radius>0.0320</radius></sphere></geometry>
+      <material>
+        <ambient>0.08 0.25 0.65 1</ambient>
+        <diffuse>0.12 0.38 0.88 1</diffuse>
+        <specular>0.20 0.40 0.80 1</specular>
+      </material>
+    </visual>
+    <visual name="gz_button">
+      <pose>0.0644 0 0.0800 0 1.5708 0</pose>
+      <geometry><cylinder><radius>0.012</radius><length>0.004</length></cylinder></geometry>
+      <material>
+        <ambient>0.9 0.75 0.05 1</ambient>
+        <diffuse>1.0 0.85 0.10 1</diffuse>
+        <emissive>0.5 0.4 0.05 1</emissive>
+      </material>
+    </visual>
+    <material>Gazebo/Blue</material>
+  </gazebo>
+
+  <gazebo reference="left_wheel">
+    <visual name="gz_wheel">
+      <pose>0 0 0 1.5708 0 0</pose>
+      <geometry><cylinder><radius>0.0600</radius><length>0.0450</length></cylinder></geometry>
+      <material>
+        <ambient>0.04 0.04 0.04 1</ambient>
+        <diffuse>0.06 0.06 0.06 1</diffuse>
+      </material>
+    </visual>
+    <material>Gazebo/Black</material>
+    <mu1>2.0</mu1>
+    <mu2>2.0</mu2>
+    <kp>1e6</kp>
+    <kd>100.0</kd>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+
+  <gazebo reference="right_wheel">
+    <visual name="gz_wheel">
+      <pose>0 0 0 1.5708 0 0</pose>
+      <geometry><cylinder><radius>0.0600</radius><length>0.0450</length></cylinder></geometry>
+      <material>
+        <ambient>0.04 0.04 0.04 1</ambient>
+        <diffuse>0.06 0.06 0.06 1</diffuse>
+      </material>
+    </visual>
+    <material>Gazebo/Black</material>
+    <mu1>2.0</mu1>
+    <mu2>2.0</mu2>
+    <kp>1e6</kp>
+    <kd>100.0</kd>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+
+  <gazebo>
+    <plugin name="gazebo_ros_joint_state_publisher"
+            filename="libgazebo_ros_joint_state_publisher.so">
+      <ros>
+        <remapping>~/out:=joint_states</remapping>
+      </ros>
+      <update_rate>50</update_rate>
+      <joint_name>left_wheel_joint</joint_name>
+      <joint_name>right_wheel_joint</joint_name>
+    </plugin>
+  </gazebo>
+
+  <gazebo>
+    <plugin name="diff_drive" filename="libgazebo_ros_diff_drive.so">
+      <ros>
+        <remapping>cmd_vel:=cmd_vel</remapping>
+        <remapping>odom:=odom</remapping>
+      </ros>
+      <update_rate>50</update_rate>
+      <left_joint>left_wheel_joint</left_joint>
+      <right_joint>right_wheel_joint</right_joint>
+      <wheel_separation>0.1600</wheel_separation>
+      <wheel_diameter>0.1200</wheel_diameter>
+      <max_wheel_torque>30</max_wheel_torque>
+      <max_wheel_acceleration>8.0</max_wheel_acceleration>
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>true</publish_odom_tf>
+      <publish_wheel_tf>false</publish_wheel_tf>
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>base_link</robot_base_frame>
+    </plugin>
+  </gazebo>
+</robot>

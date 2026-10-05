@@ -1,0 +1,58 @@
+# Joint Limits for Motion Planning
+# =================================
+#
+# LEARNING OBJECTIVES:
+# - Understand velocity/acceleration limiting
+# - See how scaling factors affect motion
+# - Learn safe vs aggressive motion profiles
+#
+# SCALING FACTORS:
+# - 0.1: Very slow, safe for learning
+# - 0.3: Moderate speed
+# - 0.5: Normal operation
+# - 1.0: Maximum speed (use with caution!)
+#
+# WHY LIMIT VELOCITY:
+# - Servo motors have torque limits
+# - Fast motion can cause oscillation
+# - Gives time to e-stop if needed
+
+default_velocity_scaling_factor: 0.2
+default_acceleration_scaling_factor: 0.2
+
+joint_limits:
+  joint_1:
+    has_velocity_limits: true
+    max_velocity: 2.0
+    has_acceleration_limits: true
+    max_acceleration: 2.0
+
+  joint_2:
+    has_velocity_limits: true
+    max_velocity: 2.0
+    has_acceleration_limits: true
+    max_acceleration: 2.0
+
+  joint_3:
+    has_velocity_limits: true
+    max_velocity: 2.0
+    has_acceleration_limits: true
+    max_acceleration: 2.0
+
+  joint_4:
+    has_velocity_limits: true
+    max_velocity: 2.0
+    has_acceleration_limits: true
+    max_acceleration: 2.0
+
+  gripper_base_joint:
+    has_velocity_limits: true
+    max_velocity: 2.0
+    has_acceleration_limits: true
+    max_acceleration: 2.0
+
+  left_gear_joint:
+    has_velocity_limits: true
+    max_velocity: 1.0
+    has_acceleration_limits: true
+    max_acceleration: 1.0

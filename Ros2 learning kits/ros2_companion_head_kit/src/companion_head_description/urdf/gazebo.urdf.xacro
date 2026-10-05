@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<!--
+  gazebo.urdf.xacro - Gazebo-specific configurations
+
+  LEARNING OBJECTIVES:
+  ====================
+  1. Understand Gazebo material properties
+  2. Learn sensor simulation setup
+  3. See ros2_control integration with Gazebo
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ==================== GAZEBO MATERIALS ==================== -->
+  <gazebo reference="base_link">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+
+  <gazebo reference="neck_pan_link">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+
+  <gazebo reference="neck_tilt_link">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+
+  <gazebo reference="head_link">
+    <material>Gazebo/White</material>
+  </gazebo>
+
+  <gazebo reference="display_link">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <!-- ==================== CAMERA SENSOR ==================== -->
+  <!--
+    CAMERA:
+    Simulates an RGB camera for face detection.
+    Publishes to /camera/image_raw and /camera/camera_info
+  -->
+  <gazebo reference="camera_link">
+    <sensor name="camera" type="camera">
+      <always_on>true</always_on>
+      <update_rate>30.0</update_rate>
+      <visualize>true</visualize>
+      <camera>
+        <horizontal_fov>1.047</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.1</near>
+          <far>10.0</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.005</stddev>
+        </noise>
+      </camera>
+      <plugin name="camera_plugin" filename="libgazebo_ros_camera.so">
+        <ros>
+          <remapping>~/image_raw:=/camera/image_raw</remapping>
+          <remapping>~/camera_info:=/camera/camera_info</remapping>
+        </ros>
+        <camera_name>camera</camera_name>
+        <frame_name>camera_optical_link</frame_name>
+      </plugin>
+    </sensor>
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+
+  <!-- ==================== ROS2 CONTROL PLUGIN ==================== -->
+  <gazebo>
+    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+      <robot_param>robot_description</robot_param>
+      <robot_param_node>robot_state_publisher</robot_param_node>
+      <parameters>$(find companion_head_description)/config/ros2_controllers.yaml</parameters>
+    </plugin>
+  </gazebo>
+
+</robot>

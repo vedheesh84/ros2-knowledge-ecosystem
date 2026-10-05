@@ -1,0 +1,162 @@
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="simple_linefollower_robot">
+
+  <!-- density of aluminum (kg/m^3) -->
+  <xacro:property name="rho" value="2700.0"/>
+
+  <!-- geometry (meters) -->
+  <xacro:property name="sphere_r" value="0.06"/>
+  <xacro:property name="wheel_r"  value="0.04"/>
+  <xacro:property name="wheel_w"  value="0.03"/>
+  <xacro:property name="box_l"    value="0.30"/>
+  <xacro:property name="box_w"    value="0.20"/>
+  <xacro:property name="box_h"    value="0.10"/>
+
+  <!-- volumes -->
+  <xacro:property name="vol_sphere" value="${(4.0/3.0)*pi*(sphere_r**3)}"/>
+  <xacro:property name="vol_wheel"  value="${pi*(wheel_r**2)*wheel_w}"/>
+  <xacro:property name="vol_box"    value="${box_l*box_w*box_h}"/>
+
+  <!-- masses -->
+  <xacro:property name="mass_sphere" value="${rho * vol_sphere}"/>
+  <xacro:property name="mass_wheel"  value="${rho * vol_wheel}"/>
+  <xacro:property name="mass_box"    value="${rho * vol_box}"/>
+
+  <!-- inertias -->
+  <xacro:property name="I_sphere" value="${(2.0/5.0) * mass_sphere * (sphere_r**2)}"/>
+  <xacro:property name="I_wheel_zz" value="${0.5 * mass_wheel * (wheel_r**2)}"/>
+  <xacro:property name="I_wheel_xx" value="${(1.0/12.0) * mass_wheel * (3.0*(wheel_r**2) + (wheel_w**2))}"/>
+  <xacro:property name="I_wheel_yy" value="${I_wheel_xx}"/>
+  <xacro:property name="I_box_xx" value="${(1.0/12.0) * mass_box * (box_h**2 + box_w**2)}"/>
+  <xacro:property name="I_box_yy" value="${(1.0/12.0) * mass_box * (box_l**2 + box_h**2)}"/>
+  <xacro:property name="I_box_zz" value="${(1.0/12.0) * mass_box * (box_l**2 + box_w**2)}"/>
+
+  <!-- BASE (box) -->
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${mass_box}"/>
+      <inertia ixx="${I_box_xx}" ixy="0" ixz="0" iyy="${I_box_yy}" iyz="0" izz="${I_box_zz}"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://simple_linefollower_robot/meshes/base_link.STL"/>
+      </geometry>
+      <material name="aluminum">
+        <color rgba="0.8 0.8 0.8 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <!-- use self-closing box tag (parser-friendly) -->
+        <box size="${box_l} ${box_w} ${box_h}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- world -> base fixed joint -->
+  <link name="world"/>
+  <joint name="world_to_base" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- LEFT WHEEL -->
+  <link name="LW_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${mass_wheel}"/>
+      <inertia ixx="${I_wheel_xx}" ixy="0" ixz="0" iyy="${I_wheel_yy}" iyz="0" izz="${I_wheel_zz}"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://simple_linefollower_robot/meshes/LW_link.STL"/>
+      </geometry>
+      <material name="aluminum"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_r}" length="${wheel_w}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="LW_joint" type="continuous">
+    <origin xyz="-0.13 0.13 -0.08" rpy="1.5708 0 0"/>
+    <parent link="base_link"/>
+    <child  link="LW_link"/>
+    <axis  xyz="0 0 -1"/>
+  </joint>
+
+  <!-- RIGHT WHEEL -->
+  <link name="RW_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${mass_wheel}"/>
+      <inertia ixx="${I_wheel_xx}" ixy="0" ixz="0" iyy="${I_wheel_yy}" iyz="0" izz="${I_wheel_zz}"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://simple_linefollower_robot/meshes/RW_link.STL"/>
+      </geometry>
+      <material name="aluminum"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_r}" length="${wheel_w}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="RW_joint" type="continuous">
+    <origin xyz="-0.13 -0.13 -0.08" rpy="1.5708 0 0"/>
+    <parent link="base_link"/>
+    <child  link="RW_link"/>
+    <axis  xyz="0 0 1"/>
+  </joint>
+
+  <!-- SPHERE -->
+  <link name="sphear_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${mass_sphere}"/>
+      <inertia ixx="${I_sphere}" ixy="0" ixz="0" iyy="${I_sphere}" iyz="0" izz="${I_sphere}"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://simple_linefollower_robot/meshes/sphear_link.STL"/>
+      </geometry>
+      <material name="aluminum"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="${sphere_r}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="sphear_joint" type="continuous">
+    <origin xyz="0.1 0 0.1" rpy="1.5708 1.5708 1.5708"/>
+    <parent link="base_link"/>
+    <child  link="sphear_link"/>
+    <axis  xyz="0.57735 0.57735 0.57735"/>
+  </joint>
+
+</robot>

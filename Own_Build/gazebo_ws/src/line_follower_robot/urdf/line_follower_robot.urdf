@@ -1,0 +1,165 @@
+<?xml version="1.0"?>
+<robot name="line_follower_robot">
+
+  <!-- ========================= -->
+  <!-- world link -->
+  <!-- ========================= -->
+  <link name="world"/>
+  <joint name="world_joint" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 1" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ========================= -->
+  <!-- Base link -->
+  <!-- ========================= -->
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0.010085 -0.0000078763 -0.0066048" rpy="0 0 0"/>
+      <mass value="0.12859"/>
+      <inertia ixx="5.2146E-05" ixy="0" ixz="0"
+               iyy="0.00017957" iyz="0" izz="0.00022799"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://line_follower_robot/meshes/base_link.STL"/>
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 0.3"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://line_follower_robot/meshes/base_link.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- ========================= -->
+  <!-- Left wheel link -->
+  <!-- ========================= -->
+  <link name="left_wheel">
+    <inertial>
+      <origin xyz="0 0 -0.0073729" rpy="0 0 0"/>
+      <mass value="0.021404"/>
+      <inertia ixx="8.6283E-06" ixy="0" ixz="0" iyy="8.6269E-06" iyz="0" izz="1.4515E-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://line_follower_robot/meshes/left_wheel.STL"/>
+      </geometry>
+      <material name="">
+        <color rgba="0.79216 0.81961 0.93333 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://line_follower_robot/meshes/left_wheel.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="left_wheel_joint" type="continuous">
+    <origin xyz="-0.033259 0.07575 -0.01375" rpy="-1.5708 0 0"/>
+    <parent link="base_link"/>
+    <child link="left_wheel"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <!-- ========================= -->
+  <!-- Right wheel link -->
+  <!-- ========================= -->
+  <link name="right_wheel">
+    <inertial>
+      <origin xyz="0 0 0.0073729" rpy="0 0 0"/>
+      <mass value="0.021404"/>
+      <inertia ixx="8.6283E-06" ixy="0" ixz="0" iyy="8.6269E-06" iyz="0" izz="1.4515E-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://line_follower_robot/meshes/right_wheel.STL"/>
+      </geometry>
+      <material name="">
+        <color rgba="0.79216 0.81961 0.93333 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://line_follower_robot/meshes/right_wheel.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="right_wheel_joint" type="continuous">
+    <origin xyz="-0.033259 -0.07575 -0.01375" rpy="-1.5708 0 0"/>
+    <parent link="base_link"/>
+    <child link="right_wheel"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <!-- ========================= -->
+  <!-- Castor links -->
+  <!-- ========================= -->
+  <link name="castor_base_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://line_follower_robot/meshes/castor_base_link.STL"/>
+      </geometry>
+      <material name="">
+        <color rgba="0.79216 0.81961 0.93333 1"/>
+      </material>
+    </visual>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.01"/>
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
+    </inertial>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://line_follower_robot/meshes/castor_wheel.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="castor_joint" type="continuous">
+    <origin xyz="0.072581 0 -0.0025" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="castor_base_link"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <link name="castor_wheel">
+    <visual>
+      <geometry>
+        <mesh filename="package://line_follower_robot/meshes/castor_wheel.STL"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.01"/>
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
+    </inertial>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://line_follower_robot/meshes/castor_wheel.STL"/>
+      </geometry>
+    </collision>    
+  </link>
+
+  <joint name="castor_wheel_joint" type="continuous">
+    <origin xyz="0.015014 0.00014167 -0.02296" rpy="-1.5708 0 0"/>
+    <parent link="castor_base_link"/>
+    <child link="castor_wheel"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+</robot>

@@ -1,0 +1,304 @@
+<?xml version="1.0"?>
+<robot name="quadruped" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!--
+    QUADRUPED ROBOT - 12-DOF Learning Platform
+
+    This is a generic quadruped robot for learning:
+    - Floating-base dynamics
+    - Model Predictive Control
+    - Gait generation
+    - Dynamic balance
+
+    Structure:
+    - Body (floating base with IMU)
+    - 4 legs x 3 DOF = 12 joints
+    - RGB-D camera for terrain perception
+  -->
+
+  <!-- Include macros -->
+  <xacro:include filename="$(find quadruped_description)/urdf/leg_macro.urdf.xacro"/>
+
+  <!-- Constants -->
+  <xacro:property name="pi" value="3.14159265359"/>
+
+  <!-- Body dimensions -->
+  <xacro:property name="body_length" value="0.40"/>
+  <xacro:property name="body_width" value="0.20"/>
+  <xacro:property name="body_height" value="0.10"/>
+  <xacro:property name="body_mass" value="8.0"/>
+
+  <!-- Use simulation? -->
+  <xacro:arg name="use_sim" default="false"/>
+  <xacro:arg name="use_fake_hardware" default="false"/>
+
+  <!-- ==================== BASE LINK ==================== -->
+
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="${body_length} ${body_width} ${body_height}"/>
+      </geometry>
+      <material name="dark_gray">
+        <color rgba="0.3 0.3 0.3 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${body_length} ${body_width} ${body_height}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="${body_mass}"/>
+      <inertia
+        ixx="${body_mass/12.0 * (body_width*body_width + body_height*body_height)}"
+        ixy="0" ixz="0"
+        iyy="${body_mass/12.0 * (body_length*body_length + body_height*body_height)}"
+        iyz="0"
+        izz="${body_mass/12.0 * (body_length*body_length + body_width*body_width)}"/>
+    </inertial>
+  </link>
+
+  <!-- ==================== LEGS ==================== -->
+
+  <!-- Front Left (FL) -->
+  <xacro:leg prefix="FL" parent="base_link" reflect_x="-1" reflect_y="1"/>
+
+  <!-- Front Right (FR) -->
+  <xacro:leg prefix="FR" parent="base_link" reflect_x="1" reflect_y="1"/>
+
+  <!-- Rear Left (RL) -->
+  <xacro:leg prefix="RL" parent="base_link" reflect_x="-1" reflect_y="-1"/>
+
+  <!-- Rear Right (RR) -->
+  <xacro:leg prefix="RR" parent="base_link" reflect_x="1" reflect_y="-1"/>
+
+  <!-- ==================== IMU ==================== -->
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 ${body_height/2}" rpy="0 0 0"/>
+  </joint>
+
+  <link name="imu_link">
+    <visual>
+      <geometry>
+        <box size="0.02 0.02 0.01"/>
+      </geometry>
+      <material name="green">
+        <color rgba="0.2 0.8 0.2 1"/>
+      </material>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+    </inertial>
+  </link>
+
+  <!-- ==================== RGB-D CAMERA ==================== -->
+
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <origin xyz="${body_length/2 + 0.02} 0 0" rpy="0 ${pi/6} 0"/>
+  </joint>
+
+  <link name="camera_link">
+    <visual>
+      <geometry>
+        <box size="0.03 0.08 0.02"/>
+      </geometry>
+      <material name="red">
+        <color rgba="0.8 0.2 0.2 1"/>
+      </material>
+    </visual>
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
+    </inertial>
+  </link>
+
+  <!-- Camera optical frame (OpenCV convention: Z forward, X right, Y down) -->
+  <joint name="camera_optical_joint" type="fixed">
+    <parent link="camera_link"/>
+    <child link="camera_link_optical"/>
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+  </joint>
+
+  <link name="camera_link_optical"/>
+
+  <!-- ==================== ROS2_CONTROL ==================== -->
+
+  <ros2_control name="quadruped_system" type="system">
+
+    <xacro:if value="$(arg use_sim)">
+      <hardware>
+        <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+      </hardware>
+    </xacro:if>
+
+    <xacro:unless value="$(arg use_sim)">
+      <xacro:if value="$(arg use_fake_hardware)">
+        <hardware>
+          <plugin>mock_components/GenericSystem</plugin>
+          <param name="calculate_dynamics">true</param>
+        </hardware>
+      </xacro:if>
+      <xacro:unless value="$(arg use_fake_hardware)">
+        <hardware>
+          <plugin>quadruped_hardware/LegHardwareInterface</plugin>
+          <param name="serial_port">/dev/ttyUSB0</param>
+          <param name="baud_rate">1000000</param>
+        </hardware>
+      </xacro:unless>
+    </xacro:unless>
+
+    <!-- Front Left Leg -->
+    <joint name="FL_HAA">
+      <command_interface name="effort">
+        <param name="min">-30</param>
+        <param name="max">30</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="FL_HFE">
+      <command_interface name="effort">
+        <param name="min">-30</param>
+        <param name="max">30</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="FL_KFE">
+      <command_interface name="effort">
+        <param name="min">-30</param>
+        <param name="max">30</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <!-- Front Right Leg -->
+    <joint name="FR_HAA">
+      <command_interface name="effort">
+        <param name="min">-30</param>
+        <param name="max">30</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="FR_HFE">
+      <command_interface name="effort">
+        <param name="min">-30</param>
+        <param name="max">30</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="FR_KFE">
+      <command_interface name="effort">
+        <param name="min">-30</param>
+        <param name="max">30</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <!-- Rear Left Leg -->
+    <joint name="RL_HAA">
+      <command_interface name="effort">
+        <param name="min">-30</param>
+        <param name="max">30</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="RL_HFE">
+      <command_interface name="effort">
+        <param name="min">-30</param>
+        <param name="max">30</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="RL_KFE">
+      <command_interface name="effort">
+        <param name="min">-30</param>
+        <param name="max">30</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <!-- Rear Right Leg -->
+    <joint name="RR_HAA">
+      <command_interface name="effort">
+        <param name="min">-30</param>
+        <param name="max">30</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="RR_HFE">
+      <command_interface name="effort">
+        <param name="min">-30</param>
+        <param name="max">30</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+    <joint name="RR_KFE">
+      <command_interface name="effort">
+        <param name="min">-30</param>
+        <param name="max">30</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+  </ros2_control>
+
+  <!-- ==================== IMU SENSOR ==================== -->
+
+  <ros2_control name="imu_sensor" type="sensor">
+    <xacro:if value="$(arg use_sim)">
+      <hardware>
+        <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+      </hardware>
+    </xacro:if>
+    <xacro:unless value="$(arg use_sim)">
+      <hardware>
+        <plugin>quadruped_hardware/IMUHardwareInterface</plugin>
+        <param name="frame_id">imu_link</param>
+      </hardware>
+    </xacro:unless>
+
+    <sensor name="imu_sensor">
+      <state_interface name="orientation.x"/>
+      <state_interface name="orientation.y"/>
+      <state_interface name="orientation.z"/>
+      <state_interface name="orientation.w"/>
+      <state_interface name="angular_velocity.x"/>
+      <state_interface name="angular_velocity.y"/>
+      <state_interface name="angular_velocity.z"/>
+      <state_interface name="linear_acceleration.x"/>
+      <state_interface name="linear_acceleration.y"/>
+      <state_interface name="linear_acceleration.z"/>
+    </sensor>
+  </ros2_control>
+
+</robot>

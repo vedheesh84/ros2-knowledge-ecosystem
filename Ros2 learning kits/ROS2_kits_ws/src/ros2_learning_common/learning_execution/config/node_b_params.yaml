@@ -1,0 +1,8 @@
+# =============================================================================
+# Parameters for Node B (simple_node_b)
+# =============================================================================
+
+node_b:
+  ros__parameters:
+    # Logging level (not yet implemented in the node, but demonstrates the pattern)
+    log_level: "info"

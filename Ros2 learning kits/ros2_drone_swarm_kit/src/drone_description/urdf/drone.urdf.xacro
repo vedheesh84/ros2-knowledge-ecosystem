@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="quadcopter">
+
+  <xacro:property name="body_mass" value="0.250"/>
+  <xacro:property name="arm_length" value="0.09"/>
+  <xacro:property name="rotor_mass" value="0.010"/>
+  <xacro:property name="rotor_radius" value="0.04"/>
+
+  <!-- Base Link / Center of Mass -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.12 0.12 0.03"/>
+      </geometry>
+      <material name="drone_body">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.12 0.12 0.03"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${body_mass}"/>
+      <inertia ixx="0.00035" ixy="0" ixz="0" iyy="0.00035" iyz="0" izz="0.00065"/>
+    </inertial>
+  </link>
+
+  <!-- IMU Frame -->
+  <link name="imu_link"/>
+  <joint name="base_to_imu" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 0.01" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Downward Optical Flow / Rangefinder -->
+  <link name="rangefinder_link"/>
+  <joint name="base_to_rangefinder" type="fixed">
+    <parent link="base_link"/>
+    <child link="rangefinder_link"/>
+    <origin xyz="0 0 -0.015" rpy="0 1.5708 0"/>
+  </joint>
+
+  <!-- Rotor Macro -->
+  <xacro:macro name="rotor" params="name x y dir color">
+    <link name="${name}">
+      <visual>
+        <origin xyz="0 0 0.01" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${rotor_radius}" length="0.005"/>
+        </geometry>
+        <material name="${color}">
+          <color rgba="${color}"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0.01" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${rotor_radius}" length="0.005"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="0 0 0.01" rpy="0 0 0"/>
+        <mass value="${rotor_mass}"/>
+        <inertia ixx="0.000004" ixy="0" ixz="0" iyy="0.000004" iyz="0" izz="0.000008"/>
+      </inertial>
+    </link>
+
+    <joint name="${name}_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${name}"/>
+      <origin xyz="${x} ${y} 0.015" rpy="0 0 0"/>
+      <axis xyz="0 0 ${dir}"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:rotor name="rotor_front_right" x="${arm_length}" y="-${arm_length}" dir="1" color="0.9 0.2 0.2 0.8"/>
+  <xacro:rotor name="rotor_front_left"  x="${arm_length}" y="${arm_length}"  dir="-1" color="0.9 0.2 0.2 0.8"/>
+  <xacro:rotor name="rotor_back_left"   x="-${arm_length}" y="${arm_length}" dir="1" color="0.2 0.2 0.8 0.8"/>
+  <xacro:rotor name="rotor_back_right"  x="-${arm_length}" y="-${arm_length}" dir="-1" color="0.2 0.2 0.8 0.8"/>
+
+</robot>

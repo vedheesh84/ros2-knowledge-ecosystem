@@ -1,0 +1,252 @@
+<?xml version="1.0"?>
+<robot name="three_wheel_robot_model" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- PROPERTIES (tweak here if needed) -->
+  <xacro:property name="wheel_radius" value="0.0425"/>
+  <xacro:property name="wheel_width"  value="0.03"/>
+  <xacro:property name="wheel_separation" value="0.22"/>  <!-- distance between left and right wheel centers -->
+  <xacro:property name="body_length" value="0.30"/>
+  <xacro:property name="body_width"  value="0.20"/>
+  <xacro:property name="body_height" value="0.10"/>
+  <xacro:property name="base_z" value="0.09"/>
+
+  <!-- MATERIALS -->
+  <material name="blue"><color rgba="0 0 0.8 1"/></material>
+  <material name="black"><color rgba="0 0 0 1"/></material>
+  <material name="orange"><color rgba="1.0 0.45 0.05 1"/></material>
+  <material name="white"><color rgba="1 1 1 1"/></material>
+
+  <!-- BASE LINK -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 ${base_z}"/>
+      <geometry>
+        <box size="${body_length} ${body_width} ${body_height}"/>
+      </geometry>
+      <material name="orange"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 ${base_z}"/>
+      <geometry>
+        <box size="${body_length} ${body_width} ${body_height}"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <!-- Use a reasonable simple inertial (tweak for realistic sim) -->
+      <origin xyz="0 0 ${base_z}"/>
+      <mass value="3.0"/>
+      <inertia ixx="0.03" iyy="0.03" izz="0.03" ixy="0.0" ixz="0.0" iyz="0.0"/>
+    </inertial>
+  </link>
+
+
+
+  <!-- RIGHT WHEEL -->
+  <link name="right_wheel">
+    <visual>
+      <!-- Cylinder oriented so rotation axis is Y (we rotate about Y) -->
+      <origin rpy="1.5708 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+
+    <collision>
+      <origin rpy="1.5708 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0 0 0"/>
+      <mass value="0.3"/>
+      <!-- approximate wheel inertia -->
+      <inertia ixx="0.0005" iyy="0.0005" izz="0.0005" ixy="0.0" ixz="0.0" iyz="0.0"/>
+    </inertial>
+  </link>
+
+  <joint name="body_right_wheel" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_wheel"/>
+    <!-- rear-right wheel: +X is forward, -Y is right in ROS -->
+    <origin xyz="-0.10 -0.11 ${wheel_radius}"/>
+    <!-- rotation axis: Y (spins to drive +x) -->
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <!-- LEFT WHEEL -->
+  <link name="left_wheel">
+    <visual>
+      <origin rpy="1.5708 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+
+    <collision>
+      <origin rpy="1.5708 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0 0 0"/>
+      <mass value="0.3"/>
+      <inertia ixx="0.0005" iyy="0.0005" izz="0.0005" ixy="0.0" ixz="0.0" iyz="0.0"/>
+    </inertial>
+  </link>
+
+  <joint name="body_left_wheel" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_wheel"/>
+    <!-- rear-left wheel: +X is forward, +Y is left in ROS -->
+    <origin xyz="-0.10 0.11 ${wheel_radius}"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <!-- FRONT CASTER SUPPORT (non-driven) -->
+  <link name="front_caster_wheel">
+    <visual>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="0.04"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="0.04"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="1e-4" iyy="1e-4" izz="1e-4" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <gazebo reference="front_caster_wheel">
+        <material>Gazebo/Black</material>
+        <mu1 value="0.001"/>
+        <mu2 value="0.001"/>
+  </gazebo>
+
+  <joint name="body_front_caster_wheel" type="fixed">
+    <parent link="base_link"/>
+    <child link="front_caster_wheel"/>
+    <origin xyz="0.10 0 ${wheel_radius}"/>
+  </joint>
+
+  <!-- LIDAR -->
+  <link name="lidar_link">
+    <visual>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.04" length="0.04"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.04" length="0.04"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0 0 0"/>
+      <mass value="0.1"/>
+      <inertia ixx="0.0001" iyy="0.0001" izz="0.0001" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <joint name="base_to_lidar" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="0 0 0.17"/>
+  </joint>
+
+  <gazebo reference="lidar_link">
+    <material>Gazebo/Black</material>
+    <sensor name="lidar" type="ray">
+      <pose>0 0 0 0 0 0</pose>
+      <always_on>true</always_on>
+      <visualize>true</visualize>
+      <update_rate>10</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.12</min>
+          <max>8.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="lidar_controller" filename="libgazebo_ros_ray_sensor.so">
+        <ros>
+          <namespace>/</namespace>
+          <remapping>~/out:=/scan</remapping>
+        </ros>
+        <output_type>sensor_msgs/LaserScan</output_type>
+        <frame_name>lidar_link</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- Optional: simple placeholder collision geometry for wheels if needed -->
+  <!-- (Already done above by using cylinder collision) -->
+
+  <!-- 
+       GAZEBO PLUGINS (for ROS2 integration)
+ -->
+
+
+  <!-- Differential-drive plugin: listens to /cmd_vel and actuates left/right joints -->
+  <gazebo>
+    <plugin name="gazebo_diff_drive" filename="libgazebo_ros_diff_drive.so">
+      <ros>
+        <namespace>/</namespace>
+        <!-- ensure this matches where you will publish teleop cmd_vel -->
+        <remapping>cmd_vel:=/cmd_vel</remapping>
+      </ros>
+
+      <!-- wheel information -->
+      <left_joint>body_left_wheel</left_joint>
+      <right_joint>body_right_wheel</right_joint>
+      <wheel_separation>${wheel_separation}</wheel_separation>
+      <wheel_diameter>${2 * wheel_radius}</wheel_diameter>
+
+      <!-- limits-->
+      <max_wheel_torque>5.0</max_wheel_torque>
+      <max_wheel_acceleration>10.0</max_wheel_acceleration>
+
+      <!--output-->
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>base_link</robot_base_frame>
+      <publish_odometry>true</publish_odometry>
+      <publish_wheel_tf>true</publish_wheel_tf> <!-- wheel->base_link TF -->  
+      <publish_odom_tf>true</publish_odom_tf>   <!-- odom->base_link TF -->
+
+    </plugin>
+  </gazebo>
+
+</robot>

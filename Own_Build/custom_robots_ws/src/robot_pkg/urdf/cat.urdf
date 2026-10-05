@@ -1,0 +1,360 @@
+<?xml version="1.0"?>
+<robot name="cat_robot">
+
+  <material name="orange">
+    <color rgba="1.0 0.45 0.05 1.0"/>
+  </material>
+  <material name="white">
+    <color rgba="1.0 1.0 1.0 1.0"/>
+  </material>
+  <material name="pink">
+    <color rgba="1.0 0.45 0.65 1.0"/>
+  </material>
+
+  <link name="body">
+    <visual>
+      <geometry>
+        <box size="0.32 0.14 0.08"/>
+      </geometry>
+      <material name="orange"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.32 0.14 0.08"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="1.5"/>
+      <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.02" iyz="0.0" izz="0.02"/>
+    </inertial>
+  </link>
+
+  <link name="head">
+    <visual>
+      <geometry>
+        <sphere radius="0.06"/>
+      </geometry>
+      <material name="orange"/>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.06"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.2"/>
+      <inertia ixx="0.0003" ixy="0.0" ixz="0.0" iyy="0.0003" iyz="0.0" izz="0.0003"/>
+    </inertial>
+  </link>
+
+  <joint name="body_to_head" type="fixed">
+    <parent link="body"/>
+    <child link="head"/>
+    <origin xyz="0.20 0 0.04"/>
+  </joint>
+
+  <link name="front_left_upper_leg">
+    <visual>
+      <geometry>
+        <cylinder radius="0.018" length="0.08"/>
+      </geometry>
+      <material name="orange"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.018" length="0.08"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="front_left_upper_leg_joint" type="fixed">
+    <parent link="body"/>
+    <child link="front_left_upper_leg"/>
+    <origin xyz="0.12 0.06 -0.03" rpy="0 0.3 0"/>
+  </joint>
+
+  <link name="front_left_lower_leg">
+    <visual>
+      <geometry>
+        <cylinder radius="0.015" length="0.08"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.015" length="0.08"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.04"/>
+      <inertia ixx="0.00008" ixy="0.0" ixz="0.0" iyy="0.00008" iyz="0.0" izz="0.00008"/>
+    </inertial>
+  </link>
+
+  <joint name="front_left_knee_joint" type="fixed">
+    <parent link="front_left_upper_leg"/>
+    <child link="front_left_lower_leg"/>
+    <origin xyz="0 0 -0.08" rpy="0 -0.4 0"/>
+  </joint>
+
+  <link name="front_left_paw">
+    <visual>
+      <geometry>
+        <sphere radius="0.022"/>
+      </geometry>
+      <material name="pink"/>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.022"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.03"/>
+      <inertia ixx="0.00004" ixy="0.0" ixz="0.0" iyy="0.00004" iyz="0.0" izz="0.00004"/>
+    </inertial>
+  </link>
+
+  <joint name="front_left_paw_joint" type="fixed">
+    <parent link="front_left_lower_leg"/>
+    <child link="front_left_paw"/>
+    <origin xyz="0 0 -0.08"/>
+  </joint>
+
+  <link name="front_right_upper_leg">
+    <visual>
+      <geometry>
+        <cylinder radius="0.018" length="0.08"/>
+      </geometry>
+      <material name="orange"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.018" length="0.08"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="front_right_upper_leg_joint" type="fixed">
+    <parent link="body"/>
+    <child link="front_right_upper_leg"/>
+    <origin xyz="0.12 -0.06 -0.03" rpy="0 0.3 0"/>
+  </joint>
+
+  <link name="front_right_lower_leg">
+    <visual>
+      <geometry>
+        <cylinder radius="0.015" length="0.08"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.015" length="0.08"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.04"/>
+      <inertia ixx="0.00008" ixy="0.0" ixz="0.0" iyy="0.00008" iyz="0.0" izz="0.00008"/>
+    </inertial>
+  </link>
+
+  <joint name="front_right_knee_joint" type="fixed">
+    <parent link="front_right_upper_leg"/>
+    <child link="front_right_lower_leg"/>
+    <origin xyz="0 0 -0.08" rpy="0 -0.4 0"/>
+  </joint>
+
+  <link name="front_right_paw">
+    <visual>
+      <geometry>
+        <sphere radius="0.022"/>
+      </geometry>
+      <material name="pink"/>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.022"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.03"/>
+      <inertia ixx="0.00004" ixy="0.0" ixz="0.0" iyy="0.00004" iyz="0.0" izz="0.00004"/>
+    </inertial>
+  </link>
+
+  <joint name="front_right_paw_joint" type="fixed">
+    <parent link="front_right_lower_leg"/>
+    <child link="front_right_paw"/>
+    <origin xyz="0 0 -0.08"/>
+  </joint>
+
+  <link name="back_left_upper_leg">
+    <visual>
+      <geometry>
+        <cylinder radius="0.02" length="0.09"/>
+      </geometry>
+      <material name="orange"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.02" length="0.09"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.06"/>
+      <inertia ixx="0.00012" ixy="0.0" ixz="0.0" iyy="0.00012" iyz="0.0" izz="0.00012"/>
+    </inertial>
+  </link>
+
+  <joint name="back_left_upper_leg_joint" type="fixed">
+    <parent link="body"/>
+    <child link="back_left_upper_leg"/>
+    <origin xyz="-0.12 0.06 -0.03" rpy="0 -0.5 0"/>
+  </joint>
+
+  <link name="back_left_lower_leg">
+    <visual>
+      <geometry>
+        <cylinder radius="0.016" length="0.09"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.016" length="0.09"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="back_left_knee_joint" type="fixed">
+    <parent link="back_left_upper_leg"/>
+    <child link="back_left_lower_leg"/>
+    <origin xyz="0 0 -0.09" rpy="0 0.6 0"/>
+  </joint>
+
+  <link name="back_left_paw">
+    <visual>
+      <geometry>
+        <sphere radius="0.024"/>
+      </geometry>
+      <material name="pink"/>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.024"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.03"/>
+      <inertia ixx="0.00004" ixy="0.0" ixz="0.0" iyy="0.00004" iyz="0.0" izz="0.00004"/>
+    </inertial>
+  </link>
+
+  <joint name="back_left_paw_joint" type="fixed">
+    <parent link="back_left_lower_leg"/>
+    <child link="back_left_paw"/>
+    <origin xyz="0 0 -0.09"/>
+  </joint>
+
+  <link name="back_right_upper_leg">
+    <visual>
+      <geometry>
+        <cylinder radius="0.02" length="0.09"/>
+      </geometry>
+      <material name="orange"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.02" length="0.09"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.06"/>
+      <inertia ixx="0.00012" ixy="0.0" ixz="0.0" iyy="0.00012" iyz="0.0" izz="0.00012"/>
+    </inertial>
+  </link>
+
+  <joint name="back_right_upper_leg_joint" type="fixed">
+    <parent link="body"/>
+    <child link="back_right_upper_leg"/>
+    <origin xyz="-0.12 -0.06 -0.03" rpy="0 -0.5 0"/>
+  </joint>
+
+  <link name="back_right_lower_leg">
+    <visual>
+      <geometry>
+        <cylinder radius="0.016" length="0.09"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.016" length="0.09"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="back_right_knee_joint" type="fixed">
+    <parent link="back_right_upper_leg"/>
+    <child link="back_right_lower_leg"/>
+    <origin xyz="0 0 -0.09" rpy="0 0.6 0"/>
+  </joint>
+
+  <link name="back_right_paw">
+    <visual>
+      <geometry>
+        <sphere radius="0.024"/>
+      </geometry>
+      <material name="pink"/>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.024"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.03"/>
+      <inertia ixx="0.00004" ixy="0.0" ixz="0.0" iyy="0.00004" iyz="0.0" izz="0.00004"/>
+    </inertial>
+  </link>
+
+  <joint name="back_right_paw_joint" type="fixed">
+    <parent link="back_right_lower_leg"/>
+    <child link="back_right_paw"/>
+    <origin xyz="0 0 -0.09"/>
+  </joint>
+
+  <gazebo>
+    <plugin name="cat_planar_move" filename="libgazebo_ros_planar_move.so">
+      <ros>
+        <namespace>/</namespace>
+        <remapping>cmd_vel:=/cmd_vel</remapping>
+        <remapping>odom:=/cat_odom</remapping>
+      </ros>
+      <update_rate>100</update_rate>
+      <publish_rate>30</publish_rate>
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>true</publish_odom_tf>
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>body</robot_base_frame>
+    </plugin>
+  </gazebo>
+
+</robot>

@@ -1,0 +1,172 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!--
+    LEG MACRO - 3-DOF Leg for Quadruped Robot
+
+    Each leg has:
+    - HAA: Hip Abduction/Adduction (rotates leg in/out from body)
+    - HFE: Hip Flexion/Extension (swings leg forward/back)
+    - KFE: Knee Flexion/Extension (bends knee)
+
+    Parameters:
+    - prefix: FL, FR, RL, RR (leg identifier)
+    - parent: link to attach hip to
+    - reflect_x: 1 for right side, -1 for left side
+    - reflect_y: 1 for front, -1 for rear
+  -->
+
+  <xacro:property name="hip_offset" value="0.08"/>
+  <xacro:property name="upper_leg_length" value="0.20"/>
+  <xacro:property name="lower_leg_length" value="0.20"/>
+
+  <xacro:property name="hip_mass" value="0.5"/>
+  <xacro:property name="upper_leg_mass" value="0.5"/>
+  <xacro:property name="lower_leg_mass" value="0.3"/>
+
+  <xacro:property name="hip_radius" value="0.03"/>
+  <xacro:property name="leg_radius" value="0.02"/>
+  <xacro:property name="foot_radius" value="0.02"/>
+
+  <!-- Joint limits -->
+  <xacro:property name="haa_limit" value="0.5"/>       <!-- rad (~28 deg) -->
+  <xacro:property name="hfe_limit_upper" value="1.57"/> <!-- rad (90 deg) -->
+  <xacro:property name="hfe_limit_lower" value="-0.5"/> <!-- rad (-28 deg) -->
+  <xacro:property name="kfe_limit_upper" value="2.7"/>  <!-- rad (155 deg) -->
+  <xacro:property name="kfe_limit_lower" value="-0.1"/> <!-- rad -->
+
+  <xacro:property name="max_effort" value="30.0"/>     <!-- Nm -->
+  <xacro:property name="max_velocity" value="10.0"/>   <!-- rad/s -->
+
+  <xacro:macro name="leg" params="prefix parent reflect_x reflect_y">
+
+    <!-- Hip (HAA) - Abduction/Adduction -->
+    <joint name="${prefix}_HAA" type="revolute">
+      <parent link="${parent}"/>
+      <child link="${prefix}_hip"/>
+      <origin xyz="${reflect_y * 0.15} ${reflect_x * 0.08} 0" rpy="0 0 0"/>
+      <axis xyz="1 0 0"/>
+      <limit lower="${-haa_limit}" upper="${haa_limit}"
+             effort="${max_effort}" velocity="${max_velocity}"/>
+      <dynamics damping="0.1" friction="0.1"/>
+    </joint>
+
+    <link name="${prefix}_hip">
+      <visual>
+        <origin xyz="0 ${reflect_x * hip_offset/2} 0" rpy="${pi/2} 0 0"/>
+        <geometry>
+          <cylinder radius="${hip_radius}" length="${hip_offset}"/>
+        </geometry>
+        <material name="gray">
+          <color rgba="0.5 0.5 0.5 1"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 ${reflect_x * hip_offset/2} 0" rpy="${pi/2} 0 0"/>
+        <geometry>
+          <cylinder radius="${hip_radius}" length="${hip_offset}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="0 ${reflect_x * hip_offset/2} 0"/>
+        <mass value="${hip_mass}"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+    </link>
+
+    <!-- Upper Leg (HFE) - Hip Flexion/Extension -->
+    <joint name="${prefix}_HFE" type="revolute">
+      <parent link="${prefix}_hip"/>
+      <child link="${prefix}_thigh"/>
+      <origin xyz="0 ${reflect_x * hip_offset} 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="${hfe_limit_lower}" upper="${hfe_limit_upper}"
+             effort="${max_effort}" velocity="${max_velocity}"/>
+      <dynamics damping="0.1" friction="0.1"/>
+    </joint>
+
+    <link name="${prefix}_thigh">
+      <visual>
+        <origin xyz="0 0 ${-upper_leg_length/2}" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${leg_radius}" length="${upper_leg_length}"/>
+        </geometry>
+        <material name="blue">
+          <color rgba="0.2 0.2 0.8 1"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 ${-upper_leg_length/2}" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${leg_radius}" length="${upper_leg_length}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="0 0 ${-upper_leg_length/2}"/>
+        <mass value="${upper_leg_mass}"/>
+        <inertia ixx="0.002" ixy="0" ixz="0" iyy="0.002" iyz="0" izz="0.0005"/>
+      </inertial>
+    </link>
+
+    <!-- Lower Leg (KFE) - Knee Flexion/Extension -->
+    <joint name="${prefix}_KFE" type="revolute">
+      <parent link="${prefix}_thigh"/>
+      <child link="${prefix}_calf"/>
+      <origin xyz="0 0 ${-upper_leg_length}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="${kfe_limit_lower}" upper="${kfe_limit_upper}"
+             effort="${max_effort}" velocity="${max_velocity}"/>
+      <dynamics damping="0.1" friction="0.1"/>
+    </joint>
+
+    <link name="${prefix}_calf">
+      <visual>
+        <origin xyz="0 0 ${-lower_leg_length/2}" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${leg_radius * 0.8}" length="${lower_leg_length}"/>
+        </geometry>
+        <material name="blue"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 ${-lower_leg_length/2}" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="${leg_radius * 0.8}" length="${lower_leg_length}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="0 0 ${-lower_leg_length/2}"/>
+        <mass value="${lower_leg_mass}"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.0002"/>
+      </inertial>
+    </link>
+
+    <!-- Foot (fixed to calf, contains contact point) -->
+    <joint name="${prefix}_foot_joint" type="fixed">
+      <parent link="${prefix}_calf"/>
+      <child link="${prefix}_foot"/>
+      <origin xyz="0 0 ${-lower_leg_length}" rpy="0 0 0"/>
+    </joint>
+
+    <link name="${prefix}_foot">
+      <visual>
+        <geometry>
+          <sphere radius="${foot_radius}"/>
+        </geometry>
+        <material name="black">
+          <color rgba="0.1 0.1 0.1 1"/>
+        </material>
+      </visual>
+      <collision>
+        <geometry>
+          <sphere radius="${foot_radius}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="0.05"/>
+        <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
+      </inertial>
+    </link>
+
+  </xacro:macro>
+
+</robot>

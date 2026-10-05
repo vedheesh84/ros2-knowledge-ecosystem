@@ -1,0 +1,297 @@
+<?xml version="1.0"?>
+<!--
+  ocean.world - Underwater Environment for Reef Drone AUV
+
+  ENVIRONMENT DESIGN:
+  ===================
+  - Ocean floor at -20m depth
+  - Water surface at z=0
+  - Coral reef structures for visual interest
+  - Blue-tinted lighting for underwater ambiance
+
+  COORDINATE SYSTEM:
+  ==================
+  Z = 0: Water surface
+  Z < 0: Underwater
+  Z > 0: Above water (not our domain)
+
+  PHYSICS NOTES:
+  ==============
+  Gazebo default physics doesn't include:
+  - Buoyancy (added via plugin)
+  - Water drag (added via plugin)
+  - Currents (can be added as external force)
+
+  Gravity still applies normally (-9.81 m/s² in Z).
+-->
+<sdf version="1.6">
+  <world name="ocean">
+
+    <!-- Physics configuration -->
+    <physics type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+
+    <!-- Scene configuration for underwater ambiance -->
+    <scene>
+      <ambient>0.2 0.3 0.5 1.0</ambient>
+      <background>0.0 0.1 0.3 1.0</background>
+      <shadows>false</shadows>
+      <fog>
+        <color>0.1 0.2 0.4 1.0</color>
+        <type>linear</type>
+        <start>1.0</start>
+        <end>30.0</end>
+        <density>0.5</density>
+      </fog>
+    </scene>
+
+    <!-- Underwater lighting -->
+    <light type="directional" name="sun">
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.3 0.4 0.6 1</diffuse>
+      <specular>0.1 0.1 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>0 0.5 -1</direction>
+    </light>
+
+    <!--
+      OCEAN FLOOR
+
+      Large flat plane at -20m depth.
+      Sandy texture would be nice but we'll keep it simple.
+    -->
+    <model name="ocean_floor">
+      <static>true</static>
+      <pose>0 0 -20 0 0 0</pose>
+      <link name="floor_link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.4 0.35 0.25 1</ambient>
+            <diffuse>0.5 0.45 0.35 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!--
+      CORAL REEF STRUCTURES
+
+      Simple box models representing reef features.
+      Provide visual landmarks and obstacles.
+    -->
+
+    <!-- Reef rock 1 -->
+    <model name="reef_rock_1">
+      <static>true</static>
+      <pose>5 3 -19 0 0 0.3</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.5 1.0 2.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.5 1.0 2.0</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.6 0.3 0.2 1</ambient>
+            <diffuse>0.7 0.4 0.3 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Reef rock 2 -->
+    <model name="reef_rock_2">
+      <static>true</static>
+      <pose>-4 5 -19.5 0 0 -0.5</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>2.0 1.5 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>2.0 1.5 1.0</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.5 0.4 0.3 1</ambient>
+            <diffuse>0.6 0.5 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Tall coral structure -->
+    <model name="coral_tower">
+      <static>true</static>
+      <pose>8 -5 -17 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>6</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>6</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.8 0.3 0.4 1</ambient>
+            <diffuse>0.9 0.4 0.5 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Reef arch -->
+    <model name="reef_arch_base_left">
+      <static>true</static>
+      <pose>-8 -8 -18.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.0 1.0 3.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.0 1.0 3.0</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.4 0.5 0.3 1</ambient>
+            <diffuse>0.5 0.6 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="reef_arch_base_right">
+      <static>true</static>
+      <pose>-8 -11 -18.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.0 1.0 3.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.0 1.0 3.0</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.4 0.5 0.3 1</ambient>
+            <diffuse>0.5 0.6 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="reef_arch_top">
+      <static>true</static>
+      <pose>-8 -9.5 -16 0 1.57 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.0 4.0 0.8</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.0 4.0 0.8</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.4 0.5 0.3 1</ambient>
+            <diffuse>0.5 0.6 0.4 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!--
+      WATER SURFACE (visual only)
+
+      Semi-transparent plane at z=0.
+      Helps orient the viewer.
+    -->
+    <model name="water_surface">
+      <static>true</static>
+      <pose>0 0 0 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.1 0.3 0.5 0.6</ambient>
+            <diffuse>0.2 0.4 0.6 0.6</diffuse>
+          </material>
+          <transparency>0.4</transparency>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Gazebo ROS integration -->
+    <plugin name="gazebo_ros_state" filename="libgazebo_ros_state.so">
+      <ros>
+        <namespace>/gazebo</namespace>
+      </ros>
+      <update_rate>50</update_rate>
+    </plugin>
+
+  </world>
+</sdf>

@@ -1,0 +1,16 @@
+{
+  "configVersion": 1,
+  "layout": {
+    "first": {
+      "first": "3D!3d_multi_robot",
+      "second": "StateTransitions!fleet_state",
+      "direction": "row"
+    },
+    "second": {
+      "first": "Plot!latency_and_battery",
+      "second": "RawMessages!system_alerts",
+      "direction": "row"
+    },
+    "direction": "column"
+  }
+}

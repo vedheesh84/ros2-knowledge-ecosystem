@@ -1,0 +1,20 @@
+# Reef Drone EKF Configuration
+# =============================
+
+auv_ekf:
+  ros__parameters:
+    # Initial state (if needed)
+    initial_x: 0.0
+    initial_y: 0.0
+    initial_z: -5.0  # Start at 5m depth
+
+    # Process noise (how much we trust the model)
+    process_noise_pos: 0.01    # m²
+    process_noise_vel: 0.1     # m²/s²
+    process_noise_orient: 0.001  # rad²
+    process_noise_omega: 0.01  # rad²/s²
+
+    # Measurement noise (how much we trust sensors)
+    dvl_noise: 0.01       # m²/s² (velocity variance)
+    depth_noise: 0.001    # m² (depth variance)
+    heading_noise: 0.01   # rad² (heading variance)

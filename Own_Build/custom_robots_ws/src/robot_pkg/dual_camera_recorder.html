@@ -1,0 +1,1057 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dual Camera Recorder</title>
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111827;
+      color: #f9fafb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    .app {
+      width: min(1500px, 100%);
+      background: #1f2937;
+      border-radius: 12px;
+      padding: 16px;
+      box-sizing: border-box;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 1.25rem;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+
+    button, select {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      background: #374151;
+      color: #f9fafb;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    button.recording {
+      background: #b91c1c;
+    }
+
+    .videos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .videos.single {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .videos.single .inactive-preview {
+      display: none;
+    }
+
+    video {
+      width: 100%;
+      background: #000;
+      border-radius: 10px;
+      aspect-ratio: 16 / 10;
+      min-height: min(44vh, 520px);
+      object-fit: cover;
+    }
+
+    #videoUsb {
+      display: block;
+      width: 100%;
+      background: #000;
+      border-radius: 10px;
+      aspect-ratio: 16 / 10;
+      min-height: min(44vh, 520px);
+      object-fit: cover;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #d1d5db;
+      min-height: 1.2rem;
+    }
+
+    .meter-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #d1d5db;
+    }
+
+    #audioMeter {
+      flex: 1;
+      height: 18px;
+    }
+
+    #playbackVideo {
+      width: 100%;
+      margin-top: 12px;
+      border-radius: 10px;
+      background: #000;
+    }
+
+    @media (max-width: 800px) {
+      .videos {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>Dual Camera Recorder</h1>
+    <div class="controls">
+      <label>
+        Mode:
+        <select id="cameraModeSelect">
+          <option value="usb">Single: USB camera</option>
+          <option value="dual">Dual: browser + USB</option>
+          <option value="builtin">Single: browser camera</option>
+        </select>
+      </label>
+      <label>
+        Browser:
+        <select id="builtinSelect"></select>
+      </label>
+      <label>
+        USB:
+        <select id="usbSelect"></select>
+      </label>
+      <label>
+        Mic:
+        <select id="micSelect"></select>
+      </label>
+      <label>
+        <input type="checkbox" id="recordAudioCheckbox" checked />
+        Record audio
+      </label>
+      <button id="startPreviewBtn">Start Preview</button>
+      <button id="resetCamerasBtn">Reset Cameras</button>
+      <button id="recordBtn" disabled>Start Recording</button>
+      <button id="downloadBtn" disabled>Download Video</button>
+    </div>
+
+    <div class="videos">
+      <video id="videoBuiltin" autoplay playsinline muted></video>
+      <img id="videoUsb" alt="USB camera preview" />
+    </div>
+
+    <div class="meter-wrap">
+      <span>Mic level:</span>
+      <meter id="audioMeter" min="0" max="100" low="5" high="60" optimum="40" value="0"></meter>
+    </div>
+
+    <video id="playbackVideo" controls style="display: none;"></video>
+
+    <canvas id="mixCanvas" width="1280" height="480" style="display: none;"></canvas>
+    <video id="probeVideo" autoplay playsinline muted style="display: none;"></video>
+    <div class="status" id="status">Checking local camera server...</div>
+  </div>
+
+  <script>
+    const cameraModeSelect = document.getElementById("cameraModeSelect");
+    const builtinSelect = document.getElementById("builtinSelect");
+    const usbSelect = document.getElementById("usbSelect");
+    const micSelect = document.getElementById("micSelect");
+    const recordAudioCheckbox = document.getElementById("recordAudioCheckbox");
+    const startPreviewBtn = document.getElementById("startPreviewBtn");
+    const resetCamerasBtn = document.getElementById("resetCamerasBtn");
+    const recordBtn = document.getElementById("recordBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const statusEl = document.getElementById("status");
+
+    const videoBuiltin = document.getElementById("videoBuiltin");
+    const videoUsb = document.getElementById("videoUsb");
+    const probeVideo = document.getElementById("probeVideo");
+    const playbackVideo = document.getElementById("playbackVideo");
+    const audioMeter = document.getElementById("audioMeter");
+    const mixCanvas = document.getElementById("mixCanvas");
+    const ctx = mixCanvas.getContext("2d");
+
+    // Always talk to the Flask server on :8000 (works for file:// and other origins).
+    const API_BASE = (() => {
+      if (location.protocol === "http:" || location.protocol === "https:") {
+        if (location.port === "8000") return "";
+        return `${location.protocol}//${location.hostname}:8000`;
+      }
+      return "http://localhost:8000";
+    })();
+
+    function apiUrl(path) {
+      return `${API_BASE}${path}`;
+    }
+
+    let streamBuiltin = null;
+    let usbStreamActive = false;
+    let usbPollTimer = null;
+    let usbRafId = null;
+    let streamAudio = null;
+    let mixedStream = null;
+    let drawInterval = null;
+    let drawRafId = null;
+    let audioMeterInterval = null;
+    let audioContext = null;
+    let audioAnalyser = null;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let recordedBlob = null;
+    let recorderMimeType = "video/webm";
+    let playbackUrl = null;
+    let activeCameraMode = "usb";
+
+    function setStatus(message) {
+      statusEl.textContent = message;
+    }
+
+    const RELEASE_DELAY_MS = 400;
+    const BUILTIN_LABEL_RE = /(integrated|internal|built[-\s]?in|front|facetime|webcam)/i;
+    const USB_LABEL_RE = /(see3cam|usb\s*2\.0|microdia|external)/i;
+
+    function hasBrowserMedia() {
+      return Boolean(navigator.mediaDevices?.getUserMedia && navigator.mediaDevices?.enumerateDevices);
+    }
+
+    function browserMediaUnavailableMessage() {
+      return "Browser camera is blocked in this context. For Dual mode, open http://localhost:8000/dual_camera_recorder.html on this computer.";
+    }
+
+    function setBrowserModesEnabled(enabled) {
+      [...cameraModeSelect.options].forEach(option => {
+        if (option.value === "dual" || option.value === "builtin") {
+          option.disabled = !enabled;
+        }
+      });
+      builtinSelect.disabled = !enabled || !modeNeedsBuiltin();
+      micSelect.disabled = !enabled;
+      recordAudioCheckbox.disabled = !enabled;
+      if (!enabled && modeNeedsBuiltin()) {
+        cameraModeSelect.value = "usb";
+      }
+    }
+
+    async function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function askPermissionOnce() {
+      if (!hasBrowserMedia()) throw new Error(browserMediaUnavailableMessage());
+      const temp = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      temp.getTracks().forEach(track => track.stop());
+      await delay(800);
+    }
+
+    async function listCameras() {
+      if (!hasBrowserMedia()) return [];
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      return devices.filter(d => d.kind === "videoinput");
+    }
+
+    async function listMicrophones() {
+      if (!hasBrowserMedia()) return [];
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      return devices.filter(d => d.kind === "audioinput");
+    }
+
+    function fillMicSelect(mics) {
+      const previousMic = micSelect.value;
+      micSelect.innerHTML = "";
+
+      mics.forEach((mic, idx) => {
+        const label = mic.label || `Microphone ${idx + 1}`;
+        micSelect.add(new Option(label, mic.deviceId));
+      });
+
+      if (mics.some(mic => mic.deviceId === previousMic)) {
+        micSelect.value = previousMic;
+      }
+    }
+
+    async function startMicrophoneStream() {
+      stopAudioMeter();
+      stopStream(streamAudio);
+      streamAudio = null;
+
+      if (!recordAudioCheckbox.checked) return;
+      if (!hasBrowserMedia()) return;
+
+      const micId = micSelect.value;
+      const constraints = micId
+        ? { audio: { deviceId: { ideal: micId }, echoCancellation: true, noiseSuppression: true }, video: false }
+        : { audio: { echoCancellation: true, noiseSuppression: true }, video: false };
+
+      streamAudio = await navigator.mediaDevices.getUserMedia(constraints);
+      startAudioMeter();
+    }
+
+    function stopAudioMeter() {
+      if (audioMeterInterval) {
+        clearInterval(audioMeterInterval);
+        audioMeterInterval = null;
+      }
+      audioAnalyser = null;
+      if (audioContext) {
+        audioContext.close().catch(() => {});
+        audioContext = null;
+      }
+      audioMeter.value = 0;
+    }
+
+    function startAudioMeter() {
+      stopAudioMeter();
+      const audioTrack = streamAudio?.getAudioTracks()[0];
+      if (!audioTrack || audioTrack.readyState !== "live") return;
+
+      audioContext = new AudioContext();
+      const source = audioContext.createMediaStreamSource(new MediaStream([audioTrack]));
+      audioAnalyser = audioContext.createAnalyser();
+      audioAnalyser.fftSize = 256;
+      source.connect(audioAnalyser);
+
+      const data = new Uint8Array(audioAnalyser.frequencyBinCount);
+      audioMeterInterval = setInterval(() => {
+        audioAnalyser.getByteFrequencyData(data);
+        const avg = data.reduce((sum, value) => sum + value, 0) / data.length;
+        audioMeter.value = Math.min(100, Math.round((avg / 255) * 100));
+      }, 100);
+
+      if (audioContext.state === "suspended") {
+        audioContext.resume().catch(() => {});
+      }
+    }
+
+    function pickRecorderMimeType(hasAudio) {
+      const candidates = hasAudio
+        ? [
+            "video/webm;codecs=vp9,opus",
+            "video/webm;codecs=vp8,opus",
+            "video/webm;codecs=opus,vp8",
+            "video/webm"
+          ]
+        : [
+            "video/webm;codecs=vp9",
+            "video/webm;codecs=vp8",
+            "video/webm"
+          ];
+      return candidates.find(type => MediaRecorder.isTypeSupported(type)) || "video/webm";
+    }
+
+    async function ensureMicrophoneReady() {
+      if (!recordAudioCheckbox.checked) return false;
+
+      const liveTrack = streamAudio?.getAudioTracks()[0];
+      if (!liveTrack || liveTrack.readyState !== "live") {
+        await startMicrophoneStream();
+      }
+
+      const track = streamAudio?.getAudioTracks()[0];
+      if (!track || track.readyState !== "live") {
+        throw new Error("Microphone is not available. Check mic permissions and device.");
+      }
+
+      track.enabled = true;
+      if (audioContext?.state === "suspended") {
+        await audioContext.resume();
+      }
+      return true;
+    }
+
+    function buildRecordingStream() {
+      const tracks = [...mixedStream.getVideoTracks()];
+      if (recordAudioCheckbox.checked && streamAudio) {
+        const audioTrack = streamAudio.getAudioTracks()[0];
+        if (audioTrack && audioTrack.readyState === "live") {
+          tracks.push(audioTrack.clone());
+        }
+      }
+      return new MediaStream(tracks);
+    }
+
+    function clearPlayback() {
+      if (playbackUrl) {
+        URL.revokeObjectURL(playbackUrl);
+        playbackUrl = null;
+      }
+      playbackVideo.removeAttribute("src");
+      playbackVideo.load();
+      playbackVideo.style.display = "none";
+    }
+
+    function fillBuiltinSelect(cameras) {
+      const previousBuiltin = builtinSelect.value;
+      builtinSelect.innerHTML = "";
+
+      const usable = cameras.filter(cam => cam.deviceId);
+      if (!usable.length) {
+        builtinSelect.add(new Option("No camera found", ""));
+        return;
+      }
+
+      usable.forEach((cam, idx) => {
+        const label = cam.label || `Camera ${idx + 1}`;
+        builtinSelect.add(new Option(label, cam.deviceId));
+      });
+
+      const builtinIndex = usable.findIndex(cam => {
+        const label = cam.label || "";
+        return BUILTIN_LABEL_RE.test(label) && !USB_LABEL_RE.test(label);
+      });
+      const nonUsbIndex = usable.findIndex(cam => !USB_LABEL_RE.test(cam.label || ""));
+
+      if (previousBuiltin && usable.some(cam => cam.deviceId === previousBuiltin)) {
+        builtinSelect.value = previousBuiltin;
+      } else if (builtinIndex >= 0) {
+        builtinSelect.selectedIndex = builtinIndex;
+      } else if (nonUsbIndex >= 0) {
+        builtinSelect.selectedIndex = nonUsbIndex;
+      } else {
+        builtinSelect.selectedIndex = 0;
+      }
+    }
+
+    async function refreshUsbSelect() {
+      usbSelect.innerHTML = "";
+      try {
+        const res = await fetch(apiUrl("/api/usb-camera/status"));
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        const status = await res.json();
+        if (status.connected) {
+          usbSelect.add(new Option(status.name || "USB Camera", status.device || "usb-server"));
+          return true;
+        }
+        usbSelect.add(new Option("USB camera not connected", ""));
+        return false;
+      } catch (_) {
+        usbSelect.add(new Option("USB camera status unavailable (start server on :8000)", ""));
+        return false;
+      } finally {
+        usbSelect.disabled = true;
+      }
+    }
+
+    function stopStream(stream) {
+      if (!stream) return;
+      stream.getTracks().forEach(track => track.stop());
+    }
+
+    function stopUsbStream() {
+      usbStreamActive = false;
+      if (usbPollTimer) {
+        clearTimeout(usbPollTimer);
+        usbPollTimer = null;
+      }
+      if (usbRafId) {
+        cancelAnimationFrame(usbRafId);
+        usbRafId = null;
+      }
+      const prev = videoUsb.dataset.blobUrl;
+      if (prev) {
+        URL.revokeObjectURL(prev);
+        delete videoUsb.dataset.blobUrl;
+      }
+      videoUsb.removeAttribute("src");
+      videoUsb.removeAttribute("srcset");
+    }
+
+    async function stopUsbStreamAsync() {
+      stopUsbStream();
+      try {
+        await fetch(apiUrl("/api/usb-camera/stop"), { method: "POST" });
+      } catch (_) {
+        // ignore
+      }
+    }
+
+    async function waitForUsbFrame(timeoutMs = 12000) {
+      const start = performance.now();
+      while (performance.now() - start < timeoutMs) {
+        if (videoUsb.naturalWidth > 0 && videoUsb.naturalHeight > 0) {
+          return true;
+        }
+        await delay(40);
+      }
+      return false;
+    }
+
+    function startUsbPolling() {
+      if (usbPollTimer) clearTimeout(usbPollTimer);
+      usbStreamActive = true;
+      let busy = false;
+
+      const pull = async () => {
+        if (!usbStreamActive) return;
+        if (busy) {
+          usbPollTimer = setTimeout(pull, 16);
+          return;
+        }
+        busy = true;
+        try {
+          const res = await fetch(apiUrl("/api/usb-camera/frame.jpg"), { cache: "no-store" });
+          if (!usbStreamActive) return;
+          if (res.ok) {
+            const blob = await res.blob();
+            if (!usbStreamActive) return;
+            const url = URL.createObjectURL(blob);
+            const prev = videoUsb.dataset.blobUrl;
+            await new Promise((resolve) => {
+              videoUsb.onload = () => resolve();
+              videoUsb.onerror = () => resolve();
+              videoUsb.src = url;
+            });
+            videoUsb.dataset.blobUrl = url;
+            if (prev) URL.revokeObjectURL(prev);
+          }
+        } catch (_) {
+          // keep trying
+        } finally {
+          busy = false;
+          if (usbStreamActive) {
+            usbPollTimer = setTimeout(pull, 33); // ~30 fps, one request at a time
+          }
+        }
+      };
+
+      pull();
+    }
+
+    async function startUsbStream() {
+      // Always await stop so we don't race a previous preview session.
+      await stopUsbStreamAsync();
+      await delay(200);
+
+      const startRes = await fetch(apiUrl("/api/usb-camera/start"), { method: "POST" });
+      const startPayload = await startRes.json();
+      if (!startRes.ok || !startPayload.ok) {
+        throw new Error(startPayload.error || "USB camera not detected. Plug it in and retry.");
+      }
+
+      // Reliable path: JPEG polling with onload (MJPEG <img> is flaky here).
+      startUsbPolling();
+      const gotFrame = await waitForUsbFrame(10000);
+      if (!gotFrame) {
+        await stopUsbStreamAsync();
+        throw new Error("USB camera stream timed out.");
+      }
+
+      return startPayload;
+    }
+
+    async function releaseAllCameras(delayMs = RELEASE_DELAY_MS) {
+      stopStream(streamBuiltin);
+      await stopUsbStreamAsync();
+      streamBuiltin = null;
+      videoBuiltin.srcObject = null;
+      probeVideo.srcObject = null;
+      if (drawInterval) {
+        clearInterval(drawInterval);
+        drawInterval = null;
+      }
+      if (drawRafId) {
+        cancelAnimationFrame(drawRafId);
+        drawRafId = null;
+      }
+      mixedStream = null;
+      recordBtn.disabled = true;
+      if (delayMs > 0) {
+        await delay(delayMs);
+      }
+    }
+
+    async function openCameraStream(deviceId, profile = {}) {
+      if (!hasBrowserMedia()) throw new Error(browserMediaUnavailableMessage());
+      const attempts = [
+        { video: { deviceId: { exact: deviceId }, ...profile }, audio: false },
+        { video: { deviceId: { ideal: deviceId }, ...profile }, audio: false },
+        { video: { deviceId: { exact: deviceId } }, audio: false }
+      ];
+      let lastError = null;
+
+      for (const constraints of attempts) {
+        let stream = null;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+          const track = stream.getVideoTracks()[0];
+          if (!track) {
+            stopStream(stream);
+            continue;
+          }
+
+          const settings = track.getSettings();
+          if (settings.deviceId && settings.deviceId !== deviceId) {
+            stopStream(stream);
+            continue;
+          }
+          return stream;
+        } catch (err) {
+          stopStream(stream);
+          lastError = err;
+        }
+      }
+      throw lastError || new Error("Unable to open camera stream.");
+    }
+
+    async function attachStreamToVideo(videoEl, stream) {
+      videoEl.srcObject = stream;
+      try {
+        await videoEl.play();
+      } catch (_) {
+        // Autoplay may already be active; ignore.
+      }
+    }
+
+    async function waitForVideoReady(videoEl, timeoutMs = 5000) {
+      const start = performance.now();
+      while (performance.now() - start < timeoutMs) {
+        if (videoEl.readyState >= 2 && videoEl.videoWidth > 0 && videoEl.videoHeight > 0) {
+          return true;
+        }
+        await delay(120);
+      }
+      return false;
+    }
+
+    async function isVideoBlank(videoEl) {
+      const width = videoEl.videoWidth || videoEl.naturalWidth || 0;
+      const height = videoEl.videoHeight || videoEl.naturalHeight || 0;
+      if (!width || !height) return true;
+      const canvas = document.createElement("canvas");
+      canvas.width = 48;
+      canvas.height = 48;
+      const blankCtx = canvas.getContext("2d", { willReadFrequently: true });
+      blankCtx.drawImage(videoEl, 0, 0, 48, 48);
+      const data = blankCtx.getImageData(0, 0, 48, 48).data;
+      let sum = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        sum += data[i] + data[i + 1] + data[i + 2];
+      }
+      return sum / (data.length / 4) / 3 <= 8;
+    }
+
+    const dualProfile = {
+      width: { ideal: 640 },
+      height: { ideal: 480 },
+      frameRate: { ideal: 30, max: 30 }
+    };
+
+    function modeNeedsBuiltin(mode = cameraModeSelect.value) {
+      return mode === "dual" || mode === "builtin";
+    }
+
+    function modeNeedsUsb(mode = cameraModeSelect.value) {
+      return mode === "dual" || mode === "usb";
+    }
+
+    function updateModeUI() {
+      const mode = cameraModeSelect.value;
+      builtinSelect.disabled = !hasBrowserMedia() || !modeNeedsBuiltin(mode);
+      usbSelect.disabled = true;
+
+      const videosWrap = document.querySelector(".videos");
+      videosWrap.classList.toggle("single", mode !== "dual");
+      videoBuiltin.classList.toggle("inactive-preview", mode === "usb");
+      videoUsb.classList.toggle("inactive-preview", mode === "builtin");
+
+      if (mode === "usb") {
+        startPreviewBtn.textContent = "Start USB Preview";
+      } else if (mode === "builtin") {
+        startPreviewBtn.textContent = "Start Browser Preview";
+      } else {
+        startPreviewBtn.textContent = "Start Dual Preview";
+      }
+    }
+
+    async function startSelectedStreams() {
+      // Caller already released; only a short settle delay before reopen.
+      await delay(150);
+      const mode = cameraModeSelect.value;
+      if (modeNeedsBuiltin(mode) && !hasBrowserMedia()) {
+        throw new Error(browserMediaUnavailableMessage());
+      }
+      activeCameraMode = mode;
+
+      if (modeNeedsUsb(mode) && !usbSelect.value) {
+        const ok = await refreshUsbSelect();
+        if (!ok) {
+          throw new Error(
+            "USB camera server not reachable. Open http://localhost:8000/dual_camera_recorder.html (run: python3 video_fetch_server.py)"
+          );
+        }
+      }
+
+      if (modeNeedsBuiltin(mode)) {
+        let builtinId = builtinSelect.value;
+        if (!builtinId) {
+          const cameras = (await listCameras()).filter(cam => cam.deviceId);
+          fillBuiltinSelect(cameras);
+          builtinId = builtinSelect.value;
+        }
+
+        if (!builtinId) {
+          throw new Error("Please select a browser camera (allow camera permission if prompted).");
+        }
+
+        setStatus("Opening browser camera...");
+        streamBuiltin = await openCameraStream(builtinId, dualProfile);
+        await attachStreamToVideo(videoBuiltin, streamBuiltin);
+        await waitForVideoReady(videoBuiltin);
+      }
+
+      let usbStatus = null;
+      if (modeNeedsUsb(mode)) {
+        setStatus("Starting USB camera via server...");
+        await delay(300);
+        usbStatus = await startUsbStream();
+      }
+
+      return { mode, usbStatus };
+    }
+
+    function startCanvasMixer() {
+      if (drawInterval) {
+        clearInterval(drawInterval);
+        drawInterval = null;
+      }
+      if (drawRafId) {
+        cancelAnimationFrame(drawRafId);
+        drawRafId = null;
+      }
+
+      const mode = activeCameraMode;
+      if (mode === "dual") {
+        mixCanvas.width = 1280;
+        mixCanvas.height = 480;
+      } else if (mode === "usb") {
+        mixCanvas.width = 1280;
+        mixCanvas.height = 720;
+      } else {
+        mixCanvas.width = 1280;
+        mixCanvas.height = 720;
+      }
+
+      const targetFps = 30;
+      const frameMs = 1000 / targetFps;
+      let lastDraw = 0;
+
+      const paint = (now) => {
+        drawRafId = requestAnimationFrame(paint);
+        if (now - lastDraw < frameMs - 1) return;
+        lastDraw = now;
+
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(0, 0, mixCanvas.width, mixCanvas.height);
+
+        if (mode === "dual") {
+          if (videoBuiltin.videoWidth > 0) {
+            ctx.drawImage(videoBuiltin, 0, 0, mixCanvas.width / 2, mixCanvas.height);
+          }
+          if (videoUsb.naturalWidth > 0) {
+            ctx.drawImage(videoUsb, mixCanvas.width / 2, 0, mixCanvas.width / 2, mixCanvas.height);
+          }
+        } else if (mode === "usb") {
+          if (videoUsb.naturalWidth > 0) {
+            ctx.drawImage(videoUsb, 0, 0, mixCanvas.width, mixCanvas.height);
+          }
+        } else if (videoBuiltin.videoWidth > 0) {
+          ctx.drawImage(videoBuiltin, 0, 0, mixCanvas.width, mixCanvas.height);
+        }
+      };
+
+      drawRafId = requestAnimationFrame(paint);
+      mixedStream = mixCanvas.captureStream(targetFps);
+    }
+
+    startPreviewBtn.addEventListener("click", async () => {
+      try {
+        startPreviewBtn.disabled = true;
+        setStatus("Releasing any previous camera sessions...");
+        await releaseAllCameras();
+        updateModeUI();
+
+        const mode = cameraModeSelect.value;
+        if (modeNeedsBuiltin(mode)) {
+          if (!hasBrowserMedia()) {
+            throw new Error(browserMediaUnavailableMessage());
+          }
+          setStatus("Requesting browser camera permission...");
+          await askPermissionOnce();
+        }
+
+        if (modeNeedsBuiltin(mode)) {
+          const cameras = await listCameras();
+          if (cameras.length < 1) {
+            throw new Error("Browser camera not found.");
+          }
+          fillBuiltinSelect(cameras);
+        }
+
+        await refreshUsbSelect();
+        const mics = await listMicrophones();
+        fillMicSelect(mics);
+        const previewStatus = await startSelectedStreams();
+        try {
+          await startMicrophoneStream();
+        } catch (err) {
+          setStatus(`Preview OK, but microphone failed: ${err.message}`);
+        }
+        startCanvasMixer();
+
+        if (activeCameraMode === "dual" && streamBuiltin && usbStreamActive) {
+          const builtinLabel = streamBuiltin.getVideoTracks()[0]?.label || "Built-in";
+          const usbLabel = previewStatus.usbStatus?.name || "USB 2.0 Camera";
+          let status = `Dual preview: Left=${builtinLabel} | Right=${usbLabel}`;
+          if (await isVideoBlank(videoUsb)) {
+            status += " | USB preview looks blank — check lens cover or USB port.";
+          }
+          if (recordAudioCheckbox.checked && streamAudio) {
+            status += ` | Mic=${streamAudio.getAudioTracks()[0]?.label || "Microphone"}`;
+          }
+          setStatus(status);
+        } else if (activeCameraMode === "usb" && usbStreamActive) {
+          const usbLabel = previewStatus.usbStatus?.name || "USB 2.0 Camera";
+          const fps = previewStatus.usbStatus?.fps;
+          const res = previewStatus.usbStatus?.resolution;
+          let status = `USB-only preview: ${usbLabel}`;
+          if (res) status += ` | ${res}`;
+          if (fps) status += ` | ~${fps} fps`;
+          if (await isVideoBlank(videoUsb)) {
+            status += " | Preview looks blank — check lens cover or USB port.";
+          }
+          if (recordAudioCheckbox.checked && streamAudio) {
+            status += ` | Mic=${streamAudio.getAudioTracks()[0]?.label || "Microphone"}`;
+          }
+          setStatus(status);
+        } else if (activeCameraMode === "builtin" && streamBuiltin) {
+          let status = `Browser-only preview started: ${streamBuiltin.getVideoTracks()[0]?.label || "Camera"}`;
+          if (recordAudioCheckbox.checked && streamAudio) {
+            status += ` | Mic=${streamAudio.getAudioTracks()[0]?.label || "Microphone"}`;
+          }
+          setStatus(status);
+        }
+
+        recordBtn.disabled = false;
+      } catch (err) {
+        setStatus(`Error: ${err.message}`);
+      } finally {
+        startPreviewBtn.disabled = false;
+      }
+    });
+
+    resetCamerasBtn.addEventListener("click", async () => {
+      resetCamerasBtn.disabled = true;
+      startPreviewBtn.disabled = true;
+      try {
+        setStatus("Resetting cameras... please wait.");
+        await releaseAllCameras();
+        setStatus("Cameras released. Wait 2 seconds, then click Start Preview.");
+      } finally {
+        resetCamerasBtn.disabled = false;
+        startPreviewBtn.disabled = false;
+      }
+    });
+
+    recordAudioCheckbox.addEventListener("change", async () => {
+      if (!mixedStream) return;
+      try {
+        if (recordAudioCheckbox.checked) {
+          await startMicrophoneStream();
+          const micLabel = streamAudio?.getAudioTracks()[0]?.label || "Microphone";
+          setStatus(`Audio enabled: ${micLabel}`);
+        } else {
+          stopStream(streamAudio);
+          streamAudio = null;
+          stopAudioMeter();
+          setStatus("Audio disabled for recording.");
+        }
+      } catch (err) {
+        setStatus(`Error: ${err.message}`);
+      }
+    });
+
+    micSelect.addEventListener("change", async () => {
+      if (!mixedStream || !recordAudioCheckbox.checked) return;
+      try {
+        await startMicrophoneStream();
+        const micLabel = streamAudio?.getAudioTracks()[0]?.label || "Microphone";
+        setStatus(`Microphone updated: ${micLabel}`);
+      } catch (err) {
+        setStatus(`Error: ${err.message}`);
+      }
+    });
+
+    builtinSelect.addEventListener("change", async () => {
+      if (!mixedStream || !modeNeedsBuiltin(activeCameraMode)) return;
+      try {
+        await startSelectedStreams();
+        startCanvasMixer();
+        setStatus("Browser camera selection updated.");
+      } catch (err) {
+        setStatus(`Error: ${err.message}`);
+      }
+    });
+
+    cameraModeSelect.addEventListener("change", () => {
+      updateModeUI();
+      if (mixedStream) {
+        setStatus("Mode changed. Click Start Preview to reopen cameras.");
+        recordBtn.disabled = true;
+      }
+    });
+
+    recordBtn.addEventListener("click", async () => {
+      if (!mixedStream) {
+        setStatus("Start preview before recording.");
+        return;
+      }
+
+      if (!mediaRecorder || mediaRecorder.state === "inactive") {
+        try {
+          clearPlayback();
+          recordedChunks = [];
+          recordedBlob = null;
+          downloadBtn.disabled = true;
+
+          const hasAudio = await ensureMicrophoneReady();
+          const recordStream = buildRecordingStream();
+          const audioTracks = recordStream.getAudioTracks();
+
+          if (hasAudio && audioTracks.length === 0) {
+            throw new Error("Microphone track missing from recording stream.");
+          }
+
+          recorderMimeType = pickRecorderMimeType(audioTracks.length > 0);
+          mediaRecorder = new MediaRecorder(recordStream, {
+            mimeType: recorderMimeType,
+            audioBitsPerSecond: 128000,
+            videoBitsPerSecond: 2500000
+          });
+
+          mediaRecorder.ondataavailable = (event) => {
+            if (event.data && event.data.size > 0) recordedChunks.push(event.data);
+          };
+
+          mediaRecorder.onstop = () => {
+            recordStream.getTracks().forEach(track => {
+              if (track.kind === "audio") track.stop();
+            });
+
+            recordedBlob = new Blob(recordedChunks, { type: recorderMimeType });
+            playbackUrl = URL.createObjectURL(recordedBlob);
+            playbackVideo.src = playbackUrl;
+            playbackVideo.muted = false;
+            playbackVideo.style.display = "block";
+            downloadBtn.disabled = false;
+
+            const audioIncluded = audioTracks.length > 0;
+            setStatus(
+              audioIncluded
+                ? "Recording ready. Play below to verify audio, then download."
+                : "Recording ready (video only). Play below, then download."
+            );
+          };
+
+          mediaRecorder.start(1000);
+          recordBtn.textContent = "Stop Recording";
+          recordBtn.classList.add("recording");
+          setStatus(audioTracks.length > 0 ? "Recording video + audio..." : "Recording video only...");
+        } catch (err) {
+          setStatus(`Error: ${err.message}`);
+        }
+      } else if (mediaRecorder.state === "recording") {
+        mediaRecorder.requestData();
+        mediaRecorder.stop();
+        recordBtn.textContent = "Start Recording";
+        recordBtn.classList.remove("recording");
+      }
+    });
+
+    downloadBtn.addEventListener("click", () => {
+      if (!recordedBlob) return;
+
+      const url = URL.createObjectURL(recordedBlob);
+      const a = document.createElement("a");
+      const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+      a.href = url;
+      const prefix = activeCameraMode === "dual" ? "dual-camera" : `${activeCameraMode}-camera`;
+      a.download = `${prefix}-${stamp}.webm`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    window.addEventListener("beforeunload", () => {
+      stopStream(streamBuiltin);
+      stopUsbStream();
+      stopStream(streamAudio);
+      stopAudioMeter();
+      clearPlayback();
+      if (drawInterval) clearInterval(drawInterval);
+    });
+
+    (async function initPage() {
+      setBrowserModesEnabled(hasBrowserMedia());
+      updateModeUI();
+      const usbOk = await refreshUsbSelect();
+      if (usbOk) {
+        setStatus("USB camera server ready. Click Start USB Preview.");
+      } else {
+        setStatus(
+          "USB server not reachable at http://localhost:8000 — run: python3 video_fetch_server.py then open that URL"
+        );
+      }
+
+      if (!hasBrowserMedia()) {
+        setStatus(`${browserMediaUnavailableMessage()} USB-only preview may still work.`);
+        return;
+      }
+
+      try {
+        const cameras = await listCameras();
+        if (cameras.some(cam => cam.deviceId)) {
+          fillBuiltinSelect(cameras);
+        }
+        const mics = await listMicrophones();
+        if (mics.length) fillMicSelect(mics);
+      } catch (_) {
+        // Permission may be needed; Start Preview will request it.
+      }
+    })();
+  </script>
+</body>
+</html>

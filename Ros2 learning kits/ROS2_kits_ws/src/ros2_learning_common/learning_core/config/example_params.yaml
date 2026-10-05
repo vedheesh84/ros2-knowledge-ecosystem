@@ -1,0 +1,94 @@
+# =============================================================================
+# Example Parameters File for learning_core
+# =============================================================================
+#
+# This YAML file demonstrates how to configure ROS2 node parameters.
+#
+# YAML STRUCTURE FOR ROS2 PARAMETERS:
+# -----------------------------------
+#
+#   node_name:
+#     ros__parameters:
+#       param1: value1
+#       param2: value2
+#
+# The "ros__parameters" key is REQUIRED - it tells ROS2 these are parameters.
+#
+# USAGE:
+# ------
+#
+#   # Method 1: Via launch file (recommended)
+#   ros2 launch learning_core all_core.launch.py \
+#       params_file:=/path/to/this/file.yaml
+#
+#   # Method 2: Directly with ros2 run
+#   ros2 run learning_core parameter_echo_node --ros-args \
+#       --params-file /path/to/this/file.yaml
+#
+# PARAMETER TYPES:
+# ----------------
+#   - string: "hello" or just hello (quotes optional for simple strings)
+#   - int: 42
+#   - float: 3.14
+#   - bool: true or false (lowercase!)
+#   - list: [item1, item2, item3]
+#
+# =============================================================================
+
+# Parameters for the parameter_echo node
+parameter_echo:
+  ros__parameters:
+
+    # =========================================================================
+    # STRING PARAMETER
+    # =========================================================================
+    # The greeting message to display
+    # Try changing this and re-launching!
+    greeting_message: "Hello from YAML configuration!"
+
+    # =========================================================================
+    # FLOAT PARAMETER
+    # =========================================================================
+    # How often to echo parameters (in seconds)
+    # Smaller = faster output, Larger = slower output
+    # Must be positive!
+    echo_rate: 3.0
+
+    # =========================================================================
+    # INTEGER PARAMETER
+    # =========================================================================
+    # Just a demonstration integer
+    demo_integer: 100
+
+    # =========================================================================
+    # BOOLEAN PARAMETER
+    # =========================================================================
+    # Note: YAML uses lowercase true/false, not True/False
+    demo_bool: false
+
+    # =========================================================================
+    # ARRAY PARAMETER
+    # =========================================================================
+    # List of strings
+    # YAML lists can use [] or - syntax
+    demo_list:
+      - "configured"
+      - "from"
+      - "yaml"
+      - "file"
+
+# =============================================================================
+# EXERCISE: TRY THESE MODIFICATIONS
+# =============================================================================
+#
+# 1. Change greeting_message and re-launch to see the new message
+#
+# 2. Set echo_rate to 0.5 to see rapid output
+#
+# 3. Add more items to demo_list
+#
+# 4. Create a COPY of this file with different values and load it:
+#    ros2 launch learning_core all_core.launch.py \
+#        params_file:=/path/to/your/copy.yaml
+#
+# =============================================================================

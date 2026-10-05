@@ -1,0 +1,10 @@
+# MoveTurtle Action Definition
+# Goal: Target position (x, y) for the turtle to move to
+float32 x
+float32 y
+---
+# Result: Whether the movement was successful
+bool success
+---
+# Feedback: Distance moved so far during the action
+float32 distance_moved

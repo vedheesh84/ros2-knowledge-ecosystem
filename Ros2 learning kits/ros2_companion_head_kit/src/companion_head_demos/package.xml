@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>companion_head_demos</name>
+  <version>0.1.0</version>
+  <description>
+    Progressive learning demos for Companion Head robot.
+
+    DEMOS (do them in order):
+    =========================
+    01. Expressions   - Face display animation basics
+    02. Servo Control - Pan/tilt movement and gestures
+    03. Vision        - Face detection and tracking
+    04. Audio         - Simulated speech recognition
+    05. Mood          - Emotional state dynamics
+    06. Multimodal    - Vision + audio integration
+    07. Full Companion - Complete behavior loop
+
+    BREAKERS (failure injection):
+    =============================
+    - break_camera: Camera failures (noise, blackout)
+    - break_audio: Audio failures (dropout, noise)
+    - break_servo: Servo failures (jam, drift)
+    - break_display: Display failures (freeze, glitch)
+  </description>
+  <maintainer email="ved@example.com">Ved</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+
+  <exec_depend>companion_head_description</exec_depend>
+  <exec_depend>companion_head_control</exec_depend>
+  <exec_depend>companion_head_expression</exec_depend>
+  <exec_depend>companion_head_sensors</exec_depend>
+  <exec_depend>companion_head_behaviors</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

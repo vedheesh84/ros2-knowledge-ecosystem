@@ -1,0 +1,23 @@
+<class_libraries>
+  <library path="leg_hardware">
+    <class name="quadruped_hardware/LegHardwareInterface"
+           type="quadruped_hardware::LegHardwareInterface"
+           base_class_type="hardware_interface::SystemInterface">
+      <description>
+        Hardware interface for quadruped leg joints (12-DOF).
+        Provides effort-based control for dynamic locomotion.
+      </description>
+    </class>
+  </library>
+
+  <library path="imu_hardware">
+    <class name="quadruped_hardware/IMUHardwareInterface"
+           type="quadruped_hardware::IMUHardwareInterface"
+           base_class_type="hardware_interface::SensorInterface">
+      <description>
+        Hardware interface for quadruped IMU sensor.
+        Provides orientation, angular velocity, and linear acceleration.
+      </description>
+    </class>
+  </library>
+</class_libraries>

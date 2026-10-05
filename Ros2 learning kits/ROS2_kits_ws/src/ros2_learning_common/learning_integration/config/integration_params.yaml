@@ -1,0 +1,8 @@
+# Integration system parameters
+robot_brain:
+  ros__parameters:
+    state_rate: 1.0
+
+sensor_fusion:
+  ros__parameters:
+    fusion_rate: 2.0

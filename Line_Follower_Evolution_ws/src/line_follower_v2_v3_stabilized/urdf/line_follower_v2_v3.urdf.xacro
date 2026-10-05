@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="line_follower_v2_v3">
+  <!-- V2-V3: 8-Channel IR Ground Array + IMU + Wheel Encoders -->
+  <link name="base_link">
+    <visual><geometry><box size="0.22 0.16 0.06"/></geometry></visual>
+    <inertial><mass value="1.2"/><inertia ixx="0.003" ixy="0" ixz="0" iyy="0.005" iyz="0" izz="0.007"/></inertial>
+  </link>
+
+  <!-- 8-Channel IR Sensor Array Bar -->
+  <link name="ir_array_bar">
+    <visual><geometry><box size="0.02 0.14 0.008"/></geometry></visual>
+  </link>
+  <joint name="ir_array_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="ir_array_bar"/>
+    <origin xyz="0.10 0 -0.025" rpy="0 0 0"/>
+  </joint>
+
+  <!-- 6-Axis IMU -->
+  <link name="imu_link"/>
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 0.02" rpy="0 0 0"/>
+  </joint>
+</robot>

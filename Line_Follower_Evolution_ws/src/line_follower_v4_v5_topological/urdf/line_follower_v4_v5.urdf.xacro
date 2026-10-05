@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="line_follower_v4_v5">
+  <!-- V4-V5: Line Array + Forward/Downward AprilTag Vision Camera -->
+  <link name="base_link">
+    <visual><geometry><box size="0.25 0.18 0.08"/></geometry></visual>
+    <inertial><mass value="1.5"/><inertia ixx="0.004" ixy="0" ixz="0" iyy="0.007" iyz="0" izz="0.009"/></inertial>
+  </link>
+
+  <!-- Tag Recognition Camera Link -->
+  <link name="tag_camera_link"/>
+  <joint name="tag_camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="tag_camera_link"/>
+    <origin xyz="0.12 0 0.06" rpy="0 0.4 0"/>
+  </joint>
+</robot>

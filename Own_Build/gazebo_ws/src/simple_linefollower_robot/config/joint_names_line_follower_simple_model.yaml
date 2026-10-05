@@ -1,0 +1,6 @@
+# Joint names configuration for the simple line follower robot
+# These joint names must match the URDF/XACRO definition
+controller_joint_names:
+  - LW_joint
+  - RW_joint
+  - sphear_joint

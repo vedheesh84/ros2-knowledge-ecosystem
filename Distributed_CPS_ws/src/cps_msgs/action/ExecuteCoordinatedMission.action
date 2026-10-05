@@ -1,0 +1,21 @@
+# ExecuteCoordinatedMission.action
+# Long-running action interface for executing end-to-end multi-robot joint operations.
+
+# Goal
+string mission_id
+string mission_type
+geometry_msgs/PoseArray target_waypoints
+float32 execution_timeout_sec
+---
+# Result
+bool mission_success
+uint32 total_tasks_completed
+float32 total_execution_time_sec
+string completion_summary
+---
+# Feedback
+string current_phase
+float32 overall_progress_percent
+string active_robot_id
+geometry_msgs/Pose current_robot_pose
+float32 elapsed_time_sec

@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<robot name="robotic_arm">
+  <!-- GROUPS: Representation of a set of joints and links -->
+  <group name="arm">
+    <joint name="joint_1"/>
+    <joint name="joint_2"/>
+    <joint name="joint_3"/>
+    <joint name="joint_4"/>
+    <joint name="gripper_base_joint"/>
+  </group>
+
+  <group name="gripper">
+    <joint name="left_gear_joint"/>
+    <joint name="left_finger_joint"/>
+    <joint name="right_gear_joint"/>
+    <joint name="right_finger_joint"/>
+  </group>
+
+  <!-- GROUP STATES: Named Poses -->
+  <group_state name="home" group="arm">
+    <joint name="joint_1" value="0"/>
+    <joint name="joint_2" value="0"/>
+    <joint name="joint_3" value="0"/>
+    <joint name="joint_4" value="0"/>
+    <joint name="gripper_base_joint" value="0"/>
+  </group_state>
+
+  <group_state name="ready" group="arm">
+    <joint name="joint_1" value="0"/>
+    <joint name="joint_2" value="-0.4"/>
+    <joint name="joint_3" value="0.8"/>
+    <joint name="joint_4" value="-0.4"/>
+    <joint name="gripper_base_joint" value="0"/>
+  </group_state>
+
+  <group_state name="open" group="gripper">
+    <joint name="left_gear_joint" value="1.0"/>
+  </group_state>
+
+  <group_state name="close" group="gripper">
+    <joint name="left_gear_joint" value="0.0"/>
+  </group_state>
+
+  <!-- END EFFECTOR -->
+  <end_effector name="gripper_ee" parent_link="grasp_link" group="gripper" parent_group="arm"/>
+
+  <!-- DISABLE COLLISIONS -->
+  <disable_collisions link1="base_link" link2="link_1" reason="Adjacent"/>
+  <disable_collisions link1="link_1" link2="link_2" reason="Adjacent"/>
+  <disable_collisions link1="link_2" link2="link_3" reason="Adjacent"/>
+  <disable_collisions link1="link_3" link2="link_4" reason="Adjacent"/>
+  <disable_collisions link1="link_4" link2="gripper_base_link" reason="Adjacent"/>
+  <disable_collisions link1="gripper_base_link" link2="left_gear_link" reason="Adjacent"/>
+  <disable_collisions link1="gripper_base_link" link2="right_gear_link" reason="Adjacent"/>
+  <disable_collisions link1="left_gear_link" link2="left_finger_link" reason="Adjacent"/>
+  <disable_collisions link1="right_gear_link" link2="right_finger_link" reason="Adjacent"/>
+</robot>

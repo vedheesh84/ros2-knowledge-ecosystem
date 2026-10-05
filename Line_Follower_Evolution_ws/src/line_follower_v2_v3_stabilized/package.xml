@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>line_follower_v2_v3_stabilized</name>
+  <version>1.0.0</version>
+  <description>Line Follower Evolution V2-V3: High-performance motion-stabilized tracker with 8-channel IR array, inner velocity PID, and angular damping.</description>
+  <maintainer email="developer@ecosystem.local">Intelligent Systems Architecture Team</maintainer>
+  <license>Apache-2.0</license>
+
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>sensor_msgs</depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

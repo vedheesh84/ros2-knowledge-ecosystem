@@ -1,0 +1,15 @@
+{
+  "title": "Distributed Multi-Robot CPS Telemetry",
+  "panels": [
+    {
+      "title": "Fleet Battery Percentages",
+      "type": "gauge",
+      "targets": [{"expr": "robot_battery_percentage"}]
+    },
+    {
+      "title": "DDS Topic Latency (ms)",
+      "type": "timeseries",
+      "targets": [{"expr": "dds_topic_latency_ms"}]
+    }
+  ]
+}

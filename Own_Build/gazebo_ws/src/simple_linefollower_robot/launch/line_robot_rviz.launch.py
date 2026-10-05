@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+import os
+
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.substitutions import Command
+from launch_ros.actions import Node
+from launch_ros.descriptions import ParameterValue
+
+def generate_launch_description():
+    # Package and Xacro paths
+    pkg_name = 'line_follower_robot'
+    pkg_share_dir = get_package_share_directory(pkg_name)
+    xacro_file = os.path.join(pkg_share_dir, 'urdf', 'line_follower_robot.urdf.xacro')
+
+    # Convert Xacro to URDF string
+    robot_description_content = ParameterValue(
+    Command(['xacro ', xacro_file]), 
+    value_type=str
+    )
+    robot_description = {'robot_description': robot_description_content}
+
+    # Robot State Publisher node
+    robot_state_publisher_node = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        output='screen',
+        parameters=[robot_description]
+    )
+    
+	
+    joint_state_publisher_node = Node(
+        package='joint_state_publisher_gui',
+        executable='joint_state_publisher_gui',
+        name='joint_state_publisher_gui',
+        output='screen'
+    )
+
+    # RViz node
+    rviz_node = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen'
+    )
+
+    # Launch description
+    ld = LaunchDescription()
+    ld.add_action(joint_state_publisher_node)
+    ld.add_action(robot_state_publisher_node)
+    ld.add_action(rviz_node)
+
+    return ld
+
+
+		
+
+	
+
+
+		
+	

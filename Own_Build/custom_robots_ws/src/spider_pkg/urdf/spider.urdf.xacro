@@ -1,0 +1,492 @@
+<?xml version="1.0"?>
+<robot name="spider_mech" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Mechanical spider: blue/black in RViz + Gazebo, teleop via cmd_vel -->
+
+  <xacro:property name="coxa_len"   value="0.032"/>
+  <xacro:property name="femur_len"  value="0.120"/>
+  <xacro:property name="tibia_len"  value="0.130"/>
+  <xacro:property name="tarsus_len" value="0.160"/>
+  <xacro:property name="seg_w"      value="0.020"/>
+  <xacro:property name="seg_h"      value="0.016"/>
+  <xacro:property name="joint_r"    value="0.017"/>
+  <xacro:property name="foot_r"     value="0.012"/>
+  <xacro:property name="body_z"     value="0.095"/>
+
+  <!-- standing joint offsets (absolute joint positions) -->
+  <xacro:property name="femur_neutral" value="0.80"/>
+  <xacro:property name="tibia_neutral" value="-1.25"/>
+  <xacro:property name="tarsus_fixed"  value="0.50"/>
+
+  <!-- ================= MATERIALS (RViz) ================= -->
+  <material name="blue">
+    <color rgba="0.12 0.42 0.92 1"/>
+  </material>
+  <material name="blue_dark">
+    <color rgba="0.05 0.22 0.55 1"/>
+  </material>
+  <material name="black">
+    <color rgba="0.06 0.06 0.07 1"/>
+  </material>
+  <material name="black_matte">
+    <color rgba="0.12 0.12 0.13 1"/>
+  </material>
+  <material name="silver">
+    <color rgba="0.72 0.74 0.78 1"/>
+  </material>
+  <material name="red">
+    <color rgba="0.85 0.12 0.10 1"/>
+  </material>
+
+  <xacro:macro name="box_inertial" params="m lx ly lz xyz:='0 0 0'">
+    <inertial>
+      <origin xyz="${xyz}" rpy="0 0 0"/>
+      <mass value="${m}"/>
+      <inertia
+        ixx="${m*(ly*ly + lz*lz)/12.0}"
+        iyy="${m*(lx*lx + lz*lz)/12.0}"
+        izz="${m*(lx*lx + ly*ly)/12.0}"
+        ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="sphere_inertial" params="m radius xyz:='0 0 0'">
+    <inertial>
+      <origin xyz="${xyz}" rpy="0 0 0"/>
+      <mass value="${m}"/>
+      <inertia
+        ixx="${0.4*m*radius*radius}"
+        iyy="${0.4*m*radius*radius}"
+        izz="${0.4*m*radius*radius}"
+        ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- Gazebo visual color (URDF materials are ignored by Gazebo) -->
+  <xacro:macro name="gazebo_color" params="link r g b">
+    <gazebo reference="${link}">
+      <visual>
+        <material>
+          <ambient>${r*0.4} ${g*0.4} ${b*0.4} 1</ambient>
+          <diffuse>${r} ${g} ${b} 1</diffuse>
+          <specular>0.25 0.25 0.25 1</specular>
+          <emissive>0 0 0 1</emissive>
+        </material>
+      </visual>
+      <mu1>0.9</mu1>
+      <mu2>0.9</mu2>
+      <kp>8e4</kp>
+      <kd>80</kd>
+    </gazebo>
+  </xacro:macro>
+
+  <xacro:macro name="hinge" params="r length">
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="${r}" length="${length}"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+    <visual>
+      <origin xyz="0 ${length*0.55} 0"/>
+      <geometry>
+        <sphere radius="${r*0.55}"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <visual>
+      <origin xyz="0 ${-length*0.55} 0"/>
+      <geometry>
+        <sphere radius="${r*0.55}"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+  </xacro:macro>
+
+  <xacro:macro name="blue_seg" params="length">
+    <visual>
+      <origin xyz="${length/2} 0 0"/>
+      <geometry>
+        <box size="${length} ${seg_w} ${seg_h}"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0.12 0.42 0.92 1"/>
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="${length/2} 0 ${seg_h*0.45}"/>
+      <geometry>
+        <box size="${length*0.92} ${seg_w*0.55} ${seg_h*0.35}"/>
+      </geometry>
+      <material name="blue_dark">
+        <color rgba="0.05 0.22 0.55 1"/>
+      </material>
+    </visual>
+  </xacro:macro>
+
+  <!-- ================= BASE ================= -->
+  <link name="base_footprint"/>
+
+  <!-- dummy root inertia link so Gazebo keeps a clean tree -->
+  <link name="base_link">
+    <xacro:box_inertial m="0.05" lx="0.05" ly="0.05" lz="0.05"/>
+  </link>
+
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0"/>
+  </joint>
+
+  <link name="body_link">
+    <xacro:box_inertial m="1.2" lx="0.16" ly="0.12" lz="0.05" xyz="0.01 0 0.01"/>
+    <!-- flat cephalothorax plate (all 8 legs mount on its sides) -->
+    <visual>
+      <origin xyz="0.01 0 0.012"/>
+      <geometry><box size="0.15 0.13 0.048"/></geometry>
+      <material name="blue"/>
+    </visual>
+    <visual>
+      <origin xyz="0.01 0 0.040"/>
+      <geometry><box size="0.13 0.10 0.018"/></geometry>
+      <material name="blue_dark"/>
+    </visual>
+    <!-- side coxa rails: legs connect here like the reference -->
+    <visual>
+      <origin xyz="0.005 0.068 -0.008"/>
+      <geometry><box size="0.12 0.028 0.040"/></geometry>
+      <material name="black_matte"/>
+    </visual>
+    <visual>
+      <origin xyz="0.005 -0.068 -0.008"/>
+      <geometry><box size="0.12 0.028 0.040"/></geometry>
+      <material name="black_matte"/>
+    </visual>
+    <visual>
+      <origin xyz="0.0 0 -0.020"/>
+      <geometry><box size="0.135 0.11 0.022"/></geometry>
+      <material name="black"/>
+    </visual>
+    <visual>
+      <origin xyz="0.015 0 0.050"/>
+      <geometry><box size="0.030 0.024 0.005"/></geometry>
+      <material name="red"/>
+    </visual>
+    <visual>
+      <origin xyz="-0.030 0.028 0.050"/>
+      <geometry><cylinder radius="0.011" length="0.004"/></geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin xyz="0.01 0 0.015"/>
+      <geometry><box size="0.14 0.11 0.045"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="base_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="body_link"/>
+    <origin xyz="0 0 ${body_z}"/>
+  </joint>
+
+  <!-- flush face on front of cephalothorax (not a separate head body) -->
+  <link name="head_link">
+    <xacro:box_inertial m="0.12" lx="0.04" ly="0.09" lz="0.035"/>
+    <visual>
+      <origin xyz="0.0 0 0.0"/>
+      <geometry><box size="0.040 0.095 0.040"/></geometry>
+      <material name="blue"/>
+    </visual>
+    <visual>
+      <origin xyz="0.018 0.020 0.006"/>
+      <geometry><sphere radius="0.007"/></geometry>
+      <material name="silver"/>
+    </visual>
+    <visual>
+      <origin xyz="0.018 -0.020 0.006"/>
+      <geometry><sphere radius="0.007"/></geometry>
+      <material name="silver"/>
+    </visual>
+    <visual>
+      <origin xyz="0.020 0 0.012"/>
+      <geometry><sphere radius="0.005"/></geometry>
+      <material name="silver"/>
+    </visual>
+    <visual>
+      <origin xyz="0.022 0.014 -0.012" rpy="0.25 0.35 0"/>
+      <geometry><box size="0.016 0.008 0.008"/></geometry>
+      <material name="black"/>
+    </visual>
+    <visual>
+      <origin xyz="0.022 -0.014 -0.012" rpy="-0.25 0.35 0"/>
+      <geometry><box size="0.016 0.008 0.008"/></geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0"/>
+      <geometry><box size="0.038 0.09 0.035"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="head_joint" type="fixed">
+    <parent link="body_link"/>
+    <child link="head_link"/>
+    <origin xyz="0.090 0 0.0"/>
+  </joint>
+
+  <link name="abdomen_link">
+    <xacro:sphere_inertial m="0.6" radius="0.07" xyz="-0.04 0 0.02"/>
+    <visual>
+      <origin xyz="-0.02 0 0.01"/>
+      <geometry><sphere radius="0.078"/></geometry>
+      <material name="blue_dark"/>
+    </visual>
+    <visual>
+      <origin xyz="-0.065 0 0.005"/>
+      <geometry><sphere radius="0.070"/></geometry>
+      <material name="blue"/>
+    </visual>
+    <visual>
+      <origin xyz="-0.035 0 0.055" rpy="0 0.35 0"/>
+      <geometry><box size="0.12 0.015 0.012"/></geometry>
+      <material name="black"/>
+    </visual>
+    <visual>
+      <origin xyz="-0.035 0.045 0.030" rpy="0.4 0.2 0.3"/>
+      <geometry><box size="0.11 0.014 0.012"/></geometry>
+      <material name="black"/>
+    </visual>
+    <visual>
+      <origin xyz="-0.035 -0.045 0.030" rpy="-0.4 0.2 -0.3"/>
+      <geometry><box size="0.11 0.014 0.012"/></geometry>
+      <material name="black"/>
+    </visual>
+    <visual>
+      <origin xyz="-0.035 0.055 -0.005" rpy="0.7 0.1 0.2"/>
+      <geometry><box size="0.10 0.013 0.011"/></geometry>
+      <material name="black_matte"/>
+    </visual>
+    <visual>
+      <origin xyz="-0.035 -0.055 -0.005" rpy="-0.7 0.1 -0.2"/>
+      <geometry><box size="0.10 0.013 0.011"/></geometry>
+      <material name="black_matte"/>
+    </visual>
+    <visual>
+      <origin xyz="-0.090 0 0.015"/>
+      <geometry><box size="0.018 0.095 0.070"/></geometry>
+      <material name="black"/>
+    </visual>
+    <visual>
+      <origin xyz="-0.115 0 -0.005"/>
+      <geometry><sphere radius="0.035"/></geometry>
+      <material name="black_matte"/>
+    </visual>
+    <collision>
+      <origin xyz="-0.04 0 0.025"/>
+      <geometry><sphere radius="0.065"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="abdomen_joint" type="fixed">
+    <parent link="body_link"/>
+    <child link="abdomen_link"/>
+    <origin xyz="-0.105 0 0.015"/>
+  </joint>
+
+  <!-- ================= LEG (3 actuated DOF + fixed tarsus) ================= -->
+  <xacro:macro name="leg" params="prefix x y yaw">
+
+    <link name="${prefix}_coxa">
+      <xacro:box_inertial m="0.04" lx="${coxa_len}" ly="${seg_w}" lz="${seg_h}" xyz="${coxa_len/2} 0 0"/>
+      <xacro:hinge r="${joint_r}" length="0.028"/>
+      <visual>
+        <origin xyz="${coxa_len/2} 0 0"/>
+        <geometry><box size="${coxa_len} ${seg_w*0.9} ${seg_h*0.9}"/></geometry>
+        <material name="black_matte"/>
+      </visual>
+    </link>
+
+    <joint name="${prefix}_hip_yaw_joint" type="revolute">
+      <parent link="body_link"/>
+      <child link="${prefix}_coxa"/>
+      <!-- all hips on cephalothorax side rails -->
+      <origin xyz="${x} ${y} -0.005" rpy="0 0 ${yaw}"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-1.0" upper="1.0" effort="30" velocity="3.0"/>
+      <dynamics damping="1.0" friction="0.2"/>
+    </joint>
+
+    <link name="${prefix}_femur">
+      <xacro:box_inertial m="0.05" lx="${femur_len}" ly="${seg_w}" lz="${seg_h}" xyz="${femur_len/2} 0 0"/>
+      <xacro:hinge r="${joint_r*0.95}" length="0.026"/>
+      <xacro:blue_seg length="${femur_len}"/>
+    </link>
+
+    <joint name="${prefix}_femur_pitch_joint" type="revolute">
+      <parent link="${prefix}_coxa"/>
+      <child link="${prefix}_femur"/>
+      <origin xyz="${coxa_len} 0 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="0.2" upper="1.5" effort="30" velocity="3.0"/>
+      <dynamics damping="1.0" friction="0.2"/>
+    </joint>
+
+    <link name="${prefix}_tibia">
+      <xacro:box_inertial m="0.045" lx="${tibia_len}" ly="${seg_w}" lz="${seg_h}" xyz="${tibia_len/2} 0 0"/>
+      <xacro:hinge r="${joint_r*0.90}" length="0.024"/>
+      <xacro:blue_seg length="${tibia_len}"/>
+    </link>
+
+    <joint name="${prefix}_tibia_pitch_joint" type="revolute">
+      <parent link="${prefix}_femur"/>
+      <child link="${prefix}_tibia"/>
+      <origin xyz="${femur_len} 0 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="-2.0" upper="-0.4" effort="30" velocity="3.0"/>
+      <dynamics damping="1.0" friction="0.2"/>
+    </joint>
+
+    <link name="${prefix}_tarsus">
+      <xacro:box_inertial m="0.035" lx="${tarsus_len}" ly="${seg_w*0.6}" lz="${seg_h*0.6}" xyz="${tarsus_len/2} 0 0"/>
+      <xacro:hinge r="${joint_r*0.80}" length="0.022"/>
+      <visual>
+        <origin xyz="${tarsus_len*0.42} 0 0"/>
+        <geometry><box size="${tarsus_len*0.84} ${seg_w*0.72} ${seg_h*0.72}"/></geometry>
+        <material name="blue"/>
+      </visual>
+      <visual>
+        <origin xyz="${tarsus_len*0.78} 0 0"/>
+        <geometry><box size="${tarsus_len*0.28} ${seg_w*0.45} ${seg_h*0.45}"/></geometry>
+        <material name="blue_dark"/>
+      </visual>
+      <visual>
+        <origin xyz="${tarsus_len*0.96} 0 -0.004"/>
+        <geometry><box size="0.028 0.010 0.012"/></geometry>
+        <material name="black"/>
+      </visual>
+      <visual>
+        <origin xyz="${tarsus_len + 0.008} 0.006 -0.002" rpy="0.5 0.9 0"/>
+        <geometry><box size="0.016 0.004 0.006"/></geometry>
+        <material name="black"/>
+      </visual>
+      <visual>
+        <origin xyz="${tarsus_len + 0.008} -0.006 -0.002" rpy="-0.5 0.9 0"/>
+        <geometry><box size="0.016 0.004 0.006"/></geometry>
+        <material name="black"/>
+      </visual>
+      <collision name="${prefix}_foot">
+        <origin xyz="${tarsus_len} 0 0"/>
+        <geometry><sphere radius="${foot_r}"/></geometry>
+      </collision>
+    </link>
+
+    <joint name="${prefix}_tarsus_joint" type="fixed">
+      <parent link="${prefix}_tibia"/>
+      <child link="${prefix}_tarsus"/>
+      <origin xyz="${tibia_len} 0 0" rpy="0 ${tarsus_fixed} 0"/>
+    </joint>
+
+    <xacro:gazebo_color link="${prefix}_coxa" r="0.12" g="0.12" b="0.13"/>
+    <xacro:gazebo_color link="${prefix}_femur" r="0.12" g="0.42" b="0.92"/>
+    <xacro:gazebo_color link="${prefix}_tibia" r="0.12" g="0.42" b="0.92"/>
+    <xacro:gazebo_color link="${prefix}_tarsus" r="0.10" g="0.35" b="0.80"/>
+
+  </xacro:macro>
+
+  <!-- All 8 legs on cephalothorax sides (like reference image), fanned out -->
+  <xacro:leg prefix="lf"  x="0.040"  y="0.068" yaw="0.75"/>
+  <xacro:leg prefix="lfm" x="0.015"  y="0.075" yaw="1.25"/>
+  <xacro:leg prefix="lrm" x="-0.010" y="0.075" yaw="1.90"/>
+  <xacro:leg prefix="lr"  x="-0.035" y="0.068" yaw="2.45"/>
+  <xacro:leg prefix="rf"  x="0.040"  y="-0.068" yaw="-0.75"/>
+  <xacro:leg prefix="rfm" x="0.015"  y="-0.075" yaw="-1.25"/>
+  <xacro:leg prefix="rrm" x="-0.010" y="-0.075" yaw="-1.90"/>
+  <xacro:leg prefix="rr"  x="-0.035" y="-0.068" yaw="-2.45"/>
+
+  <xacro:gazebo_color link="body_link" r="0.12" g="0.42" b="0.92"/>
+  <xacro:gazebo_color link="head_link" r="0.10" g="0.38" b="0.88"/>
+  <xacro:gazebo_color link="abdomen_link" r="0.08" g="0.28" b="0.70"/>
+
+  <!-- ================= LIDAR (for mapping) ================= -->
+  <xacro:arg name="include_lidar" default="true"/>
+  <xacro:if value="$(arg include_lidar)">
+
+  <link name="lidar_link">
+    <xacro:box_inertial m="0.08" lx="0.06" ly="0.06" lz="0.05" xyz="0 0 0"/>
+    <visual>
+      <origin xyz="0 0 0.01"/>
+      <geometry><cylinder radius="0.028" length="0.04"/></geometry>
+      <material name="black_matte"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.032"/>
+      <geometry><cylinder radius="0.022" length="0.012"/></geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.01"/>
+      <geometry><cylinder radius="0.028" length="0.045"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="lidar_joint" type="fixed">
+    <parent link="body_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="0.0 0 0.12" rpy="0 0 0"/>
+  </joint>
+
+  <xacro:gazebo_color link="lidar_link" r="0.15" g="0.15" b="0.16"/>
+
+  <gazebo reference="lidar_link">
+    <sensor name="spider_lidar" type="ray">
+      <always_on>true</always_on>
+      <visualize>true</visualize>
+      <update_rate>10</update_rate>
+      <pose>0 0 0 0 0 0</pose>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.35</min>
+          <max>12.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="spider_lidar_plugin" filename="libgazebo_ros_ray_sensor.so">
+        <ros>
+          <remapping>~/out:=scan</remapping>
+        </ros>
+        <output_type>sensor_msgs/LaserScan</output_type>
+        <frame_name>lidar_link</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  </xacro:if>
+
+  <gazebo>
+    <selfCollide>false</selfCollide>
+    <plugin name="spider_gazebo_gait_plugin" filename="libspider_gazebo_gait_plugin.so">
+      <speed_hz>0.9</speed_hz>
+      <hip_swing>0.30</hip_swing>
+      <femur_lift>0.25</femur_lift>
+      <tibia_lift>0.28</tibia_lift>
+      <motion_timeout>0.6</motion_timeout>
+      <linear_scale>0.50</linear_scale>
+      <angular_scale>1.2</angular_scale>
+    </plugin>
+  </gazebo>
+
+</robot>

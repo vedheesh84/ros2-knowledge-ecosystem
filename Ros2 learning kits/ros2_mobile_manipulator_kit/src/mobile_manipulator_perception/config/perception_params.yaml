@@ -1,0 +1,34 @@
+# Perception Parameters
+# =====================
+#
+# LEARNING OBJECTIVES:
+# - Tune detection for your environment
+# - Understand HSV color ranges
+# - Practice parameter adjustment
+
+perception_node:
+  ros__parameters:
+    # Target object
+    target_color: "red"      # red, green, blue, yellow
+    object_width: 0.05       # Known object width in meters (5cm cube)
+
+    # Detection rate (Hz)
+    detection_rate: 10.0
+
+    # Output frame for object pose
+    target_frame: "arm_base_link"
+
+# Color Detection Tuning
+# ----------------------
+# HSV ranges can be adjusted for your lighting conditions.
+# Use a color picker tool to find optimal values.
+#
+# H (Hue): 0-180 in OpenCV
+# S (Saturation): 0-255
+# V (Value/Brightness): 0-255
+#
+# Common colors:
+#   Red: H=0-10 or H=160-180, S>100, V>100
+#   Green: H=35-85, S>100, V>100
+#   Blue: H=100-130, S>100, V>100
+#   Yellow: H=20-35, S>100, V>100

@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="line_follower_v6">
+  <!-- V6: Full Autonomous AMR (2D 360-degree LiDAR + Depth Camera + IMU) -->
+  <link name="base_link">
+    <visual><geometry><box size="0.28 0.20 0.10"/></geometry></visual>
+    <inertial><mass value="2.2"/><inertia ixx="0.009" ixy="0" ixz="0" iyy="0.015" iyz="0" izz="0.021"/></inertial>
+  </link>
+
+  <!-- 2D Planar 360 LiDAR -->
+  <link name="lidar_link">
+    <visual><geometry><cylinder radius="0.035" length="0.04"/></geometry></visual>
+  </link>
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="0 0 0.08" rpy="0 0 0"/>
+  </joint>
+</robot>

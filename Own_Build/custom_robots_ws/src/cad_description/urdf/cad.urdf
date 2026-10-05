@@ -1,0 +1,788 @@
+<?xml version="1.0"?>
+<robot name="cad_robot">
+
+  <material name="matte_black">
+    <color rgba="0.08 0.08 0.08 1.0"/>
+  </material>
+  <material name="wheel_rubber">
+    <color rgba="0.18 0.18 0.20 1.0"/>
+  </material>
+  <material name="gripper_body">
+    <color rgba="0.20 0.45 0.75 1.0"/>
+  </material>
+  <material name="gripper_finger_mat">
+    <color rgba="0.95 0.55 0.10 1.0"/>
+  </material>
+  <material name="red_spring">
+    <color rgba="0.85 0.12 0.10 1.0"/>
+  </material>
+  <material name="green_led">
+    <color rgba="0.10 0.90 0.20 1.0"/>
+  </material>
+  <material name="silver">
+    <color rgba="0.75 0.75 0.78 1.0"/>
+  </material>
+  <material name="lidar_blue">
+    <color rgba="0.15 0.35 0.55 1.0"/>
+  </material>
+
+
+  <!-- BASE (root link — Gazebo diff_drive publishes odom→base_footprint) -->
+  <link name="base_footprint"/>
+
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0 0 0.15" rpy="0 0 0"/>
+      <mass value="45.0"/>
+      <inertia ixx="2.5" ixy="0" ixz="0" iyy="3.2" iyz="0" izz="4.0"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/base_link.stl"/>
+      </geometry>
+      <material name="matte_black"/>
+    </visual>
+    <!-- Keep collision away from wheel sweep to avoid turn resistance -->
+    <collision>
+      <origin xyz="0 0 0.20" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.26 0.30 0.20"/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0.36" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.75 0.55 0.12"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- WHEELS -->
+  <link name="front_left_wheel">
+    <inertial>
+      <mass value="3.5"/>
+      <inertia ixx="0.02" ixy="0" ixz="0" iyy="0.03" iyz="0" izz="0.02"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/wheel.stl"/>
+      </geometry>
+      <material name="wheel_rubber"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.14" length="0.10"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="front_left_wheel"/>
+    <origin xyz="0.28 0.30 0.14" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <link name="front_right_wheel">
+    <inertial>
+      <mass value="3.5"/>
+      <inertia ixx="0.02" ixy="0" ixz="0" iyy="0.03" iyz="0" izz="0.02"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/wheel.stl"/>
+      </geometry>
+      <material name="wheel_rubber"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.14" length="0.10"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="front_right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="front_right_wheel"/>
+    <origin xyz="0.28 -0.30 0.14" rpy="0 0 0"/>
+    <axis xyz="0 -1 0"/>
+  </joint>
+
+  <link name="rear_left_wheel">
+    <inertial>
+      <mass value="3.5"/>
+      <inertia ixx="0.02" ixy="0" ixz="0" iyy="0.03" iyz="0" izz="0.02"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/wheel.stl"/>
+      </geometry>
+      <material name="wheel_rubber"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.14" length="0.10"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="rear_left_wheel"/>
+    <origin xyz="-0.28 0.30 0.14" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <link name="rear_right_wheel">
+    <inertial>
+      <mass value="3.5"/>
+      <inertia ixx="0.02" ixy="0" ixz="0" iyy="0.03" iyz="0" izz="0.02"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/wheel.stl"/>
+      </geometry>
+      <material name="wheel_rubber"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.14" length="0.10"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rear_right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="rear_right_wheel"/>
+    <origin xyz="-0.28 -0.30 0.14" rpy="0 0 0"/>
+    <axis xyz="0 -1 0"/>
+  </joint>
+
+  <!-- SUSPENSION -->
+  <link name="front_left_suspension">
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/suspension.stl"/>
+      </geometry>
+      <material name="red_spring"/>
+    </visual>
+  </link>
+  <joint name="front_left_suspension_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="front_left_suspension"/>
+    <origin xyz="0.28 0.30 0.30" rpy="0 0 0"/>
+  </joint>
+
+  <link name="front_right_suspension">
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/suspension.stl"/>
+      </geometry>
+      <material name="red_spring"/>
+    </visual>
+  </link>
+  <joint name="front_right_suspension_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="front_right_suspension"/>
+    <origin xyz="0.28 -0.30 0.30" rpy="0 0 0"/>
+  </joint>
+
+  <link name="rear_left_suspension">
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/suspension.stl"/>
+      </geometry>
+      <material name="red_spring"/>
+    </visual>
+  </link>
+  <joint name="rear_left_suspension_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="rear_left_suspension"/>
+    <origin xyz="-0.28 0.30 0.30" rpy="0 0 0"/>
+  </joint>
+
+  <link name="rear_right_suspension">
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/suspension.stl"/>
+      </geometry>
+      <material name="red_spring"/>
+    </visual>
+  </link>
+  <joint name="rear_right_suspension_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="rear_right_suspension"/>
+    <origin xyz="-0.28 -0.30 0.30" rpy="0 0 0"/>
+  </joint>
+
+  <!-- SENSORS -->
+  <link name="lidar_link">
+    <inertial>
+      <mass value="0.8"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/lidar.stl"/>
+      </geometry>
+      <material name="lidar_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.04" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.055" length="0.08"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="0.12 0 0.30" rpy="0 0 0"/>
+  </joint>
+
+  <link name="camera_link">
+    <inertial>
+      <mass value="0.3"/>
+      <inertia ixx="0.0005" ixy="0" ixz="0" iyy="0.0005" iyz="0" izz="0.0005"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/camera.stl"/>
+      </geometry>
+      <material name="matte_black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.04" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.10 0.04 0.08"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <origin xyz="0.375 0 0.15" rpy="0 0 0"/>
+  </joint>
+
+  <link name="front_left_led">
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/led_strip.stl"/>
+      </geometry>
+      <material name="green_led"/>
+    </visual>
+  </link>
+  <joint name="front_left_led_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="front_left_led"/>
+    <origin xyz="0.375 0.18 0.22" rpy="0 0 0"/>
+  </joint>
+
+  <link name="front_right_led">
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/led_strip.stl"/>
+      </geometry>
+      <material name="green_led"/>
+    </visual>
+  </link>
+  <joint name="front_right_led_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="front_right_led"/>
+    <origin xyz="0.375 -0.18 0.22" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ARM -->
+  <link name="arm_base_link">
+    <inertial>
+      <origin xyz="0 0 0.03" rpy="0 0 0"/>
+      <mass value="2.0"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/arm_base.stl"/>
+      </geometry>
+      <material name="matte_black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.03" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.07" length="0.06"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="arm_base_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="arm_base_link"/>
+    <origin xyz="-0.18 0 0.30" rpy="0 0 0"/>
+  </joint>
+
+  <link name="shoulder_link">
+    <inertial>
+      <origin xyz="0 0 0.07" rpy="0 0 0"/>
+      <mass value="3.0"/>
+      <inertia ixx="0.02" ixy="0" ixz="0" iyy="0.02" iyz="0" izz="0.02"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/shoulder_link.stl"/>
+      </geometry>
+      <material name="matte_black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.07" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.10 0.12 0.14"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="shoulder_pan_joint" type="revolute">
+    <parent link="arm_base_link"/>
+    <child link="shoulder_link"/>
+    <origin xyz="0 0 0.06" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14" upper="3.14" effort="100" velocity="1.5"/>
+  </joint>
+
+  <link name="upper_arm_link">
+    <inertial>
+      <origin xyz="0 0 0.14" rpy="0 0 0"/>
+      <mass value="2.5"/>
+      <inertia ixx="0.03" ixy="0" ixz="0" iyy="0.03" iyz="0" izz="0.01"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/upper_arm_link.stl"/>
+      </geometry>
+      <material name="matte_black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.14" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.09 0.09 0.28"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="shoulder_lift_joint" type="revolute">
+    <parent link="shoulder_link"/>
+    <child link="upper_arm_link"/>
+    <origin xyz="0 0 0.14" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.57" upper="1.57" effort="100" velocity="1.5"/>
+  </joint>
+
+  <link name="forearm_link">
+    <inertial>
+      <origin xyz="0 0 0.11" rpy="0 0 0"/>
+      <mass value="1.8"/>
+      <inertia ixx="0.02" ixy="0" ixz="0" iyy="0.02" iyz="0" izz="0.008"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/forearm_link.stl"/>
+      </geometry>
+      <material name="matte_black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.11" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.075 0.075 0.22"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="elbow_joint" type="revolute">
+    <parent link="upper_arm_link"/>
+    <child link="forearm_link"/>
+    <origin xyz="0 0 0.28" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="80" velocity="1.5"/>
+  </joint>
+
+  <link name="wrist_link">
+    <inertial>
+      <origin xyz="0 0 0.03" rpy="0 0 0"/>
+      <mass value="0.8"/>
+      <inertia ixx="0.005" ixy="0" ixz="0" iyy="0.005" iyz="0" izz="0.005"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/wrist_link.stl"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.03" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.06 0.08 0.06"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="wrist_pitch_joint" type="revolute">
+    <parent link="forearm_link"/>
+    <child link="wrist_link"/>
+    <origin xyz="0 0 0.22" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.57" upper="1.57" effort="40" velocity="2.0"/>
+  </joint>
+
+  <link name="arm_camera_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/arm_camera.stl"/>
+      </geometry>
+      <material name="matte_black"/>
+    </visual>
+  </link>
+  <joint name="arm_camera_joint" type="fixed">
+    <parent link="forearm_link"/>
+    <child link="arm_camera_link"/>
+    <origin xyz="0.05 -0.06 0.12" rpy="0 0.3 0"/>
+  </joint>
+
+  <link name="gripper_base_link">
+    <inertial>
+      <origin xyz="0 0 0.02" rpy="0 0 0"/>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/gripper_base.stl"/>
+      </geometry>
+      <material name="gripper_body"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.02" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.08 0.05 0.07"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="wrist_roll_joint" type="revolute">
+    <parent link="wrist_link"/>
+    <child link="gripper_base_link"/>
+    <origin xyz="0 0 0.06" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14" upper="3.14" effort="30" velocity="2.0"/>
+  </joint>
+
+  <link name="left_gripper_finger">
+    <inertial>
+      <origin xyz="0 0 0.05" rpy="0 0 0"/>
+      <mass value="0.15"/>
+      <inertia ixx="0.0002" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0001"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/gripper_finger.stl"/>
+      </geometry>
+      <material name="gripper_finger_mat"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.05" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.015 0.025 0.10"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_gripper_joint" type="prismatic">
+    <parent link="gripper_base_link"/>
+    <child link="left_gripper_finger"/>
+    <origin xyz="0 0.02 0.07" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="0" upper="0.03" effort="20" velocity="0.5"/>
+  </joint>
+
+  <link name="right_gripper_finger">
+    <inertial>
+      <origin xyz="0 0 0.05" rpy="0 0 0"/>
+      <mass value="0.15"/>
+      <inertia ixx="0.0002" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0001"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="package://cad_description/meshes/gripper_finger.stl"/>
+      </geometry>
+      <material name="gripper_finger_mat"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.05" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.015 0.025 0.10"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_gripper_joint" type="prismatic">
+    <parent link="gripper_base_link"/>
+    <child link="right_gripper_finger"/>
+    <origin xyz="0 -0.02 0.07" rpy="0 0 0"/>
+    <axis xyz="0 -1 0"/>
+    <limit lower="0" upper="0.03" effort="20" velocity="0.5"/>
+    <mimic joint="left_gripper_joint" multiplier="1.0" offset="0"/>
+  </joint>
+
+  <!-- GAZEBO VISUALS (primitives — STL meshes often fail in Gazebo Classic) -->
+  <gazebo reference="base_link">
+    <visual name="gz_base">
+      <pose>0 0 0.15 0 0 0</pose>
+      <geometry><box><size>0.75 0.55 0.30</size></box></geometry>
+      <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
+    </visual>
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+
+  <gazebo reference="front_left_wheel">
+    <visual name="gz_wheel">
+      <pose>0 0 0 1.5708 0 0</pose>
+      <geometry><cylinder><radius>0.14</radius><length>0.10</length></cylinder></geometry>
+      <material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.4 0.4 0.42 1</diffuse></material>
+    </visual>
+    <material>Gazebo/Grey</material>
+    <mu1>1.0</mu1><mu2>0.5</mu2>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+  </gazebo>
+  <gazebo reference="front_right_wheel">
+    <visual name="gz_wheel">
+      <pose>0 0 0 1.5708 0 0</pose>
+      <geometry><cylinder><radius>0.14</radius><length>0.10</length></cylinder></geometry>
+      <material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.4 0.4 0.42 1</diffuse></material>
+    </visual>
+    <material>Gazebo/Grey</material>
+    <mu1>1.0</mu1><mu2>0.5</mu2>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+  </gazebo>
+  <gazebo reference="rear_left_wheel">
+    <visual name="gz_wheel">
+      <pose>0 0 0 1.5708 0 0</pose>
+      <geometry><cylinder><radius>0.14</radius><length>0.10</length></cylinder></geometry>
+      <material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.4 0.4 0.42 1</diffuse></material>
+    </visual>
+    <material>Gazebo/Grey</material>
+    <mu1>1.0</mu1><mu2>0.5</mu2>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+  </gazebo>
+  <gazebo reference="rear_right_wheel">
+    <visual name="gz_wheel">
+      <pose>0 0 0 1.5708 0 0</pose>
+      <geometry><cylinder><radius>0.14</radius><length>0.10</length></cylinder></geometry>
+      <material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.4 0.4 0.42 1</diffuse></material>
+    </visual>
+    <material>Gazebo/Grey</material>
+    <mu1>1.0</mu1><mu2>0.5</mu2>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+  </gazebo>
+
+  <gazebo reference="front_left_suspension">
+    <visual name="gz_spring"><pose>0 0 -0.05 0 0 0</pose>
+      <geometry><cylinder><radius>0.03</radius><length>0.10</length></cylinder></geometry>
+      <material><ambient>0.8 0.1 0.1 1</ambient><diffuse>0.9 0.15 0.1 1</diffuse></material>
+    </visual>
+  </gazebo>
+  <gazebo reference="front_right_suspension">
+    <visual name="gz_spring"><pose>0 0 -0.05 0 0 0</pose>
+      <geometry><cylinder><radius>0.03</radius><length>0.10</length></cylinder></geometry>
+      <material><ambient>0.8 0.1 0.1 1</ambient><diffuse>0.9 0.15 0.1 1</diffuse></material>
+    </visual>
+  </gazebo>
+  <gazebo reference="rear_left_suspension">
+    <visual name="gz_spring"><pose>0 0 -0.05 0 0 0</pose>
+      <geometry><cylinder><radius>0.03</radius><length>0.10</length></cylinder></geometry>
+      <material><ambient>0.8 0.1 0.1 1</ambient><diffuse>0.9 0.15 0.1 1</diffuse></material>
+    </visual>
+  </gazebo>
+  <gazebo reference="rear_right_suspension">
+    <visual name="gz_spring"><pose>0 0 -0.05 0 0 0</pose>
+      <geometry><cylinder><radius>0.03</radius><length>0.10</length></cylinder></geometry>
+      <material><ambient>0.8 0.1 0.1 1</ambient><diffuse>0.9 0.15 0.1 1</diffuse></material>
+    </visual>
+  </gazebo>
+
+  <gazebo reference="lidar_link">
+    <visual name="gz_lidar"><pose>0 0 0.04 0 0 0</pose>
+      <geometry><cylinder><radius>0.055</radius><length>0.07</length></cylinder></geometry>
+      <material><ambient>0.1 0.3 0.6 1</ambient><diffuse>0.15 0.4 0.7 1</diffuse></material>
+    </visual>
+  </gazebo>
+
+  <gazebo reference="camera_link">
+    <visual name="gz_cam"><pose>0 0 0.04 0 0 0</pose>
+      <geometry><box><size>0.10 0.04 0.08</size></box></geometry>
+      <material><ambient>0.1 0.1 0.1 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
+    </visual>
+  </gazebo>
+
+  <gazebo reference="front_left_led">
+    <visual name="gz_led"><geometry><box><size>0.18 0.015 0.008</size></box></geometry>
+      <material><ambient>0.1 0.9 0.2 1</ambient><diffuse>0.2 1.0 0.3 1</diffuse><emissive>0.1 0.8 0.2 1</emissive></material>
+    </visual>
+  </gazebo>
+  <gazebo reference="front_right_led">
+    <visual name="gz_led"><geometry><box><size>0.18 0.015 0.008</size></box></geometry>
+      <material><ambient>0.1 0.9 0.2 1</ambient><diffuse>0.2 1.0 0.3 1</diffuse><emissive>0.1 0.8 0.2 1</emissive></material>
+    </visual>
+  </gazebo>
+
+  <gazebo reference="arm_base_link">
+    <visual name="gz_arm_base"><pose>0 0 0.03 0 0 0</pose>
+      <geometry><cylinder><radius>0.07</radius><length>0.06</length></cylinder></geometry>
+      <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
+    </visual>
+  </gazebo>
+  <gazebo reference="shoulder_link">
+    <visual name="gz_shoulder"><pose>0 0 0.07 0 0 0</pose>
+      <geometry><box><size>0.10 0.12 0.14</size></box></geometry>
+      <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
+    </visual>
+  </gazebo>
+  <gazebo reference="upper_arm_link">
+    <visual name="gz_upper"><pose>0 0 0.14 0 0 0</pose>
+      <geometry><box><size>0.09 0.09 0.28</size></box></geometry>
+      <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
+    </visual>
+  </gazebo>
+  <gazebo reference="forearm_link">
+    <visual name="gz_forearm"><pose>0 0 0.11 0 0 0</pose>
+      <geometry><box><size>0.075 0.075 0.22</size></box></geometry>
+      <material><ambient>0.15 0.15 0.15 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
+    </visual>
+  </gazebo>
+  <gazebo reference="wrist_link">
+    <visual name="gz_wrist"><pose>0 0 0.03 0 0 0</pose>
+      <geometry><box><size>0.06 0.08 0.06</size></box></geometry>
+      <material><ambient>0.6 0.6 0.62 1</ambient><diffuse>0.7 0.7 0.72 1</diffuse></material>
+    </visual>
+  </gazebo>
+  <gazebo reference="gripper_base_link">
+    <visual name="gz_grip_base"><pose>0 0 0.02 0 0 0</pose>
+      <geometry><box><size>0.08 0.05 0.07</size></box></geometry>
+      <material><ambient>0.15 0.4 0.7 1</ambient><diffuse>0.2 0.45 0.75 1</diffuse></material>
+    </visual>
+    <material>Gazebo/Blue</material>
+  </gazebo>
+  <gazebo reference="left_gripper_finger">
+    <visual name="gz_finger"><pose>0 0 0.05 0 0 0</pose>
+      <geometry><box><size>0.015 0.025 0.10</size></box></geometry>
+      <material><ambient>0.9 0.5 0.1 1</ambient><diffuse>1.0 0.55 0.15 1</diffuse></material>
+    </visual>
+    <material>Gazebo/Orange</material>
+  </gazebo>
+  <gazebo reference="right_gripper_finger">
+    <visual name="gz_finger"><pose>0 0 0.05 0 0 0</pose>
+      <geometry><box><size>0.015 0.025 0.10</size></box></geometry>
+      <material><ambient>0.9 0.5 0.1 1</ambient><diffuse>1.0 0.55 0.15 1</diffuse></material>
+    </visual>
+    <material>Gazebo/Orange</material>
+  </gazebo>
+
+  <!-- GAZEBO SENSORS & PLUGINS -->
+  <gazebo reference="lidar_link">
+    <sensor name="lidar" type="ray">
+      <always_on>true</always_on>
+      <visualize>false</visualize>
+      <update_rate>5</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.15</min>
+          <max>12.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </ray>
+      <plugin name="gazebo_ros_lidar" filename="libgazebo_ros_ray_sensor.so">
+        <ros>
+          <remapping>~/out:=scan</remapping>
+        </ros>
+        <output_type>sensor_msgs/LaserScan</output_type>
+        <frame_name>lidar_link</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="camera_link">
+    <sensor name="front_camera" type="camera">
+      <always_on>true</always_on>
+      <update_rate>30</update_rate>
+      <camera>
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>50.0</far>
+        </clip>
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <frame_name>camera_link</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <gazebo>
+    <plugin name="gazebo_ros_joint_state_publisher"
+            filename="libgazebo_ros_joint_state_publisher.so">
+      <ros>
+        <remapping>~/out:=joint_states</remapping>
+      </ros>
+      <update_rate>30</update_rate>
+      <joint_name>front_left_wheel_joint</joint_name>
+      <joint_name>front_right_wheel_joint</joint_name>
+      <joint_name>rear_left_wheel_joint</joint_name>
+      <joint_name>rear_right_wheel_joint</joint_name>
+      <joint_name>shoulder_pan_joint</joint_name>
+      <joint_name>shoulder_lift_joint</joint_name>
+      <joint_name>elbow_joint</joint_name>
+      <joint_name>wrist_pitch_joint</joint_name>
+      <joint_name>wrist_roll_joint</joint_name>
+      <joint_name>left_gripper_joint</joint_name>
+      <joint_name>right_gripper_joint</joint_name>
+    </plugin>
+  </gazebo>
+
+  <gazebo>
+    <plugin name="diff_drive" filename="libgazebo_ros_diff_drive.so">
+      <ros>
+        <remapping>cmd_vel:=cmd_vel</remapping>
+        <remapping>odom:=odom</remapping>
+      </ros>
+      <update_rate>50</update_rate>
+      <num_wheel_pairs>2</num_wheel_pairs>
+      <left_joint>front_left_wheel_joint</left_joint>
+      <right_joint>front_right_wheel_joint</right_joint>
+      <left_joint>rear_left_wheel_joint</left_joint>
+      <right_joint>rear_right_wheel_joint</right_joint>
+      <wheel_separation>0.60</wheel_separation>
+      <wheel_separation>0.60</wheel_separation>
+      <wheel_diameter>0.28</wheel_diameter>
+      <wheel_diameter>0.28</wheel_diameter>
+      <max_wheel_torque>150</max_wheel_torque>
+      <max_wheel_acceleration>5.0</max_wheel_acceleration>
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>true</publish_odom_tf>
+      <publish_wheel_tf>false</publish_wheel_tf>
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>base_footprint</robot_base_frame>
+    </plugin>
+  </gazebo>
+
+</robot>

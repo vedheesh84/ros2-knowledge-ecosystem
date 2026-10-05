@@ -1,0 +1,203 @@
+<?xml version="1.0"?>
+<!--
+  gazebo.xacro - Gazebo-specific plugins for Reef Drone AUV
+
+  This file adds Gazebo simulation capabilities to the URDF:
+  - Underwater physics plugins (buoyancy, hydrodynamics, thrusters)
+  - Sensor plugins (IMU, camera, etc.)
+  - Visual enhancements for underwater rendering
+
+  INCLUDE ORDER MATTERS:
+  1. reef_drone.urdf.xacro (base robot)
+  2. This file (Gazebo plugins)
+
+  PLUGIN LOADING:
+  Plugins are loaded from the reef_drone_gazebo package.
+  Ensure that package is built and sourced before simulation.
+-->
+<robot name="reef_drone_gazebo" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!--
+    BUOYANCY PLUGIN
+
+    Simulates Archimedes' principle:
+    F_buoyancy = rho * g * V
+
+    Parameters:
+      fluid_density: 1025 kg/m³ (seawater)
+      displaced_volume: 0.0114 m³ (~11.7 kg of water displaced)
+      center_of_volume: 0 0 0.02 (above CoM for passive stability)
+
+    Vehicle weight: 11.5 kg * 9.81 = 112.8 N (down)
+    Buoyancy force: 1025 * 9.81 * 0.0114 = 114.6 N (up)
+    Net buoyancy: +1.8 N (slightly positive, floats up slowly)
+  -->
+  <gazebo>
+    <plugin name="buoyancy" filename="libbuoyancy_plugin.so">
+      <link_name>base_link</link_name>
+      <fluid_density>1025</fluid_density>
+      <displaced_volume>0.0114</displaced_volume>
+      <center_of_volume>0 0 0.02</center_of_volume>
+    </plugin>
+  </gazebo>
+
+  <!--
+    HYDRODYNAMICS PLUGIN
+
+    Simulates drag forces from water resistance.
+
+    Linear drag (low speed): F = -D * v
+    Quadratic drag (high speed): F = -D * |v| * v
+
+    Asymmetric coefficients reflect vehicle shape:
+      X (surge): Low drag (streamlined)
+      Y (sway): High drag (broad side)
+      Z (heave): High drag (top/bottom area)
+  -->
+  <gazebo>
+    <plugin name="hydrodynamics" filename="libhydrodynamics_plugin.so">
+      <link_name>base_link</link_name>
+      <linear_drag>5 10 10</linear_drag>
+      <quadratic_drag>20 40 40</quadratic_drag>
+      <angular_drag>0.5 0.5 1.0</angular_drag>
+    </plugin>
+  </gazebo>
+
+  <!--
+    THRUSTER PLUGIN
+
+    Converts thruster commands to forces.
+
+    Command range: -1.0 to +1.0
+    Thrust model: F = F_max * cmd * |cmd| (quadratic)
+    Dynamics: First-order with 0.1s time constant
+
+    All 6 thrusters controlled via /thrusters/cmd topic.
+  -->
+  <gazebo>
+    <plugin name="thrusters" filename="libthruster_plugin.so">
+      <max_thrust>50</max_thrust>
+      <time_constant>0.1</time_constant>
+      <thruster_link>thruster_1_link</thruster_link>
+      <thruster_link>thruster_2_link</thruster_link>
+      <thruster_link>thruster_3_link</thruster_link>
+      <thruster_link>thruster_4_link</thruster_link>
+      <thruster_link>thruster_5_link</thruster_link>
+      <thruster_link>thruster_6_link</thruster_link>
+    </plugin>
+  </gazebo>
+
+  <!--
+    IMU SENSOR PLUGIN
+
+    Simulates 6-DOF IMU:
+      - 3-axis accelerometer
+      - 3-axis gyroscope
+
+    Publishes to: /imu/data (sensor_msgs/Imu)
+    Update rate: 100 Hz
+  -->
+  <gazebo reference="imu_link">
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <imu>
+        <angular_velocity>
+          <x>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>0.001</stddev>
+            </noise>
+          </x>
+          <y>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>0.001</stddev>
+            </noise>
+          </y>
+          <z>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>0.001</stddev>
+            </noise>
+          </z>
+        </angular_velocity>
+        <linear_acceleration>
+          <x>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>0.01</stddev>
+            </noise>
+          </x>
+          <y>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>0.01</stddev>
+            </noise>
+          </y>
+          <z>
+            <noise type="gaussian">
+              <mean>0.0</mean>
+              <stddev>0.01</stddev>
+            </noise>
+          </z>
+        </linear_acceleration>
+      </imu>
+      <plugin name="imu_plugin" filename="libgazebo_ros_imu_sensor.so">
+        <ros>
+          <remapping>~/out:=/imu/data</remapping>
+        </ros>
+        <frame_name>imu_link</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!--
+    CAMERA SENSOR PLUGIN
+
+    Forward-looking camera for visual perception.
+    Underwater effects applied via world shader.
+
+    Publishes to:
+      /camera/image_raw (sensor_msgs/Image)
+      /camera/camera_info (sensor_msgs/CameraInfo)
+
+    Resolution: 640x480 @ 30 Hz
+  -->
+  <gazebo reference="camera_link">
+    <sensor name="camera" type="camera">
+      <always_on>true</always_on>
+      <update_rate>30</update_rate>
+      <camera>
+        <horizontal_fov>1.57</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.1</near>
+          <far>20</far>
+        </clip>
+      </camera>
+      <plugin name="camera_plugin" filename="libgazebo_ros_camera.so">
+        <ros>
+          <remapping>~/image_raw:=/camera/image_raw</remapping>
+          <remapping>~/camera_info:=/camera/camera_info</remapping>
+        </ros>
+        <frame_name>camera_optical_link</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!--
+    DEPTH SENSOR (Simulated as altimeter)
+
+    In real systems, this is a pressure sensor.
+    Here we simulate direct depth measurement.
+
+    Publishes to: /depth (std_msgs/Float64)
+    Note: Custom plugin needed for realistic pressure simulation.
+  -->
+
+</robot>

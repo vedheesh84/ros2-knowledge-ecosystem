@@ -1,0 +1,249 @@
+<?xml version="1.0"?>
+<!--
+  reef_drone.urdf.xacro - Reef Drone AUV Description
+
+  VEHICLE OVERVIEW:
+  =================
+  BlueROV2-style Autonomous Underwater Vehicle (AUV)
+
+  Physical Properties:
+    Mass: 11.5 kg
+    Dimensions: 0.457m × 0.338m × 0.254m (L × W × H)
+    Displaced Volume: 0.0114 m³
+    Buoyancy: Slightly positive (~1 N upward)
+
+  THRUSTER CONFIGURATION (6-Thruster Vectored):
+  =============================================
+  Horizontal thrusters (T1-T4) are mounted at 45° angles.
+  This "vectored" configuration enables:
+    - Surge (forward/backward)
+    - Sway (left/right)
+    - Yaw (rotation)
+  with just 4 thrusters.
+
+  Vertical thrusters (T5-T6) control:
+    - Heave (up/down)
+    - Pitch (nose up/down)
+    - Roll (limited, coupled motion)
+
+  TOP VIEW:
+                    FRONT
+           T1 ╲          ╱ T2
+               ╲        ╱
+           ┌────────────────┐
+           │                │
+           │       ●        │
+           │    (center)    │
+           └────────────────┘
+               ╱        ╲
+           T3 ╱          ╲ T4
+                    REAR
+
+  T1: Front-Left,  thrust at 45° (forward-right)
+  T2: Front-Right, thrust at 45° (forward-left)
+  T3: Rear-Left,   thrust at 45° (forward-left)
+  T4: Rear-Right,  thrust at 45° (forward-right)
+
+  FRONT VIEW:
+           T5 ┃    ┃ T6
+              ┃    ┃
+           ┌──┴────┴──┐
+           │          │
+           │    ○     │
+           │          │
+           └──────────┘
+
+  T5: Vertical-Left,  thrust upward
+  T6: Vertical-Right, thrust upward
+
+  COORDINATE FRAME (ROS REP-103):
+  ================================
+  X: Forward (surge)
+  Y: Left (sway)
+  Z: Up (heave)
+
+  STABILITY:
+  ==========
+  Center of Buoyancy (CB) is ABOVE Center of Mass (CM).
+  This creates a passive restoring moment:
+  - If robot tilts, buoyancy force creates righting moment
+  - Like a pendulum hanging from the CB
+
+  Metacentric height: h_m = z_CB - z_CM = 0.02m (positive = stable)
+-->
+<robot name="reef_drone" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Include macros -->
+  <xacro:include filename="$(find reef_drone_description)/urdf/thruster_macro.urdf.xacro"/>
+  <xacro:include filename="$(find reef_drone_description)/urdf/sensor_mounts.urdf.xacro"/>
+
+  <!-- Robot dimensions -->
+  <xacro:property name="body_length" value="0.457"/>
+  <xacro:property name="body_width" value="0.338"/>
+  <xacro:property name="body_height" value="0.254"/>
+  <xacro:property name="body_mass" value="11.5"/>
+
+  <!-- Thruster positions -->
+  <xacro:property name="thruster_x" value="0.12"/>
+  <xacro:property name="thruster_y" value="0.12"/>
+  <xacro:property name="vert_thruster_y" value="0.10"/>
+  <xacro:property name="vert_thruster_z" value="0.05"/>
+
+  <!-- Thruster angles (45 degrees in radians) -->
+  <xacro:property name="thruster_angle" value="${pi/4}"/>
+
+  <!--
+    BASE LINK
+
+    This is the main body of the AUV.
+    All other links are attached to this.
+
+    INERTIA CALCULATION:
+    For a rectangular box:
+      Ixx = m(h² + d²)/12
+      Iyy = m(w² + d²)/12
+      Izz = m(w² + h²)/12
+
+    Where: w=width, h=height, d=depth(length)
+  -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="${body_length} ${body_width} ${body_height}"/>
+      </geometry>
+      <material name="reef_drone_blue">
+        <color rgba="0.2 0.4 0.8 1.0"/>
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <box size="${body_length} ${body_width} ${body_height}"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <mass value="${body_mass}"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia
+        ixx="${body_mass * (body_height*body_height + body_width*body_width) / 12}"
+        ixy="0" ixz="0"
+        iyy="${body_mass * (body_height*body_height + body_length*body_length) / 12}"
+        iyz="0"
+        izz="${body_mass * (body_width*body_width + body_length*body_length) / 12}"/>
+    </inertial>
+  </link>
+
+  <gazebo reference="base_link">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+
+  <!--
+    HORIZONTAL THRUSTERS (T1-T4)
+
+    Vectored configuration at 45° angles.
+
+    Thrust directions (unit vectors in body frame):
+      T1: [ 0.707,  0.707, 0]  (forward-right)
+      T2: [ 0.707, -0.707, 0]  (forward-left)
+      T3: [ 0.707, -0.707, 0]  (forward-left)
+      T4: [ 0.707,  0.707, 0]  (forward-right)
+
+    Combined effects:
+      All same direction → Surge (forward/backward)
+      T1+T4 vs T2+T3    → Sway (left/right)
+      T1+T3 vs T2+T4    → Yaw (rotation)
+  -->
+
+  <!-- Thruster 1: Front-Left, pointing forward-right -->
+  <xacro:thruster
+    name="thruster_1"
+    parent="base_link"
+    xyz="${thruster_x} ${-thruster_y} 0"
+    rpy="0 0 ${thruster_angle}"/>
+
+  <!-- Thruster 2: Front-Right, pointing forward-left -->
+  <xacro:thruster
+    name="thruster_2"
+    parent="base_link"
+    xyz="${thruster_x} ${thruster_y} 0"
+    rpy="0 0 ${-thruster_angle}"/>
+
+  <!-- Thruster 3: Rear-Left, pointing forward-left -->
+  <xacro:thruster
+    name="thruster_3"
+    parent="base_link"
+    xyz="${-thruster_x} ${-thruster_y} 0"
+    rpy="0 0 ${-thruster_angle}"/>
+
+  <!-- Thruster 4: Rear-Right, pointing forward-right -->
+  <xacro:thruster
+    name="thruster_4"
+    parent="base_link"
+    xyz="${-thruster_x} ${thruster_y} 0"
+    rpy="0 0 ${thruster_angle}"/>
+
+  <!--
+    VERTICAL THRUSTERS (T5-T6)
+
+    Mounted on top, pointing upward.
+    Placed symmetrically about centerline.
+
+    Combined effects:
+      Both same     → Heave (up/down)
+      T5 vs T6      → Roll (limited authority)
+      Both + offset → Pitch (via moment arm)
+  -->
+
+  <!-- Thruster 5: Vertical-Left -->
+  <xacro:thruster
+    name="thruster_5"
+    parent="base_link"
+    xyz="0 ${-vert_thruster_y} ${vert_thruster_z}"
+    rpy="0 ${-pi/2} 0"/>
+
+  <!-- Thruster 6: Vertical-Right -->
+  <xacro:thruster
+    name="thruster_6"
+    parent="base_link"
+    xyz="0 ${vert_thruster_y} ${vert_thruster_z}"
+    rpy="0 ${-pi/2} 0"/>
+
+  <!--
+    SENSORS
+
+    All sensors mounted to base_link.
+    See sensor_mounts.urdf.xacro for detailed sensor descriptions.
+  -->
+
+  <!-- IMU at center of mass -->
+  <xacro:imu_sensor parent="base_link"/>
+
+  <!-- DVL bottom-facing for velocity measurement -->
+  <xacro:dvl_sensor parent="base_link"/>
+
+  <!-- Depth sensor on top -->
+  <xacro:depth_sensor parent="base_link"/>
+
+  <!-- Forward-looking camera -->
+  <xacro:camera_sensor parent="base_link"/>
+
+  <!-- Forward-looking sonar -->
+  <xacro:sonar_sensor parent="base_link"/>
+
+  <!--
+    BUOYANCY REFERENCE POINT
+
+    This is a virtual link marking the Center of Buoyancy (CB).
+    Used by Gazebo buoyancy plugin.
+
+    CB is above CM by 0.02m for passive roll/pitch stability.
+  -->
+  <link name="buoyancy_link"/>
+  <joint name="buoyancy_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="buoyancy_link"/>
+    <origin xyz="0 0 0.02" rpy="0 0 0"/>
+  </joint>
+
+</robot>

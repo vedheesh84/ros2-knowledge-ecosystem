@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<!--
+  Camera URDF
+
+  LEARNING OBJECTIVES:
+  - Understand camera_link vs camera_link_optical frames
+  - See the OpenCV optical frame convention (Z forward, X right, Y down)
+  - Learn camera placement for eye-to-base configuration
+
+  FRAME CONVENTIONS:
+  - camera_link: ROS convention (X forward, Y left, Z up)
+  - camera_link_optical: OpenCV convention (Z forward, X right, Y down)
+
+  The transform between them is:
+    Rotation of -90 degrees about Z, then -90 degrees about X
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ===================== CAMERA LINK ===================== -->
+  <joint name="camera_joint" type="fixed">
+    <parent link="camera_mount_link"/>
+    <child link="camera_link"/>
+    <origin xyz="0.01 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="camera_link">
+    <visual>
+      <geometry>
+        <box size="0.02 0.06 0.03"/>
+      </geometry>
+      <material name="camera_mat">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.02 0.06 0.03"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
+    </inertial>
+  </link>
+
+  <!-- ===================== CAMERA OPTICAL FRAME ===================== -->
+  <!--
+    CRITICAL FOR PERCEPTION:
+
+    camera_link (ROS convention):
+      X: forward (into scene)
+      Y: left
+      Z: up
+
+    camera_link_optical (OpenCV convention):
+      X: right
+      Y: down
+      Z: forward (into scene)
+
+    Transform: rotate -pi/2 about Z, then -pi/2 about X
+    rpy = (-pi/2, 0, -pi/2)
+
+    All image processing uses camera_link_optical.
+    Object poses must be transformed FROM camera_link_optical TO arm frames.
+  -->
+  <joint name="camera_optical_joint" type="fixed">
+    <parent link="camera_link"/>
+    <child link="camera_link_optical"/>
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+  </joint>
+
+  <link name="camera_link_optical">
+    <!-- Virtual frame for image processing -->
+  </link>
+
+</robot>

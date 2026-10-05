@@ -1,0 +1,155 @@
+<?xml version="1.0"?>
+<robot name="three_wheel_car" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- =====================
+       PARAMETERS
+  ===================== -->
+  <xacro:property name="wheel_radius" value="0.025"/>
+  <xacro:property name="wheel_width"  value="0.03"/>
+  <xacro:property name="wheel_sep"    value="0.30"/>
+  <xacro:property name="caster_radius" value="0.015"/>
+
+  <!-- =====================
+       MATERIALS
+  ===================== -->
+  <material name="blue">
+    <color rgba="0.0 0.3 1.0 1.0"/>
+  </material>
+
+  <material name="black">
+    <color rgba="0.1 0.1 0.1 1.0"/>
+  </material>
+
+  <!-- =====================
+       BASE LINK
+  ===================== -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.25" length="0.1"/>
+      </geometry>
+      <origin xyz="0 0 0.1"/>
+      <material name="blue"/>
+    </visual>
+
+    <collision>
+      <geometry>
+        <cylinder radius="0.25" length="0.1"/>
+      </geometry>
+      <origin xyz="0 0 0.1"/>
+    </collision>
+
+    <inertial>
+      <mass value="2.0"/>
+      <origin xyz="0 0 0.1"/>
+      <inertia ixx="0.05" iyy="0.05" izz="0.08"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <!-- =====================
+       REAR WHEEL MACRO
+  ===================== -->
+  <xacro:macro name="rear_wheel" params="name x y">
+    <link name="${name}">
+      <visual>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <origin rpy="1.5708 0 0"/>
+        <material name="black"/>
+      </visual>
+
+      <collision>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <origin rpy="1.5708 0 0"/>
+      </collision>
+
+      <inertial>
+        <mass value="0.3"/>
+        <inertia ixx="0.001" iyy="0.001" izz="0.001"
+                 ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+    </link>
+
+    <joint name="${name}_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${name}"/>
+      <origin xyz="${x} ${y} 0.05"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+
+ <!-- =====================
+     FRONT CASTER WHEEL (SMALL)
+===================== -->
+<link name="front_caster">
+  <visual>
+    <origin xyz="0 0 -${caster_radius}"/>
+    <geometry>
+      <sphere radius="${caster_radius}"/>
+    </geometry>
+    <material name="black"/>
+  </visual>
+
+  <collision>
+    <origin xyz="0 0 -${caster_radius}"/>
+    <geometry>
+      <sphere radius="${caster_radius}"/>
+    </geometry>
+  </collision>
+
+  <inertial>
+    <mass value="0.1"/>
+    <origin xyz="0 0 -${caster_radius}"/>
+    <inertia ixx="0.0001" iyy="0.0001" izz="0.0001"
+             ixy="0" ixz="0" iyz="0"/>
+  </inertial>
+</link>
+
+<joint name="front_caster_joint" type="continuous">
+  <parent link="base_link"/>
+  <child link="front_caster"/>
+  <!-- height = rear wheel radius -->
+  <origin xyz="0.25 0 ${wheel_radius}"/>
+  <axis xyz="0 0 1"/>
+</joint>
+
+
+  <!-- =====================
+       REAR DRIVEN WHEELS
+  ===================== -->
+  <xacro:rear_wheel name="left_wheel"  x="-0.2" y="0.15"/>
+  <xacro:rear_wheel name="right_wheel" x="-0.2" y="-0.15"/>
+
+  <!-- =====================
+       GAZEBO DIFF DRIVE
+  ===================== -->
+  <gazebo>
+    <plugin name="diff_drive" filename="libgazebo_ros_diff_drive.so">
+      <ros>
+        <namespace>/</namespace>
+        <remapping>cmd_vel:=/cmd_vel</remapping>
+        <remapping>odom:=/odom</remapping>
+      </ros>
+
+      <left_joint>left_wheel_joint</left_joint>
+      <right_joint>right_wheel_joint</right_joint>
+
+      <wheel_separation>${wheel_sep}</wheel_separation>
+      <wheel_diameter>${2 * wheel_radius}</wheel_diameter>
+
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>base_link</robot_base_frame>
+
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>true</publish_odom_tf>
+      <publish_wheel_tf>true</publish_wheel_tf>
+
+      <update_rate>50</update_rate>
+    </plugin>
+  </gazebo>
+
+</robot>

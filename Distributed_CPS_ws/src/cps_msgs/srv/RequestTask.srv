@@ -1,0 +1,11 @@
+# RequestTask.srv
+# Service invoked by an edge robot when idle to bid on or request an assignment from the Coordinator.
+
+string robot_id
+geometry_msgs/Pose current_pose
+float32 battery_level
+float32[3] capabilities
+---
+bool task_available
+TaskAssignment assigned_task
+string message

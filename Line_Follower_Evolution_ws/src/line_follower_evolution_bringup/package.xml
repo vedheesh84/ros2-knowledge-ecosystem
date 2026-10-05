@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>line_follower_evolution_bringup</name>
+  <version>1.0.0</version>
+  <description>Master orchestration, simulation worlds, and comparison launch recipes for Line Follower Evolution.</description>
+  <maintainer email="developer@ecosystem.local">Intelligent Systems Architecture Team</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <exec_depend>line_follower_v1_reactive</exec_depend>
+  <exec_depend>line_follower_v2_v3_stabilized</exec_depend>
+  <exec_depend>line_follower_v4_v5_topological</exec_depend>
+  <exec_depend>line_follower_v6_exploratory</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

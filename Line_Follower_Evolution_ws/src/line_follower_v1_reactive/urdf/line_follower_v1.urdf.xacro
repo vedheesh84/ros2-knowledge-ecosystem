@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="line_follower_v1">
+  <!-- V1: Minimal Differential Drive with 2 Downward IR Sensors & L298N Driver -->
+  <link name="base_link">
+    <visual>
+      <geometry><box size="0.20 0.15 0.05"/></geometry>
+      <material name="chassis_mat"><color rgba="0.2 0.4 0.8 1.0"/></material>
+    </visual>
+    <collision>
+      <geometry><box size="0.20 0.15 0.05"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.8"/>
+      <inertia ixx="0.0016" ixy="0" ixz="0" iyy="0.0028" iyz="0" izz="0.0042"/>
+    </inertial>
+  </link>
+
+  <!-- Left & Right Drive Wheels -->
+  <link name="left_wheel">
+    <visual>
+      <geometry><cylinder radius="0.033" length="0.02"/></geometry>
+      <material name="wheel_mat"><color rgba="0.1 0.1 0.1 1.0"/></material>
+    </visual>
+  </link>
+  <joint name="left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_wheel"/>
+    <origin xyz="-0.04 0.085 0" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <link name="right_wheel">
+    <visual>
+      <geometry><cylinder radius="0.033" length="0.02"/></geometry>
+      <material name="wheel_mat"><color rgba="0.1 0.1 0.1 1.0"/></material>
+    </visual>
+  </link>
+  <joint name="right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_wheel"/>
+    <origin xyz="-0.04 -0.085 0" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <!-- 2 Discrete IR Sensor Links -->
+  <link name="ir_left_sensor"><visual><geometry><box size="0.01 0.01 0.01"/></geometry></visual></link>
+  <joint name="ir_left_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="ir_left_sensor"/>
+    <origin xyz="0.08 0.025 -0.02" rpy="0 0 0"/>
+  </joint>
+
+  <link name="ir_right_sensor"><visual><geometry><box size="0.01 0.01 0.01"/></geometry></visual></link>
+  <joint name="ir_right_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="ir_right_sensor"/>
+    <origin xyz="0.08 -0.025 -0.02" rpy="0 0 0"/>
+  </joint>
+</robot>

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>drone_bringup</name>
+  <version>1.0.0</version>
+  <description>Master launch orchestrators for single-agent and multi-agent drone swarms.</description>
+  <maintainer email="vedheesh@intelligentsystems.io">Vedheesh B</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>drone_description</exec_depend>
+  <exec_depend>swarm_control</exec_depend>
+  <exec_depend>swarm_formation</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

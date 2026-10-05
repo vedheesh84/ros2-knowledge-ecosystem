@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <world name="spider_map">
+    <gravity>0 0 -9.81</gravity>
+
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <scene>
+      <ambient>0.45 0.45 0.45 1</ambient>
+      <background>0.70 0.78 0.88 1</background>
+      <shadows>true</shadows>
+    </scene>
+
+    <physics name="default_physics" type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_update_rate>1000</real_time_update_rate>
+      <ode>
+        <solver>
+          <type>quick</type>
+          <iters>80</iters>
+          <sor>1.3</sor>
+        </solver>
+        <constraints>
+          <cfm>0.0001</cfm>
+          <erp>0.2</erp>
+          <contact_max_correcting_vel>100</contact_max_correcting_vel>
+          <contact_surface_layer>0.001</contact_surface_layer>
+        </constraints>
+      </ode>
+    </physics>
+
+    <!-- Simple room walls for lidar mapping -->
+    <model name="wall_north">
+      <static>true</static>
+      <pose>0 4 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>8 0.15 1.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>8 0.15 1.0</size></box></geometry>
+          <material><ambient>0.3 0.3 0.35 1</ambient><diffuse>0.45 0.45 0.5 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="wall_south">
+      <static>true</static>
+      <pose>0 -4 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>8 0.15 1.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>8 0.15 1.0</size></box></geometry>
+          <material><ambient>0.3 0.3 0.35 1</ambient><diffuse>0.45 0.45 0.5 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="wall_east">
+      <static>true</static>
+      <pose>4 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.15 8 1.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.15 8 1.0</size></box></geometry>
+          <material><ambient>0.3 0.3 0.35 1</ambient><diffuse>0.45 0.45 0.5 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="wall_west">
+      <static>true</static>
+      <pose>-4 0 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.15 8 1.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.15 8 1.0</size></box></geometry>
+          <material><ambient>0.3 0.3 0.35 1</ambient><diffuse>0.45 0.45 0.5 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Interior obstacles -->
+    <model name="box_a">
+      <static>true</static>
+      <pose>1.5 1.2 0.4 0 0 0.3</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.8 0.6 0.8</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.8 0.6 0.8</size></box></geometry>
+          <material><ambient>0.2 0.35 0.55 1</ambient><diffuse>0.25 0.45 0.7 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="box_b">
+      <static>true</static>
+      <pose>-1.8 -0.8 0.35 0 0 -0.4</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>1.0 0.5 0.7</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>1.0 0.5 0.7</size></box></geometry>
+          <material><ambient>0.45 0.25 0.2 1</ambient><diffuse>0.6 0.35 0.25 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="pillar">
+      <static>true</static>
+      <pose>0.5 -2.0 0.6 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><cylinder><radius>0.25</radius><length>1.2</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.25</radius><length>1.2</length></cylinder></geometry>
+          <material><ambient>0.25 0.25 0.28 1</ambient><diffuse>0.4 0.4 0.45 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="box_c">
+      <static>true</static>
+      <pose>-2.2 2.0 0.3 0 0 0.6</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.7 0.7 0.6</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.7 0.7 0.6</size></box></geometry>
+          <material><ambient>0.2 0.4 0.3 1</ambient><diffuse>0.3 0.55 0.4 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+  </world>
+</sdf>

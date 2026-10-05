@@ -1,0 +1,27 @@
+# Manipulation Parameters
+# =======================
+#
+# LEARNING OBJECTIVES:
+# - Configure state machine behavior
+# - Tune timeouts for your hardware
+# - Set pick/place locations
+
+manipulation_node:
+  ros__parameters:
+    # State machine tick rate (Hz)
+    tick_rate: 10.0
+
+    # Default place position (arm_base_link frame)
+    place_x: 0.25
+    place_y: 0.15
+    place_z: 0.05
+
+# State Machine Tuning
+# --------------------
+# Adjust these for your arm speed:
+#
+# detection_timeout: How long to wait for perception (sec)
+# motion_timeout: Max time for arm movements (sec)
+# gripper_timeout: Max time for gripper action (sec)
+# state_delay: Pause between states (sec)
+# max_retries: Retry count per state

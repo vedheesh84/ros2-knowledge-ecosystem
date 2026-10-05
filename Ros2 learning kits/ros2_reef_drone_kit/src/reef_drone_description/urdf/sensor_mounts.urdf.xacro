@@ -1,0 +1,270 @@
+<?xml version="1.0"?>
+<!--
+  sensor_mounts.urdf.xacro - Sensor Mounting Points for Reef Drone AUV
+
+  UNDERWATER SENSING CHALLENGES:
+  ==============================
+  Unlike ground robots, AUVs face unique sensing challenges:
+
+  1. NO GPS: Radio waves don't penetrate water
+     Solution: DVL (Doppler Velocity Log) + IMU + Depth sensor
+
+  2. LIGHT ATTENUATION: Red light absorbed first, then green, then blue
+     Solution: Use blue/green lighting, short-range cameras
+
+  3. ACOUSTIC PROPAGATION: Sound travels ~1500 m/s in water (vs 340 m/s air)
+     Solution: Sonar for ranging and imaging
+
+  4. PRESSURE: Increases 1 atm per 10m depth
+     Solution: Pressure sensors for accurate depth measurement
+
+  SENSOR SUITE:
+  =============
+  - IMU: Body-fixed accelerometer + gyroscope
+  - DVL: Doppler Velocity Log (bottom-facing acoustic beams)
+  - Depth Sensor: Pressure-based depth measurement
+  - Magnetometer: Heading reference (North)
+  - Camera: Forward-looking visual sensor
+  - Sonar: Forward-looking acoustic sensor
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Sensor dimensions -->
+  <xacro:property name="sensor_mass" value="0.1"/>
+  <xacro:property name="camera_size" value="0.03"/>
+  <xacro:property name="dvl_radius" value="0.04"/>
+  <xacro:property name="dvl_height" value="0.06"/>
+
+  <!--
+    IMU Link
+
+    WHAT IT MEASURES:
+    - Angular velocity (gyroscope): rad/s about x, y, z
+    - Linear acceleration (accelerometer): m/s² along x, y, z
+
+    WHY IT'S IMPORTANT:
+    - Primary sensor for orientation estimation
+    - High-rate data (100-1000 Hz) for attitude control
+    - Subject to bias drift over time (needs fusion with other sensors)
+  -->
+  <xacro:macro name="imu_sensor" params="parent">
+    <link name="imu_link">
+      <visual>
+        <geometry>
+          <box size="0.02 0.02 0.01"/>
+        </geometry>
+        <material name="imu_green">
+          <color rgba="0.0 0.8 0.0 1.0"/>
+        </material>
+      </visual>
+      <inertial>
+        <mass value="0.05"/>
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+      </inertial>
+    </link>
+
+    <joint name="imu_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="imu_link"/>
+      <!-- IMU at center of mass for best orientation estimate -->
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+
+  <!--
+    DVL (Doppler Velocity Log) Link
+
+    HOW IT WORKS:
+    1. Emits 4 acoustic beams toward seafloor (Janus configuration)
+    2. Measures Doppler shift of reflected signals
+    3. Computes 3D velocity from beam geometry:
+       v = c * (f_received - f_transmitted) / (2 * f_transmitted)
+
+    LIMITATIONS:
+    - Requires seafloor within range (~100-200m typically)
+    - Beam quality degrades in turbid water
+    - Bottom-lock lost if seafloor too far or too smooth
+
+    OUTPUT:
+    - Velocity vector: [vx, vy, vz] in m/s
+    - Altitude: distance to seafloor
+  -->
+  <xacro:macro name="dvl_sensor" params="parent">
+    <link name="dvl_link">
+      <visual>
+        <geometry>
+          <cylinder radius="${dvl_radius}" length="${dvl_height}"/>
+        </geometry>
+        <material name="dvl_blue">
+          <color rgba="0.0 0.0 0.8 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder radius="${dvl_radius}" length="${dvl_height}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="0.5"/>
+        <inertia ixx="5e-4" ixy="0" ixz="0" iyy="5e-4" iyz="0" izz="4e-4"/>
+      </inertial>
+    </link>
+
+    <joint name="dvl_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="dvl_link"/>
+      <!-- DVL mounted bottom-facing for bottom-lock -->
+      <origin xyz="0 0 -0.13" rpy="0 0 0"/>
+    </joint>
+
+    <gazebo reference="dvl_link">
+      <material>Gazebo/Blue</material>
+    </gazebo>
+  </xacro:macro>
+
+  <!--
+    Depth Sensor Link
+
+    HOW IT WORKS:
+    P = P0 + rho * g * h
+
+    Where:
+      P   = Absolute pressure at depth
+      P0  = Atmospheric pressure (101325 Pa)
+      rho = Water density (1025 kg/m³)
+      g   = Gravity (9.81 m/s²)
+      h   = Depth (m)
+
+    Solving for depth:
+      h = (P - P0) / (rho * g)
+      h = (P - 101325) / 10055.25  [meters]
+
+    ACCURACY:
+    - Typical sensors: 0.1% of full scale
+    - At 100m range: ~10cm accuracy
+    - Temperature compensation important
+  -->
+  <xacro:macro name="depth_sensor" params="parent">
+    <link name="depth_sensor_link">
+      <visual>
+        <geometry>
+          <cylinder radius="0.01" length="0.02"/>
+        </geometry>
+        <material name="depth_yellow">
+          <color rgba="0.8 0.8 0.0 1.0"/>
+        </material>
+      </visual>
+      <inertial>
+        <mass value="0.02"/>
+        <inertia ixx="1e-7" ixy="0" ixz="0" iyy="1e-7" iyz="0" izz="1e-7"/>
+      </inertial>
+    </link>
+
+    <joint name="depth_sensor_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="depth_sensor_link"/>
+      <!-- Mounted on top of vehicle for best access to water column -->
+      <origin xyz="0 0 0.13" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+
+  <!--
+    Camera Link
+
+    UNDERWATER CAMERA CONSIDERATIONS:
+    - Light attenuates exponentially with distance
+    - Red absorbed first (visibility ~5m), green (~15m), blue (~50m)
+    - Backscatter from particles reduces contrast
+    - Dome ports correct for refraction index mismatch
+
+    For simulation, we apply:
+    - Blue-green color tint
+    - Fog effect for visibility limits
+    - Reduced range compared to air cameras
+  -->
+  <xacro:macro name="camera_sensor" params="parent">
+    <link name="camera_link">
+      <visual>
+        <geometry>
+          <box size="${camera_size} ${camera_size*1.5} ${camera_size}"/>
+        </geometry>
+        <material name="camera_black">
+          <color rgba="0.1 0.1 0.1 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="${camera_size} ${camera_size*1.5} ${camera_size}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="0.2"/>
+        <inertia ixx="1e-4" ixy="0" ixz="0" iyy="1e-4" iyz="0" izz="1e-4"/>
+      </inertial>
+    </link>
+
+    <joint name="camera_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="camera_link"/>
+      <!-- Forward-facing camera -->
+      <origin xyz="0.23 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Camera optical frame (Z forward, X right, Y down - ROS convention) -->
+    <link name="camera_optical_link"/>
+    <joint name="camera_optical_joint" type="fixed">
+      <parent link="camera_link"/>
+      <child link="camera_optical_link"/>
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    </joint>
+
+    <gazebo reference="camera_link">
+      <material>Gazebo/Black</material>
+    </gazebo>
+  </xacro:macro>
+
+  <!--
+    Forward-Looking Sonar Link
+
+    HOW IT WORKS:
+    - Emits acoustic pulses
+    - Measures time-of-flight of echoes
+    - Distance = (speed_of_sound * time) / 2
+    - Speed of sound in seawater: ~1500 m/s
+
+    TYPES:
+    - Single-beam: One distance measurement
+    - Multi-beam: Fan of beams for 2D imaging
+    - Imaging sonar: High-resolution acoustic images
+
+    For this kit: Simple single-beam for obstacle detection
+  -->
+  <xacro:macro name="sonar_sensor" params="parent">
+    <link name="sonar_link">
+      <visual>
+        <geometry>
+          <cylinder radius="0.025" length="0.03"/>
+        </geometry>
+        <material name="sonar_orange">
+          <color rgba="0.9 0.5 0.0 1.0"/>
+        </material>
+      </visual>
+      <inertial>
+        <mass value="0.1"/>
+        <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
+      </inertial>
+    </link>
+
+    <joint name="sonar_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="sonar_link"/>
+      <!-- Forward-facing, below camera -->
+      <origin xyz="0.23 0 -0.05" rpy="0 ${pi/2} 0"/>
+    </joint>
+
+    <gazebo reference="sonar_link">
+      <material>Gazebo/Orange</material>
+    </gazebo>
+  </xacro:macro>
+
+</robot>

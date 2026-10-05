@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!--
+  Mobile Manipulator URDF - Main Assembly
+
+  LEARNING OBJECTIVES:
+  - Understand modular URDF composition
+  - See how base + arm + camera form complete robot
+  - Learn TF tree structure for manipulation
+
+  TF TREE:
+    map -> odom -> body_link -> arm_mount_link -> arm_base_link -> ... -> tool_frame
+                            -> camera_link -> camera_link_optical
+                            -> wheel links
+
+  USAGE:
+    sim_mode:=true  - Use Gazebo plugins
+    sim_mode:=false - Use hardware interfaces
+-->
+<robot name="mobile_manipulator" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Arguments -->
+  <xacro:arg name="sim_mode" default="false"/>
+  <xacro:property name="sim_mode" value="$(arg sim_mode)"/>
+
+  <!-- Include component xacros -->
+  <xacro:include filename="$(find mobile_manipulator_description)/urdf/base.urdf.xacro"/>
+  <xacro:include filename="$(find mobile_manipulator_description)/urdf/arm.urdf.xacro"/>
+  <xacro:include filename="$(find mobile_manipulator_description)/urdf/camera.urdf.xacro"/>
+  <xacro:include filename="$(find mobile_manipulator_description)/urdf/ros2_control.urdf.xacro"/>
+
+  <!-- Conditional Gazebo plugins -->
+  <xacro:if value="${sim_mode}">
+    <xacro:include filename="$(find mobile_manipulator_description)/urdf/gazebo.urdf.xacro"/>
+  </xacro:if>
+
+</robot>

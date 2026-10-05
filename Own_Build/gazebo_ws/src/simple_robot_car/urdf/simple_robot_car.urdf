@@ -1,0 +1,259 @@
+<!--?xml version="1.0" encoding="utf-8"?-->
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="simple_robot_car">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="3.46944695195361E-18 8.13151629364128E-20 -0.00762885082499636"
+        rpy="0 0 0" />
+      <mass
+        value="0.0295481966798763" />
+      <inertia
+        ixx="4.16167841962694E-06"
+        ixy="7.43950876610838E-22"
+        ixz="-3.29139139146144E-23"
+        iyy="6.94254087483972E-06"
+        iyz="1.57980461815193E-23"
+        izz="9.95971925663699E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://simple_robot_car/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://simple_robot_car/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="FR_wheel_link">
+    <inertial>
+      <origin
+        xyz="-3.4694E-18 -0.00253 -1.7347E-18"
+        rpy="0 0 0" />
+      <mass
+        value="0.0016328" />
+      <inertia
+        ixx="4.5923E-08"
+        ixy="9.9798E-24"
+        ixz="-8.9695E-25"
+        iyy="8.4837E-08"
+        iyz="-4.5946E-26"
+        izz="4.5923E-08" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0.015 0.03 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://simple_robot_car/meshes/FR_wheel_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://simple_robot_car/meshes/FR_wheel_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="FR_wheel_joint"
+    type="continuous">
+    <origin
+      xyz="0.0 0.0 0.0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="FR_wheel_link" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="FL_wheel_link">
+    <inertial>
+      <origin
+        xyz="5.2042E-18 0.00253 -1.7347E-18"
+        rpy="0 0 0" />
+      <mass
+        value="0.0016328" />
+      <inertia
+        ixx="4.5923E-08"
+        ixy="8.8645E-24"
+        ixz="-1.2746E-42"
+        iyy="8.4837E-08"
+        iyz="-7.6776E-41"
+        izz="4.5923E-08" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://simple_robot_car/meshes/FL_wheel_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://simple_robot_car/meshes/FL_wheel_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="FL_wheel_joint"
+    type="continuous">
+    <origin
+      xyz="0.02286 -0.02413 -0.0127"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="FL_wheel_link" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="BR_wheel_link">
+    <inertial>
+      <origin
+        xyz="-3.4694E-18 -0.00253 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.0016328" />
+      <inertia
+        ixx="4.5923E-08"
+        ixy="1.2637E-23"
+        ixz="-8.9695E-25"
+        iyy="8.4837E-08"
+        iyz="-4.5946E-26"
+        izz="4.5923E-08" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://simple_robot_car/meshes/BR_wheel_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://simple_robot_car/meshes/BR_wheel_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="BR_wheel_joint"
+    type="continuous">
+    <origin
+      xyz="-0.02286 0.02413 -0.0127"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="BR_wheel_link" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="BL_wheel_link">
+    <inertial>
+      <origin
+        xyz="3.4694E-18 0.00253 -1.7347E-18"
+        rpy="0 0 0" />
+      <mass
+        value="0.0016328" />
+      <inertia
+        ixx="4.5923E-08"
+        ixy="7.0633E-24"
+        ixz="-1.2746E-42"
+        iyy="8.4837E-08"
+        iyz="-7.6776E-41"
+        izz="4.5923E-08" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://simple_robot_car/meshes/BL_wheel_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://simple_robot_car/meshes/BL_wheel_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="BL_wheel_joint"
+    type="continuous">
+    <origin
+      xyz="-0.02286 -0.02413 -0.0127"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="BL_wheel_link" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+</robot>

@@ -1,0 +1,19 @@
+# control.yaml - Control parameters for Companion Head
+#
+# LEARNING OBJECTIVES:
+# ====================
+# 1. Understand controller tuning
+# 2. Learn about parameter organization
+
+gaze_controller:
+  ros__parameters:
+    tracking_gain: 2.0
+    max_velocity: 1.5        # rad/s
+    smoothing_factor: 0.3    # 0-1, higher = more smoothing
+    pan_limits: [-1.57, 1.57]   # ±90 degrees
+    tilt_limits: [-0.52, 0.79]  # -30 to +45 degrees
+
+
+gesture_generator:
+  ros__parameters:
+    gesture_speed: 1.0       # Speed multiplier (2.0 = twice as fast)

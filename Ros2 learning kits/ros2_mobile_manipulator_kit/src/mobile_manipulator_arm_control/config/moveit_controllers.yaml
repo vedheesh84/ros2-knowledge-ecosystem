@@ -1,0 +1,44 @@
+# MoveIt Controller Configuration
+# ================================
+#
+# LEARNING OBJECTIVES:
+# - Understand MoveIt ↔ ros2_control bridge
+# - See controller type mapping
+# - Learn action interface patterns
+#
+# HOW IT WORKS:
+# 1. MoveIt plans trajectory
+# 2. MoveIt sends to controller via action
+# 3. Controller executes on hardware
+#
+# CONTROLLER TYPES:
+# - FollowJointTrajectory: For arm (trajectory execution)
+# - GripperCommand: For gripper (position + effort)
+#
+# ACTION NAMESPACES:
+# Must match ros2_controllers.yaml action_ns!
+
+moveit_controller_manager: moveit_simple_controller_manager/MoveItSimpleControllerManager
+
+moveit_simple_controller_manager:
+  controller_names:
+    - arm_controller
+    - gripper_controller
+
+  arm_controller:
+    type: FollowJointTrajectory
+    joints:
+      - joint_1
+      - joint_2
+      - joint_3
+      - joint_4
+      - gripper_base_joint
+    action_ns: follow_joint_trajectory
+    default: true
+
+  gripper_controller:
+    type: GripperCommand
+    joints:
+      - left_gear_joint
+    action_ns: gripper_cmd
+    default: true

@@ -1,0 +1,82 @@
+# =============================================================================
+# CountToNumber.action
+# =============================================================================
+#
+# A custom ROS2 action for learning purposes.
+#
+# WHAT IS AN ACTION?
+# ------------------
+# An action is a three-part interface:
+# 1. GOAL: What we want to accomplish (sent at start)
+# 2. FEEDBACK: Progress updates (sent periodically)
+# 3. RESULT: Final outcome (sent at end)
+#
+#     ┌────────────┐         Goal          ┌────────────┐
+#     │   Action   │ ─────────────────────▶│   Action   │
+#     │   Client   │                       │   Server   │
+#     │            │◀───── Feedback ───────│            │
+#     │            │◀────── Result ────────│            │
+#     └────────────┘                       └────────────┘
+#
+# WHEN TO USE ACTIONS:
+# --------------------
+# - Task takes significant time (> few seconds)
+# - You want to track progress
+# - You might want to cancel mid-way
+# - Examples: navigation, arm motion, data collection
+#
+# THIS ACTION:
+# ------------
+# Counts from 0 to a target number, sending feedback at each count.
+# This simulates a long-running task with measurable progress.
+#
+# =============================================================================
+
+# =============================================================================
+# GOAL
+# =============================================================================
+# What the client wants the server to do.
+# Sent once when the action is initiated.
+
+# The number to count up to (must be positive)
+int32 target_number
+
+# How long to wait between counts (seconds)
+float32 delay_between_counts
+
+---
+
+# =============================================================================
+# RESULT
+# =============================================================================
+# The final outcome, sent when the action completes.
+# Only sent once at the end.
+
+# The final count reached
+int32 final_count
+
+# Total time taken (seconds)
+float32 time_taken
+
+# Whether we completed successfully
+bool success
+
+# Human-readable message
+string message
+
+---
+
+# =============================================================================
+# FEEDBACK
+# =============================================================================
+# Progress updates, sent periodically during execution.
+# Sent many times between goal and result.
+
+# Current count
+int32 current_count
+
+# Progress as percentage (0.0 to 100.0)
+float32 percentage_complete
+
+# Estimated time remaining (seconds)
+float32 estimated_time_remaining

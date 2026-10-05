@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+SRDF - Semantic Robot Description Format
+=========================================
+
+LEARNING OBJECTIVES:
+- Understand planning groups (arm, gripper)
+- See named poses (home, ready, extended)
+- Learn end effector definition
+- Practice collision matrix setup
+
+KEY CONCEPTS:
+- Groups: Collections of joints for motion planning
+- Group States: Named configurations (like "home")
+- End Effector: Links the gripper to the arm
+- Virtual Joint: Connects arm to mobile base
+- Passive Joints: Mimic joints not for planning
+- Disable Collisions: Performance optimization
+-->
+<robot name="mobile_manipulator">
+    <!-- =============================================
+    PLANNING GROUPS
+    ============================================= -->
+    <!-- Arm group: 5 DOF (base rotation, shoulder, elbow, wrist pitch, wrist rotation) -->
+    <group name="arm">
+        <joint name="virtual_joint"/>
+        <joint name="joint_1"/>
+        <joint name="joint_2"/>
+        <joint name="joint_3"/>
+        <joint name="joint_4"/>
+        <joint name="gripper_base_joint"/>
+    </group>
+
+    <!-- Gripper group: 1 DOF (left_gear controls both fingers via mimic) -->
+    <group name="gripper">
+        <joint name="left_gear_joint"/>
+    </group>
+
+    <!-- =============================================
+    NAMED POSES
+    ============================================= -->
+    <!-- Home: All zeros, arm straight up -->
+    <group_state name="home" group="arm">
+        <joint name="joint_1" value="0"/>
+        <joint name="joint_2" value="0"/>
+        <joint name="joint_3" value="0"/>
+        <joint name="joint_4" value="0"/>
+        <joint name="gripper_base_joint" value="0"/>
+    </group_state>
+
+    <!-- Ready: Pre-grasp position, arm forward and down -->
+    <group_state name="ready" group="arm">
+        <joint name="joint_1" value="0"/>
+        <joint name="joint_2" value="0.5"/>
+        <joint name="joint_3" value="0.7"/>
+        <joint name="joint_4" value="0.4"/>
+        <joint name="gripper_base_joint" value="0"/>
+    </group_state>
+
+    <!-- Extended: Maximum reach forward -->
+    <group_state name="extended" group="arm">
+        <joint name="joint_1" value="0"/>
+        <joint name="joint_2" value="0.3"/>
+        <joint name="joint_3" value="0.0"/>
+        <joint name="joint_4" value="0.0"/>
+        <joint name="gripper_base_joint" value="0"/>
+    </group_state>
+
+    <!-- Gripper open -->
+    <group_state name="open" group="gripper">
+        <joint name="left_gear_joint" value="0.8"/>
+    </group_state>
+
+    <!-- Gripper closed -->
+    <group_state name="closed" group="gripper">
+        <joint name="left_gear_joint" value="0"/>
+    </group_state>
+
+    <!-- =============================================
+    END EFFECTOR
+    ============================================= -->
+    <!-- Define gripper as end effector of arm -->
+    <end_effector name="gripper" parent_link="gripper_base_link" group="gripper" parent_group="arm"/>
+
+    <!-- =============================================
+    VIRTUAL JOINT
+    ============================================= -->
+    <!-- Connects arm base to mobile platform (fixed for now) -->
+    <virtual_joint name="virtual_joint" type="fixed" parent_frame="arm_mount_link" child_link="arm_base_link"/>
+
+    <!-- =============================================
+    PASSIVE JOINTS (mimic joints, not planned)
+    ============================================= -->
+    <passive_joint name="right_gear_joint"/>
+    <passive_joint name="left_finger_joint"/>
+    <passive_joint name="right_finger_joint"/>
+
+    <!-- =============================================
+    DISABLE COLLISIONS
+    ============================================= -->
+    <!-- Adjacent links (always in contact) -->
+    <disable_collisions link1="arm_base_link" link2="link_1" reason="Adjacent"/>
+    <disable_collisions link1="link_1" link2="link_2" reason="Adjacent"/>
+    <disable_collisions link1="link_2" link2="link_3" reason="Adjacent"/>
+    <disable_collisions link1="link_3" link2="link_4" reason="Adjacent"/>
+    <disable_collisions link1="link_4" link2="gripper_base_link" reason="Adjacent"/>
+    <disable_collisions link1="gripper_base_link" link2="left_gear_link" reason="Adjacent"/>
+    <disable_collisions link1="gripper_base_link" link2="right_gear_link" reason="Adjacent"/>
+    <disable_collisions link1="left_gear_link" link2="left_finger_link" reason="Adjacent"/>
+    <disable_collisions link1="right_gear_link" link2="right_finger_link" reason="Adjacent"/>
+
+    <!-- Never in collision (too far apart) -->
+    <disable_collisions link1="arm_base_link" link2="link_3" reason="Never"/>
+    <disable_collisions link1="arm_base_link" link2="link_4" reason="Never"/>
+    <disable_collisions link1="arm_base_link" link2="gripper_base_link" reason="Never"/>
+    <disable_collisions link1="link_1" link2="link_3" reason="Never"/>
+    <disable_collisions link1="link_1" link2="link_4" reason="Never"/>
+    <disable_collisions link1="link_1" link2="gripper_base_link" reason="Never"/>
+    <disable_collisions link1="link_2" link2="link_4" reason="Never"/>
+    <disable_collisions link1="link_2" link2="gripper_base_link" reason="Never"/>
+
+    <!-- Gripper internal links -->
+    <disable_collisions link1="left_gear_link" link2="right_gear_link" reason="Never"/>
+    <disable_collisions link1="left_finger_link" link2="right_finger_link" reason="Never"/>
+    <disable_collisions link1="left_gear_link" link2="right_finger_link" reason="Never"/>
+    <disable_collisions link1="right_gear_link" link2="left_finger_link" reason="Never"/>
+
+    <!-- Mobile base to arm (fixed mount) -->
+    <disable_collisions link1="body_link" link2="arm_base_link" reason="Adjacent"/>
+    <disable_collisions link1="body_link" link2="link_1" reason="Never"/>
+</robot>

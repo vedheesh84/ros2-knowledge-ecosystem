@@ -1,0 +1,14 @@
+# Reef Drone Navigation Configuration
+# ====================================
+
+waypoint_follower:
+  ros__parameters:
+    position_tolerance: 0.5   # m (how close to consider "reached")
+    heading_tolerance: 0.1    # rad (~6 degrees)
+    approach_velocity: 0.3    # m/s
+    hold_time: 2.0            # s (time to hold at waypoint)
+
+mission_executor:
+  ros__parameters:
+    operating_depth: -10.0    # m (depth for survey operations)
+    surface_depth: -1.0       # m (depth considered "surfaced")
