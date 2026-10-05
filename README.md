@@ -12,6 +12,12 @@ The robotics kit ecosystem is structured around a deliberate product philosophy:
 
 For full portfolio architecture, intelligence dimensions, and hardware/software specifications, refer to [Kits & Products Strategy](KITS_AND_PRODUCTS_STRATEGY.md).
 
+## Repository & Version Control Architecture
+
+This domain is maintained as an independent Git repository (`ros2-knowledge-ecosystem`) connected to GitHub at `git@github.com:vedheesh84/ros2-knowledge-ecosystem.git`.
+
+For the complete repository directory map, operational workflows, commit conventions, and robotics-specific GitHub practices, refer to [GitHub & Repository System Reference](GITHUB_SYSTEM.md).
+
 ## Collection map
 
 Refer to [ROS2 Domain Architecture Framework](resources/ROS2_Domain_Architecture_Framework.docx) for historical structure and navigation details.
