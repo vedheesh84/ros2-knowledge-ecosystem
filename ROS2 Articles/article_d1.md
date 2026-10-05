@@ -147,19 +147,19 @@ In a second terminal, transition the node deterministically and observe topic ac
 
 ```bash
 # 1. Query current state (Initial: unconfigured)
-ros2 lifecycle get /lifecycle_sensor_node
+ros2 lifecycle get /lifecycle_sensor
 
 # 2. Transition: Unconfigured -> Inactive (Configures hardware/buffers)
-ros2 lifecycle set /lifecycle_sensor_node configure
+ros2 lifecycle set /lifecycle_sensor configure
 
 # 3. Transition: Inactive -> Active (Starts publisher timer loop)
-ros2 lifecycle set /lifecycle_sensor_node activate
+ros2 lifecycle set /lifecycle_sensor activate
 
 # 4. Verify topic is now receiving active data
-ros2 topic echo /lifecycle_sensor_data
+ros2 topic echo /sensor_data
 
 # 5. Transition: Active -> Inactive (Pauses publishing cleanly without killing process)
-ros2 lifecycle set /lifecycle_sensor_node deactivate
+ros2 lifecycle set /lifecycle_sensor deactivate
 ```
 
 ---
