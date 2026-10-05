@@ -287,13 +287,13 @@ In a second terminal, verify each interface and apply the 4-question decision ch
 ros2 topic list
 ros2 topic hz /chatter
 
-# 2. Inspect Services (Guaranteed synchronous query: /add_two_ints)
+# 2. Inspect Services (Guaranteed synchronous query: /toggle_counter)
 ros2 service list
-ros2 service call /add_two_ints example_interfaces/srv/AddTwoInts "{a: 10, b: 20}"
+ros2 service call /toggle_counter std_srvs/srv/SetBool "{data: true}"
 
-# 3. Inspect Actions (Long-running goal + feedback: /count_until)
+# 3. Inspect Actions (Long-running goal + feedback: /count_to_number)
 ros2 action list
-ros2 action send_goal --feedback /count_until example_interfaces/action/Fibonacci "{order: 5}"
+ros2 action send_goal --feedback /count_to_number learning_comms/action/CountToNumber "{target_number: 5, delay_between_counts: 0.5}"
 ```
 
 ---

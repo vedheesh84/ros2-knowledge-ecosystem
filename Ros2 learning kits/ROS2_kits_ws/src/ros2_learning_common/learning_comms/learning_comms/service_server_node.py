@@ -52,8 +52,8 @@ TOPICS vs SERVICES:
 
 THIS SERVICE:
 -------------
-Provides a service that adds two integers and returns the sum.
-This is the classic "AddTwoInts" service example.
+Provides a service to toggle a stateful counter on or off.
+Uses standard ROS 2 interface `std_srvs/srv/SetBool`.
 
 USAGE:
 ------
@@ -61,7 +61,7 @@ USAGE:
     ros2 run learning_comms service_server_node.py
 
     # Terminal 2: Call the service from CLI
-    ros2 service call /add_two_ints std_srvs/srv/SetBool "data: true"
+    ros2 service call /toggle_counter std_srvs/srv/SetBool "data: true"
 
     # Or run the client node
     ros2 run learning_comms service_client_node.py

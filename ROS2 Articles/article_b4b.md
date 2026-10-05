@@ -286,7 +286,7 @@ ros2 topic hz /chatter
 #### 2. Observe Synchronous Service Blocking
 ```bash
 # Call service in a rapid loop to observe synchronous client blocking overhead
-for i in {1..10}; do ros2 service call /add_two_ints example_interfaces/srv/AddTwoInts "{a: $i, b: $i}"; done
+for i in {1..10}; do ros2 service call /toggle_counter std_srvs/srv/SetBool "{data: true}"; done
 ```
 
 Notice the round-trip latency overhead compared to the fire-and-forget streaming throughput of topics.

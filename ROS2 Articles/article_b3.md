@@ -187,10 +187,10 @@ In a second terminal:
 ros2 action list
 
 # 2. Inspect the action server and client endpoints
-ros2 action info /count_until
+ros2 action info /count_to_number
 
 # 3. Send a goal with real-time feedback streaming
-ros2 action send_goal --feedback /count_until example_interfaces/action/Fibonacci "{order: 12}"
+ros2 action send_goal --feedback /count_to_number learning_comms/action/CountToNumber "{target_number: 5, delay_between_counts: 0.5}"
 ```
 
 ---

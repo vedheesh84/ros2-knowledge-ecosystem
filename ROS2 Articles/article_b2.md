@@ -157,11 +157,11 @@ In a second terminal:
 ros2 service list
 
 # 2. Inspect the service request/response schema type
-ros2 service type /add_two_ints
+ros2 service type /toggle_counter
 
 # 3. Call the service synchronously with typed JSON arguments
-ros2 service call /add_two_ints example_interfaces/srv/AddTwoInts "{a: 14, b: 28}"
-# Output: response: example_interfaces.srv.AddTwoInts_Response(sum=42)
+ros2 service call /toggle_counter std_srvs/srv/SetBool "{data: true}"
+# Output: response: std_srvs.srv.SetBool_Response(success=True, message='Counter ENABLED. Current value: 0')
 ```
 
 ---
