@@ -117,8 +117,8 @@ ros2 launch learning_tf full_tf_demo.launch.py
 In a second terminal, verify spatial transformation vectors between coordinate frames:
 
 ```bash
-# 1. Echo the real-time translation and rotation between base_link and sensor_link
-ros2 run tf2_ros tf2_echo base_link sensor_link
+# 1. Echo the translation and rotation between base_link and camera_link (or rotating_sensor)
+ros2 run tf2_ros tf2_echo base_link camera_link
 
 # 2. Inspect static transforms published on /tf_static
 ros2 topic echo /tf_static --once
