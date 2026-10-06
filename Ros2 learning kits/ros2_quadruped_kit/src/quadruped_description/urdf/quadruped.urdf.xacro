@@ -19,8 +19,6 @@
   <!-- Include macros -->
   <xacro:include filename="$(find quadruped_description)/urdf/leg_macro.urdf.xacro"/>
 
-  <!-- Constants -->
-  <xacro:property name="pi" value="3.14159265359"/>
 
   <!-- Body dimensions -->
   <xacro:property name="body_length" value="0.40"/>
@@ -31,6 +29,7 @@
   <!-- Use simulation? -->
   <xacro:arg name="use_sim" default="false"/>
   <xacro:arg name="use_fake_hardware" default="false"/>
+  <xacro:arg name="serial_port" default="/dev/ttyUSB0"/>
 
   <!-- ==================== BASE LINK ==================== -->
 
@@ -148,7 +147,7 @@
       <xacro:unless value="$(arg use_fake_hardware)">
         <hardware>
           <plugin>quadruped_hardware/LegHardwareInterface</plugin>
-          <param name="serial_port">/dev/ttyUSB0</param>
+          <param name="serial_port">$(arg serial_port)</param>
           <param name="baud_rate">1000000</param>
         </hardware>
       </xacro:unless>

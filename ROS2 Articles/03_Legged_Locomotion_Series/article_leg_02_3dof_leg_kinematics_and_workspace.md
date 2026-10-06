@@ -79,4 +79,7 @@ This equation allows whole-body controllers to instantly map desired 3D ground r
 #### 1. Kinematics Node Source Code:
 - Leg Solver Node: [`ros2_quadruped_kit/src/quadruped_locomotion/quadruped_locomotion/gait_scheduler.py`](../../Ros2%20learning%20kits/ros2_quadruped_kit/src/quadruped_locomotion/quadruped_locomotion/gait_scheduler.py)
 - Run Demo 01: `ros2 run quadruped_demos demo_01_joint_control`
+- Physical Microcontroller Firmware: [`ros2_quadruped_kit/arduino/quadruped_controller/quadruped_controller.ino`](../../Ros2%20learning%20kits/ros2_quadruped_kit/arduino/quadruped_controller/quadruped_controller.ino)
+- Desktop Pseudo-Hardware Emulator: [`ros2_quadruped_kit/scripts/pseudo_quadruped_emulator.py`](../../Ros2%20learning%20kits/ros2_quadruped_kit/scripts/pseudo_quadruped_emulator.py)
+- Automated Verification Suite: [`ros2_quadruped_kit/scripts/test_quadruped_kit.py`](../../Ros2%20learning%20kits/ros2_quadruped_kit/scripts/test_quadruped_kit.py)
 

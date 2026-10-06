@@ -105,14 +105,41 @@ colcon build --symlink-install
 source install/setup.bash
 
 # Visualize robot (no physics)
-ros2 launch quadruped_description display.launch.py
+ros2 launch quadruped_description display.launch.py use_rviz:=true
 
-# Run with mock hardware
-ros2 launch quadruped_bringup hardware.launch.py use_fake_hardware:=true
+# Run simulation
+ros2 launch quadruped_bringup simulation.launch.py
+
+# Run with Physical Hardware (Arduino Due / Teensy 4.1 / STM32 for 12 actuators + IMU)
+ros2 launch quadruped_bringup hardware.launch.py serial_port:=/dev/ttyACM0
+
+# Run with Desktop Pseudo-Hardware Emulator (No physical microcontrollers required)
+python3 scripts/pseudo_quadruped_emulator.py --serial-port /tmp/tty_quadruped
+# In a separate terminal:
+ros2 launch quadruped_bringup hardware.launch.py serial_port:=/tmp/tty_quadruped
+
+# Run Complete Automated Verification Test Suite
+python3 scripts/test_quadruped_kit.py
 
 # Start with Demo 01
 ros2 run quadruped_demos demo_01_joint_control
 ```
+
+### Hardware Firmware & Emulation Architecture
+
+1. **Physical Microcontroller Sketch (`arduino/quadruped_controller/`)**:
+   - Implements 12-actuator torque/position streaming and 6-axis IMU telemetry (linear acceleration + angular velocity).
+   - Handles effort command decoding (`EFFORT <tau_1> ... <tau_12>`), joint position updates (`JOINTS <q_1> ... <q_12>`), and IMU streaming (`IMU <ax> <ay> <az> <gx> <gy> <gz>`).
+   - Includes standalone loopback `#define SIMULATION_MODE` for benchtop testing directly on an Arduino Due, Teensy 4.1, or STM32 without motors attached.
+2. **Desktop Pseudo Hardware Emulator (`scripts/pseudo_quadruped_emulator.py`)**:
+   - Opens pseudo-terminal (`pty`) pairs symlinked to `/tmp/tty_quadruped`.
+   - Emulates 100 Hz kinematic integration of joint efforts into velocities and positions with damping, plus synthetic IMU gravity and angular velocity telemetry.
+3. **Automated Test Suite (`scripts/test_quadruped_kit.py`)**:
+   - Validates leg kinematics, analytical Jacobians, and Bézier swing trajectory generation.
+   - Validates gait scheduling (walk/trot/crawl), Single Rigid Body Dynamics (SRBD), and joint PD control.
+   - Validates contact force estimation and behavior state machine lifecycle transitions.
+   - Validates `ros2_control` multi-controller stack (`joint_state_broadcaster`, `leg_controller`, `imu_broadcaster`) with desktop hardware emulation.
+   - Validates progressive demos and intentional fault injection breakers (`break_contact`, `break_gait`, `break_imu`).
 
 ---
 

@@ -19,6 +19,7 @@ from launch.actions import DeclareLaunchArgument, TimerAction
 from launch.conditions import IfCondition
 from launch.substitutions import Command, LaunchConfiguration
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 from ament_index_python.packages import get_package_share_directory
 
 
@@ -30,14 +31,19 @@ def generate_launch_description():
     # Launch arguments
     use_rviz = LaunchConfiguration('use_rviz')
     use_fake_hardware = LaunchConfiguration('use_fake_hardware')
+    serial_port = LaunchConfiguration('serial_port')
 
     # Robot description from xacro
-    robot_description = Command([
-        'xacro ',
-        os.path.join(pkg_description, 'urdf', 'quadruped.urdf.xacro'),
-        ' use_sim:=false',
-        ' use_fake_hardware:=', use_fake_hardware,
-    ])
+    robot_description = ParameterValue(
+        Command([
+            'xacro ',
+            os.path.join(pkg_description, 'urdf', 'quadruped.urdf.xacro'),
+            ' use_sim:=false',
+            ' use_fake_hardware:=', use_fake_hardware,
+            ' serial_port:=', serial_port,
+        ]),
+        value_type=str
+    )
 
     # Controller config
     controller_config = os.path.join(pkg_description, 'config', 'ros2_controllers.yaml')
@@ -54,6 +60,11 @@ def generate_launch_description():
             'use_fake_hardware',
             default_value='true',
             description='Use mock hardware (safe for testing)'
+        ),
+        DeclareLaunchArgument(
+            'serial_port',
+            default_value='/dev/ttyUSB0',
+            description='Serial port for real hardware communication'
         ),
 
         # ==================== ROBOT STATE PUBLISHER ====================
@@ -72,6 +83,9 @@ def generate_launch_description():
             parameters=[
                 {'robot_description': robot_description},
                 controller_config,
+            ],
+            remappings=[
+                ('/imu_broadcaster/imu', '/imu/data'),
             ],
             output='screen',
         ),

@@ -56,4 +56,7 @@ $$\boldsymbol{\tau}_{\text{cmd}} = M_{jb} \mathbf{\ddot{q}}_b^* + M_{jj} \mathbf
 
 #### 1. Whole-Body Controller Source:
 - Controller Source: [`ros2_quadruped_kit/src/quadruped_control/quadruped_control/whole_body_controller.py`](../../Ros2%20learning%20kits/ros2_quadruped_kit/src/quadruped_control/quadruped_control/whole_body_controller.py)
+- Physical Microcontroller Firmware: [`ros2_quadruped_kit/arduino/quadruped_controller/quadruped_controller.ino`](../../Ros2%20learning%20kits/ros2_quadruped_kit/arduino/quadruped_controller/quadruped_controller.ino)
+- Desktop Pseudo-Hardware Emulator: [`ros2_quadruped_kit/scripts/pseudo_quadruped_emulator.py`](../../Ros2%20learning%20kits/ros2_quadruped_kit/scripts/pseudo_quadruped_emulator.py)
+- Automated Verification Suite: [`ros2_quadruped_kit/scripts/test_quadruped_kit.py`](../../Ros2%20learning%20kits/ros2_quadruped_kit/scripts/test_quadruped_kit.py)
 

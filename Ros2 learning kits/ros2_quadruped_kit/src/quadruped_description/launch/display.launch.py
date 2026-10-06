@@ -15,6 +15,7 @@ from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration, Command
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
@@ -25,13 +26,17 @@ def generate_launch_description():
 
     # Launch arguments
     use_gui = LaunchConfiguration('use_gui')
+    use_rviz = LaunchConfiguration('use_rviz')
 
     # Robot description from xacro
-    robot_description = Command([
-        'xacro ', urdf_file,
-        ' use_sim:=false',
-        ' use_fake_hardware:=true'
-    ])
+    robot_description = ParameterValue(
+        Command([
+            'xacro ', urdf_file,
+            ' use_sim:=false',
+            ' use_fake_hardware:=true'
+        ]),
+        value_type=str
+    )
 
     return LaunchDescription([
         # Arguments
@@ -39,6 +44,11 @@ def generate_launch_description():
             'use_gui',
             default_value='true',
             description='Use joint_state_publisher_gui for interactive control'
+        ),
+        DeclareLaunchArgument(
+            'use_rviz',
+            default_value='true',
+            description='Launch RViz for visualization'
         ),
 
         # Robot State Publisher - publishes TF from /joint_states
@@ -74,6 +84,7 @@ def generate_launch_description():
             executable='rviz2',
             name='rviz2',
             output='screen',
-            arguments=['-d', rviz_config]
+            arguments=['-d', rviz_config],
+            condition=IfCondition(use_rviz)
         ),
     ])

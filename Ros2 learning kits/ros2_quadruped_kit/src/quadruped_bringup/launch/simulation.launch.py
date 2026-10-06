@@ -29,6 +29,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+from launch_ros.parameter_descriptions import ParameterValue
 from ament_index_python.packages import get_package_share_directory
 
 
@@ -43,12 +44,15 @@ def generate_launch_description():
     world = LaunchConfiguration('world')
 
     # Robot description from xacro
-    robot_description = Command([
-        'xacro ',
-        os.path.join(pkg_description, 'urdf', 'quadruped.urdf.xacro'),
-        ' use_sim:=true',
-        ' use_fake_hardware:=false',
-    ])
+    robot_description = ParameterValue(
+        Command([
+            'xacro ',
+            os.path.join(pkg_description, 'urdf', 'quadruped.urdf.xacro'),
+            ' use_sim:=true',
+            ' use_fake_hardware:=false',
+        ]),
+        value_type=str
+    )
 
     # Controller config
     controller_config = os.path.join(pkg_description, 'config', 'ros2_controllers.yaml')

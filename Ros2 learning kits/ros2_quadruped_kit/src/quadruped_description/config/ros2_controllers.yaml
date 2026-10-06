@@ -21,10 +21,6 @@ controller_manager:
       type: imu_sensor_broadcaster/IMUSensorBroadcaster
 
 
-joint_state_broadcaster:
-  ros__parameters:
-    # Publishes all joints
-    # No configuration needed - auto-discovers from URDF
 
 
 leg_controller:
