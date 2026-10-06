@@ -66,6 +66,8 @@ A system is differentially flat if states and inputs can be expressed in terms o
 
 ### 4. Hands-On Lab & Practical Code References
 
-#### 1. Flight Controller Simulator Source:
-- Controller Node: [`ros2_drone_swarm_kit/src/swarm_control/swarm_control/flight_controller_node.py`](../../Ros2%20learning%20kits/ros2_drone_swarm_kit/src/swarm_control/swarm_control/flight_controller_node.py)
+#### 1. Flight Controller Simulator & Hardware Bridge Source:
+- Simulation Controller Node: [`ros2_drone_swarm_kit/src/swarm_control/swarm_control/flight_controller_node.py`](../../Ros2%20learning%20kits/ros2_drone_swarm_kit/src/swarm_control/swarm_control/flight_controller_node.py)
+- Hardware Telemetry Bridge: [`ros2_drone_swarm_kit/src/drone_hardware/drone_hardware/flight_controller_bridge.py`](../../Ros2%20learning%20kits/ros2_drone_swarm_kit/src/drone_hardware/drone_hardware/flight_controller_bridge.py)
+- Physical Arduino Firmware: [`ros2_drone_swarm_kit/arduino/drone_flight_controller/drone_flight_controller.ino`](../../Ros2%20learning%20kits/ros2_drone_swarm_kit/arduino/drone_flight_controller/drone_flight_controller.ino)
 - Run Demo 01: `ros2 run swarm_demos demo_01_single_drone_flight`

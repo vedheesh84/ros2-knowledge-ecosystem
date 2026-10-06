@@ -49,5 +49,11 @@ By LaSalle's Invariance Principle, the swarm provably converges to the critical 
 
 ### 2. Hands-On Lab & Practical Code References
 
-#### 1. Running Area Coverage Demo:
-- Source: [`ros2_drone_swarm_kit/src/swarm_demos/swarm_demos/demo_06_swarm_area_coverage.py`](../../Ros2%20learning%20kits/ros2_drone_swarm_kit/src/swarm_demos/swarm_demos/demo_06_swarm_area_coverage.py)
+#### 1. Running Area Coverage & Swarm Partitioning:
+- Coordination Node: [`ros2_drone_swarm_kit/src/swarm_coordination/swarm_coordination/area_coverage_node.py`](../../Ros2%20learning%20kits/ros2_drone_swarm_kit/src/swarm_coordination/swarm_coordination/area_coverage_node.py)
+- Educational Demo: [`ros2_drone_swarm_kit/src/swarm_demos/swarm_demos/demo_06_swarm_area_coverage.py`](../../Ros2%20learning%20kits/ros2_drone_swarm_kit/src/swarm_demos/swarm_demos/demo_06_swarm_area_coverage.py)
+- Command:
+  ```bash
+  ros2 run swarm_coordination area_coverage_node
+  ros2 run swarm_demos demo_06_swarm_area_coverage
+  ```
