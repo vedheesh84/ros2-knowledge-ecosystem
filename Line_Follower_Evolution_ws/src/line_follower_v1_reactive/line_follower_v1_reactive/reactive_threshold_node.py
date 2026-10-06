@@ -1,12 +1,13 @@
 import rclpy
 from rclpy.node import Node
+from rclpy.executors import ExternalShutdownException
 from std_msgs.msg import Float32MultiArray, String
 from geometry_msgs.msg import Twist
-import time
+
 
 class ReactiveThresholdNode(Node):
     """
-    Line Follower V1: Pure Reactive Bang-Bang / Threshold Controller.
+    Line Follower V1: Pure Reactive Bang-Bang / Threshold Controller (Article LFE-02).
     
     Demonstrates fundamental physical challenges:
     1. Zero velocity regulation: Motor commands are raw PWM-like twist values.
@@ -20,9 +21,9 @@ class ReactiveThresholdNode(Node):
         self.declare_parameter('turn_angular_rate', 1.8) # rad/s aggressive bang-bang turn
         self.declare_parameter('threshold_analog', 0.5)  # 0.0 = white floor, 1.0 = black line
         
-        self.v_fwd = self.get_parameter('forward_speed').value
-        self.omega_turn = self.get_parameter('turn_angular_rate').value
-        self.threshold = self.get_parameter('threshold_analog').value
+        self.v_fwd = float(self.get_parameter('forward_speed').value)
+        self.omega_turn = float(self.get_parameter('turn_angular_rate').value)
+        self.threshold = float(self.get_parameter('threshold_analog').value)
         
         # Subscriptions
         self.sub_ir = self.create_subscription(
@@ -76,16 +77,19 @@ class ReactiveThresholdNode(Node):
         diag.data = f"State: {self.last_state} | L_IR: {left_ir:.2f} | R_IR: {right_ir:.2f}"
         self.pub_diag.publish(diag)
 
+
 def main(args=None):
     rclpy.init(args=args)
     node = ReactiveThresholdNode()
     try:
         rclpy.spin(node)
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, ExternalShutdownException):
         pass
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()

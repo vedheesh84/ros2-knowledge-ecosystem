@@ -1,19 +1,21 @@
 import rclpy
 from rclpy.node import Node
+from rclpy.executors import ExternalShutdownException
 from std_msgs.msg import Float32, Bool
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Imu
 import math
 
+
 class StabilizedMotionController(Node):
     """
-    V2-V3 Motion Layer: Closed-Loop Dual PID with Angular Damping.
+    V2-V3 Motion Layer: Closed-Loop Dual PID with Angular Damping (Articles LFE-03 & 04).
     
     Control Laws:
     1. Line Centering Yaw Rate:
        omega_cmd = -K_p * e - K_d * de/dt - K_gyro * omega_imu
     2. Adaptive Velocity Profiling:
-       v_cmd = v_max * max(0.3, 1.0 - alpha * |e| - beta * |omega_imu|)
+       v_cmd = v_max * max(0.25, 1.0 - 15.0 * |e| - 0.2 * |omega_imu|)
     """
     def __init__(self):
         super().__init__('stabilized_motion_controller')
@@ -23,10 +25,10 @@ class StabilizedMotionController(Node):
         self.declare_parameter('k_gyro_damping', 0.15)
         self.declare_parameter('v_max', 0.65) # High-speed line following (0.65 m/s)
         
-        self.kp = self.get_parameter('kp').value
-        self.kd = self.get_parameter('kd').value
-        self.k_gyro = self.get_parameter('k_gyro_damping').value
-        self.v_max = self.get_parameter('v_max').value
+        self.kp = float(self.get_parameter('kp').value)
+        self.kd = float(self.get_parameter('kd').value)
+        self.k_gyro = float(self.get_parameter('k_gyro_damping').value)
+        self.v_max = float(self.get_parameter('v_max').value)
         
         self.last_error = 0.0
         self.last_time = self.get_clock().now()
@@ -41,7 +43,7 @@ class StabilizedMotionController(Node):
         self.get_logger().info('Stabilized High-Performance Motion Controller running.')
 
     def imu_callback(self, msg: Imu):
-        self.current_yaw_rate = msg.angular_velocity.z
+        self.current_yaw_rate = float(msg.angular_velocity.z)
 
     def intersection_callback(self, msg: Bool):
         if msg.data:
@@ -50,10 +52,10 @@ class StabilizedMotionController(Node):
     def error_callback(self, msg: Float32):
         now = self.get_clock().now()
         dt = (now - self.last_time).nanoseconds * 1e-9
-        if dt <= 0.0:
+        if dt < 0.005 or dt > 0.5:
             dt = 0.02
             
-        error = msg.data
+        error = float(msg.data)
         d_error = (error - self.last_error) / dt
         
         # 1. Closed-loop angular rate with IMU gyro damping
@@ -63,23 +65,26 @@ class StabilizedMotionController(Node):
         v = self.v_max * max(0.25, 1.0 - 15.0 * abs(error) - 0.2 * abs(self.current_yaw_rate))
         
         cmd = Twist()
-        cmd.linear.x = v
-        cmd.angular.z = omega
+        cmd.linear.x = float(v)
+        cmd.angular.z = float(omega)
         self.pub_cmd.publish(cmd)
         
         self.last_error = error
         self.last_time = now
+
 
 def main(args=None):
     rclpy.init(args=args)
     node = StabilizedMotionController()
     try:
         rclpy.spin(node)
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, ExternalShutdownException):
         pass
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()

@@ -36,7 +36,45 @@ This workspace implements the progressive evolutionary roadmap of autonomous gro
 
 ---
 
-## 3. Quick Start & Execution Recipes
+## 3. Physical Hardware & Embedded Firmware
+
+The workspace is fully grounded in physical micro-controller hardware:
+- **Arduino Firmware:** `arduino/line_follower_controller/line_follower_controller.ino`
+  - 8-channel analog IR array ADC processing with background noise rejection.
+  - Onboard weighted centroid error estimation ($e_{line} = \frac{\sum x_i I_i}{\sum I_i}$).
+  - Dual-wheel quadrature encoder interrupt counters (`INT0`, `INT1`).
+  - Closed-loop PID motor PWM actuation (L298N / TB6612FNG drivers).
+  - High-frequency 50 Hz NMEA 0183 serial telemetry (`$LFE,seq=...`) with checksum verification and emergency stop (`$CMD,ESTOP`).
+
+---
+
+## 4. Testing Sandbox & Emulation Layer
+
+For development and verification without physical robots attached:
+- **POSIX Pseudo-Hardware Emulator:** `scripts/pseudo_line_follower_emulator.py`
+  - Creates virtual serial interface `/tmp/ttyLFE_ROBOT` via PTY master/slave.
+  - Generates synthetic S-curve track physics, 2-channel & 8-channel IR sensors, IMU gyro angular rates, and 2D SLAM maps.
+- **Automated 8-Phase Verification Suite:** `scripts/test_line_follower_evolution.py`
+  - Validates V1 reactive logic, V2-V3 centroid math, PID and gyro damping, V4 graph parsing, V5 FSM & rollback, V6 SLAM frontier boundary detection, serial command exchange, and master launch configurations.
+
+```bash
+# Execute automated test suite:
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+python3 scripts/test_line_follower_evolution.py
+```
+
+---
+
+## 5. Architectural & Pedagogical Reports
+
+- [System Architecture Specification](SYSTEM_ARCHITECTURE.md)
+- [Error Diagnosis & Technical Solutions Registry](ERROR_DIAGNOSIS_AND_SOLUTIONS.md)
+- [Grass-Roots Pedagogical Coherence Audit Report](COHERENCE_AUDIT_REPORT.md)
+
+---
+
+## 6. Quick Start & Execution Recipes
 
 ### Build Workspace
 ```bash
@@ -62,11 +100,11 @@ ros2 launch line_follower_v6_exploratory v6_exploratory_simulation.launch.py
 
 ### Universal Master Selector
 ```bash
-ros2 launch line_follower_evolution_bringup master_evolution_selector.launch.py version:=v2_v3
+ros2 launch line_follower_evolution_bringup master_evolution_selector.launch.py generation:=v2_v3
 ```
 
 ---
 
-## 4. Master Learning Series Curriculum
+## 7. Master Learning Series Curriculum
 
 For comprehensive theory, physics proofs, and code walkthroughs, read the [Line Follower Evolution Learning Series](../ROS2%20Articles/07_Line_Follower_Evolution_Series/article_lfe_01_evolutionary_intelligence_framework.md).

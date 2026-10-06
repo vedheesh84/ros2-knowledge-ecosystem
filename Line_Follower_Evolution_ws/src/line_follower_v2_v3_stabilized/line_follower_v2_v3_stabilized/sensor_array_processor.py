@@ -1,11 +1,13 @@
 import rclpy
 from rclpy.node import Node
+from rclpy.executors import ExternalShutdownException
 from std_msgs.msg import Float32MultiArray, Float32, Bool
 import numpy as np
 
+
 class SensorArrayProcessor(Node):
     """
-    V3 Perception Layer: Computes weighted line centroid e and flags intersection presence.
+    V3 Perception Layer: Computes weighted line centroid e and flags intersection presence (Article LFE-04).
     
     Centroid Equation:
     e = \frac{\sum_{i=1}^{N} w_i \cdot I_i}{\sum_{i=1}^{N} I_i}
@@ -51,16 +53,19 @@ class SensorArrayProcessor(Node):
             
         self.pub_centroid_error.publish(error_msg)
 
+
 def main(args=None):
     rclpy.init(args=args)
     node = SensorArrayProcessor()
     try:
         rclpy.spin(node)
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, ExternalShutdownException):
         pass
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()
