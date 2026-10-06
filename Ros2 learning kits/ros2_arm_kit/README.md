@@ -18,6 +18,11 @@ It bridges fundamental ROS2 communication with advanced spatial kinematics, anal
 
 ```text
 ros2_arm_kit/
+├── arduino/
+│   └── robotic_arm_controller/          # 5-DOF Arduino/ESP32 servo PWM controller firmware
+├── scripts/
+│   ├── pseudo_arm_emulator.py           # Virtual PTY serial bridge for desktop HIL testing
+│   └── test_arm_kit.py                  # End-to-end automated verification test suite
 ├── resources/
 │   ├── arm_kinematics_derivation.md     # Forward/Inverse kinematics & Jacobian derivations
 │   └── moveit2_planning_pipeline.md     # OMPL & MoveIt2 motion planning architecture
@@ -28,7 +33,7 @@ ros2_arm_kit/
 │   ├── arm_manipulation/                # Gripper action server and pick-and-place state machine
 │   ├── arm_moveit/                      # MoveIt2 SRDF, OMPL configuration, and kinematics
 │   ├── arm_bringup/                     # Master simulation and hardware launch orchestration
-│   └── arm_demos/                       # 6 progressive educational demos + 4 failure breakers
+│   └── arm_demos/                       # 9 progressive educational demos + 4 failure breakers
 └── README.md                            # Primary workspace documentation
 ```
 
@@ -47,7 +52,18 @@ ros2 launch arm_description display.launch.py
 
 # 3. Launch full simulated arm environment
 ros2 launch arm_bringup arm_sim.launch.py
+
+# 4. Launch Hardware Bringup (Desktop Pseudo-Hardware or Physical Microcontroller)
+# Terminal A (Pseudo-Hardware):
+python3 scripts/pseudo_arm_emulator.py --port /tmp/tty_arm_fake
+
+# Terminal B (Hardware Bridge):
+ros2 launch arm_bringup arm_hardware.launch.py serial_port:=/tmp/tty_arm_fake
+
+# 5. Run Automated Verification Test Suite
+python3 scripts/test_arm_kit.py
 ```
+
 
 ---
 

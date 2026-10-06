@@ -21,6 +21,8 @@ For the full learning kit, progressive demos, and failure breakers, refer to:
 - **Motion Planning:** MoveIt2 with OMPL RRTConnect planners and collision avoidance.
 - **Actuation & Bridges:** ros2_control Joint Trajectory Controller with PCA9685 / Arduino serial hardware bridges.
 - **Autonomous Manipulation:** Parallel gripper action servers and autonomous pick-and-place state machines.
+- **Hardware-in-the-Loop Emulation:** Desktop pseudo-hardware serial PTY emulator (`scripts/pseudo_arm_emulator.py`) and Arduino/ESP32 firmware (`arduino/robotic_arm_controller/`).
+
 
 ---
 

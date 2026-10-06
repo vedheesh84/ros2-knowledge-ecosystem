@@ -82,8 +82,32 @@ When all 5 servos accelerate simultaneously, peak inrush current can spike to **
 
 ### 5. Hands-On Lab & Practical Code References
 
-#### 1. Inspecting the Hardware Bridge:
-- Driver Source: [`ros2_arm_kit/src/arm_hardware/arm_hardware/servo_bridge.py`](../../Ros2%20learning%20kits/ros2_arm_kit/src/arm_hardware/arm_hardware/servo_bridge.py)
+#### 1. Source Code & Firmware References:
+- **ROS 2 Hardware Bridge:** [`ros2_arm_kit/src/arm_hardware/arm_hardware/servo_bridge.py`](../../Ros2%20learning%20kits/ros2_arm_kit/src/arm_hardware/arm_hardware/servo_bridge.py)
+- **Arduino Servo Firmware:** [`ros2_arm_kit/arduino/robotic_arm_controller/robotic_arm_controller.ino`](../../Ros2%20learning%20kits/ros2_arm_kit/arduino/robotic_arm_controller/robotic_arm_controller.ino)
+- **Pseudo-Hardware Serial Emulator:** [`ros2_arm_kit/scripts/pseudo_arm_emulator.py`](../../Ros2%20learning%20kits/ros2_arm_kit/scripts/pseudo_arm_emulator.py)
+- **Hardware Launch Orchestration:** [`ros2_arm_kit/src/arm_bringup/launch/arm_hardware.launch.py`](../../Ros2%20learning%20kits/ros2_arm_kit/src/arm_bringup/launch/arm_hardware.launch.py)
 
+#### 2. Desktop Hardware-in-the-Loop (HIL) Testing:
+Before connecting physical servos, verify the entire communication pipeline using the virtual serial bridge:
 
+```bash
+# Terminal 1: Launch Pseudo-Hardware Serial Emulator
+python3 "02 — Domains/ROS2/Ros2 learning kits/ros2_arm_kit/scripts/pseudo_arm_emulator.py" --port /tmp/tty_arm_fake
 
+# Terminal 2: Launch Hardware Bridge with Robot Description
+ros2 launch arm_bringup arm_hardware.launch.py serial_port:=/tmp/tty_arm_fake
+
+# Terminal 3: Dispatch Trajectory Commands & Verify /joint_states
+ros2 run arm_demos demo_01_joint_control
+ros2 topic echo /joint_states
+```
+
+#### 3. Physical Hardware Deployment:
+1. Flash `robotic_arm_controller.ino` to Arduino Uno/Mega or ESP32 using the Arduino IDE.
+2. Wire logic grounds (`GND`) together between SBC and microcontroller.
+3. Power PCA9685 / servos with external 5V/6V 10A power supply (never directly from USB/Arduino 5V rail).
+4. Launch hardware bridge connecting to physical USB port:
+```bash
+ros2 launch arm_bringup arm_hardware.launch.py serial_port:=/dev/ttyUSB0
+```

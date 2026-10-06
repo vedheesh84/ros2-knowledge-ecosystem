@@ -13,6 +13,8 @@ def generate_launch_description():
     default_rviz_config = os.path.join(pkg_desc, 'config', 'arm.rviz')
 
     use_rviz = LaunchConfiguration('use_rviz')
+    serial_port = LaunchConfiguration('serial_port')
+    baud_rate = LaunchConfiguration('baud_rate')
 
     rsp_node = Node(
         package='robot_state_publisher',
@@ -25,10 +27,14 @@ def generate_launch_description():
         }]
     )
 
-    mock_hw_node = Node(
+    hardware_bridge_node = Node(
         package='arm_hardware',
-        executable='mock_hardware_node.py',
-        name='mock_arm_hardware'
+        executable='servo_bridge.py',
+        name='servo_hardware_bridge',
+        parameters=[{
+            'serial_port': serial_port,
+            'baud_rate': baud_rate,
+        }]
     )
 
     kinematics_node = Node(
@@ -55,8 +61,10 @@ def generate_launch_description():
         DeclareLaunchArgument('model', default_value=default_model_path),
         DeclareLaunchArgument('rvizconfig', default_value=default_rviz_config),
         DeclareLaunchArgument('use_rviz', default_value='true', description='Launch RViz for visualization'),
+        DeclareLaunchArgument('serial_port', default_value='/dev/ttyUSB0', description='Microcontroller serial port'),
+        DeclareLaunchArgument('baud_rate', default_value='115200', description='Baud rate for hardware serial'),
         rsp_node,
-        mock_hw_node,
+        hardware_bridge_node,
         kinematics_node,
         gripper_node,
         rviz_node
