@@ -80,5 +80,20 @@ When motor current surges through common ground wires, Ohm's law ($V = I \cdot R
 ### 4. Hands-On Lab & Practical Code References
 
 #### 1. Hardware Interface Driver Source:
-- C++ Hardware Plugin: [`ros2_mobile_manipulator_kit/src/mobile_manipulator_hardware/src/arm_hardware_interface.cpp`](file:///e:/Intelligent%20Systems%20Knowledge%20Ecosystem/02%20—%20Domains/ROS2/Ros2%20learning%20kits/ros2_mobile_manipulator_kit/src/mobile_manipulator_hardware/src/arm_hardware_interface.cpp)
-- Base Hardware Interface: [`ros2_mobile_manipulator_kit/src/mobile_manipulator_hardware/src/base_hardware_interface.cpp`](file:///e:/Intelligent%20Systems%20Knowledge%20Ecosystem/02%20—%20Domains/ROS2/Ros2%20learning%20kits/ros2_mobile_manipulator_kit/src/mobile_manipulator_hardware/src/base_hardware_interface.cpp)
+- C++ Hardware Plugin: [`ros2_mobile_manipulator_kit/src/mobile_manipulator_hardware/src/arm_hardware_interface.cpp`](file:///media/ved/DATA/Intelligent%20Systems%20Knowledge%20Ecosystem/02%20—%20Domains/ROS2/Ros2%20learning%20kits/ros2_mobile_manipulator_kit/src/mobile_manipulator_hardware/src/arm_hardware_interface.cpp)
+- Base Hardware Interface: [`ros2_mobile_manipulator_kit/src/mobile_manipulator_hardware/src/base_hardware_interface.cpp`](file:///media/ved/DATA/Intelligent%20Systems%20Knowledge%20Ecosystem/02%20—%20Domains/ROS2/Ros2%20learning%20kits/ros2_mobile_manipulator_kit/src/mobile_manipulator_hardware/src/base_hardware_interface.cpp)
+
+#### 2. Physical Arduino Microcontroller Firmware:
+- Unified Controller Sketch: [`ros2_mobile_manipulator_kit/arduino/mobile_manipulator_controller/mobile_manipulator_controller.ino`](file:///media/ved/DATA/Intelligent%20Systems%20Knowledge%20Ecosystem/02%20—%20Domains/ROS2/Ros2%20learning%20kits/ros2_mobile_manipulator_kit/arduino/mobile_manipulator_controller/mobile_manipulator_controller.ino)
+  - Features real-time interrupt-driven wheel encoder telemetry (`ENC <fl> <fr> <bl> <br>`) and servo PWM commanding (`SET_ALL_SERVOS <angles...>`).
+  - Supports `#define SIMULATION_MODE` for standalone desktop bench testing without active load motors.
+
+#### 3. Desktop PTY Pseudo Hardware Emulation:
+- Dual Virtual Serial Bridge: [`ros2_mobile_manipulator_kit/scripts/pseudo_mobile_manipulator_emulator.py`](file:///media/ved/DATA/Intelligent%20Systems%20Knowledge%20Ecosystem/02%20—%20Domains/ROS2/Ros2%20learning%20kits/ros2_mobile_manipulator_kit/scripts/pseudo_mobile_manipulator_emulator.py)
+  - Creates dual pseudo-terminal (`pty`) pairs symlinked to `/tmp/tty_mm_base` and `/tmp/tty_mm_arm`.
+  - Simulates wheel velocity integration into tick rates and responds to arm servo commands in real-time at 50 Hz.
+
+#### 4. Automated Verification Test Suite:
+- End-to-End Test Suite: [`ros2_mobile_manipulator_kit/scripts/test_mobile_manipulator_kit.py`](file:///media/ved/DATA/Intelligent%20Systems%20Knowledge%20Ecosystem/02%20—%20Domains/ROS2/Ros2%20learning%20kits/ros2_mobile_manipulator_kit/scripts/test_mobile_manipulator_kit.py)
+  - Tests 2D/3D perception, top-down grasp planning, PickPlaceStateMachine transitions, multi-hardware ros2_control interfaces with the emulator, progressive demos, and intentional fault injection breakers.
+

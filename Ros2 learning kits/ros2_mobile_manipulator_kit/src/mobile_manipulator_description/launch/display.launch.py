@@ -11,6 +11,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
+from launch.conditions import IfCondition
 from launch.substitutions import Command, LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
@@ -23,6 +24,8 @@ def generate_launch_description():
     rviz_config = os.path.join(pkg_description, 'rviz', 'display.rviz')
 
     sim_mode = LaunchConfiguration('sim_mode')
+    use_rviz = LaunchConfiguration('use_rviz')
+    use_gui = LaunchConfiguration('use_gui')
 
     robot_description = ParameterValue(
         Command(['xacro ', urdf_file, ' sim_mode:=', sim_mode]),
@@ -34,6 +37,16 @@ def generate_launch_description():
             'sim_mode',
             default_value='false',
             description='Enable simulation mode'
+        ),
+        DeclareLaunchArgument(
+            'use_rviz',
+            default_value='true',
+            description='Launch RViz for visualization'
+        ),
+        DeclareLaunchArgument(
+            'use_gui',
+            default_value='true',
+            description='Launch Joint State Publisher GUI'
         ),
 
         # Robot State Publisher
@@ -51,6 +64,7 @@ def generate_launch_description():
             executable='joint_state_publisher_gui',
             name='joint_state_publisher_gui',
             output='screen',
+            condition=IfCondition(use_gui),
         ),
 
         # RViz
@@ -60,5 +74,7 @@ def generate_launch_description():
             name='rviz2',
             arguments=['-d', rviz_config],
             output='screen',
+            condition=IfCondition(use_rviz),
         ),
     ])
+

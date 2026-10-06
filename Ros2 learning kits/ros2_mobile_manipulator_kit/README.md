@@ -92,15 +92,40 @@ cd ros2_mobile_manipulator_kit
 colcon build --symlink-install
 source install/setup.bash
 
-# Visualize robot
-ros2 launch mobile_manipulator_description display.launch.py
+# Visualize robot (headless or GUI)
+ros2 launch mobile_manipulator_description display.launch.py use_rviz:=true
 
 # Run simulation
 ros2 launch mobile_manipulator_bringup simulation.launch.py
 
+# Run with Physical Hardware (Arduino Mega for base + Arduino Uno for arm)
+ros2 launch mobile_manipulator_bringup hardware.launch.py base_port:=/dev/ttyACM0 arm_port:=/dev/ttyACM1
+
+# Run with Desktop Pseudo-Hardware Emulator (No physical boards required)
+python3 scripts/pseudo_mobile_manipulator_emulator.py --base-port /tmp/tty_mm_base --arm-port /tmp/tty_mm_arm
+# In a separate terminal:
+ros2 launch mobile_manipulator_bringup hardware.launch.py base_port:=/tmp/tty_mm_base arm_port:=/tmp/tty_mm_arm
+
+# Run Complete Automated Verification Test Suite
+python3 scripts/test_mobile_manipulator_kit.py
+
 # Start with Demo 01
 ros2 launch mobile_manipulator_demos demo_01_joint_control.launch.py
 ```
+
+### Hardware Firmware & Emulation Architecture
+
+1. **Physical Microcontroller Sketch (`arduino/mobile_manipulator_controller/`)**:
+   - Implements full dual-subsystem control: differential drive 4-wheel encoder feedback + PWM motor drivers, and 6-DOF servo position control with feedback.
+   - Includes standalone loopback `#define SIMULATION_MODE` for benchtop testing directly on an Arduino Mega / Uno without motors attached.
+2. **Desktop Pseudo Hardware Emulator (`scripts/pseudo_mobile_manipulator_emulator.py`)**:
+   - Opens dual pseudo-terminal (`pty`) pairs symlinked to `/tmp/tty_mm_base` and `/tmp/tty_mm_arm`.
+   - Emulates 50 Hz base velocity kinematic integration into incremental encoder ticks (`ENC <fl> <fr> <bl> <br>`) and servo angles (`SERVO_POS <s1> <s2> <s3> <s4> <s5> <s6>`).
+3. **Automated Test Suite (`scripts/test_mobile_manipulator_kit.py`)**:
+   - Validates perception (HSV segmentation, contour centroids, 3D optical frame deprojection).
+   - Validates manipulation (Grasp planner top-down approach angle and `PickPlaceStateMachine` state transitions).
+   - Validates `ros2_control` hardware interfaces with emulator and verifies all 4 controllers (`joint_state_broadcaster`, `diff_drive_controller`, `arm_controller`, `gripper_controller`).
+   - Validates progressive demos and intentional fault injection breakers.
 
 ---
 

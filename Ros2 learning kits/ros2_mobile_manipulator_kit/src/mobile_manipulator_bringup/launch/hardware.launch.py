@@ -48,6 +48,7 @@ from launch.substitutions import (
 )
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
@@ -72,12 +73,16 @@ def generate_launch_description():
     arm_port = LaunchConfiguration('arm_port')
 
     # Process URDF with xacro (hardware mode)
-    robot_description = Command([
-        'xacro ', urdf_file,
-        ' sim_mode:=false',
-        ' base_serial_port:=', base_port,
-        ' arm_serial_port:=', arm_port,
-    ])
+    robot_description = ParameterValue(
+        Command([
+            'xacro ', urdf_file,
+            ' sim_mode:=false',
+            ' base_serial_port:=', base_port,
+            ' arm_serial_port:=', arm_port,
+        ]),
+        value_type=str
+    )
+
 
     return LaunchDescription([
         # ========================================

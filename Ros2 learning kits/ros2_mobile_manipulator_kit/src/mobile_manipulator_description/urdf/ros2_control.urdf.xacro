@@ -28,7 +28,7 @@
     <ros2_control name="base_system" type="system">
       <hardware>
         <plugin>mobile_manipulator_hardware/BaseHardwareInterface</plugin>
-        <param name="serial_port">/dev/ttyACM0</param>
+        <param name="serial_port">$(arg base_serial_port)</param>
         <param name="baud_rate">115200</param>
         <param name="wheel_radius">0.075</param>
         <param name="wheel_separation">0.35</param>
@@ -85,7 +85,7 @@
     <ros2_control name="arm_system" type="system">
       <hardware>
         <plugin>mobile_manipulator_hardware/ArmHardwareInterface</plugin>
-        <param name="serial_port">/dev/ttyACM1</param>
+        <param name="serial_port">$(arg arm_serial_port)</param>
         <param name="baud_rate">115200</param>
       </hardware>
 

@@ -21,6 +21,8 @@
   <!-- Arguments -->
   <xacro:arg name="sim_mode" default="false"/>
   <xacro:property name="sim_mode" value="$(arg sim_mode)"/>
+  <xacro:arg name="base_serial_port" default="/dev/ttyACM0"/>
+  <xacro:arg name="arm_serial_port" default="/dev/ttyACM1"/>
 
   <!-- Include component xacros -->
   <xacro:include filename="$(find mobile_manipulator_description)/urdf/base.urdf.xacro"/>
