@@ -55,4 +55,5 @@ Instead of playing static pre-recorded video clips, each eye is rendered dynamic
 
 #### 1. Expression Renderer Source:
 - Renderer Node: [`ros2_companion_head_kit/src/companion_head_expression/companion_head_expression/expression_renderer.py`](../../Ros2%20learning%20kits/ros2_companion_head_kit/src/companion_head_expression/companion_head_expression/expression_renderer.py)
-- Run Demo 01: `ros2 run companion_head_demos demo_01_expressions.py`
+- Run Demo 01: `ros2 run companion_head_demos demo_01_expressions`
+- Automated Verification Suite: [`ros2_companion_head_kit/scripts/test_companion_head_kit.py`](../../Ros2%20learning%20kits/ros2_companion_head_kit/scripts/test_companion_head_kit.py)

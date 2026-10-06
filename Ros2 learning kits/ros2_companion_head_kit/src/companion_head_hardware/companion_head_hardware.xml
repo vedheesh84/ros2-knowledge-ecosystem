@@ -1,0 +1,11 @@
+<library path="companion_head_hardware">
+  <class name="companion_head_hardware/ServoInterface"
+         type="companion_head_hardware::ServoInterface"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Hardware interface for 2-DOF Pan/Tilt companion robot head.
+      Communicates with Arduino / servo controller over serial link.
+      Provides position command and state interfaces for neck_pan_joint and neck_tilt_joint.
+    </description>
+  </class>
+</library>

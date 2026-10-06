@@ -54,4 +54,5 @@ $$\mathbf{\dot{m}}(t) = -\lambda_{\text{decay}} (\mathbf{m}(t) - \mathbf{m}_{\te
 
 #### 1. Mood Engine Source Code:
 - Mood Engine: [`ros2_companion_head_kit/src/companion_head_behaviors/companion_head_behaviors/mood_engine.py`](../../Ros2%20learning%20kits/ros2_companion_head_kit/src/companion_head_behaviors/companion_head_behaviors/mood_engine.py)
-- Run Demo 05: `ros2 run companion_head_demos demo_05_mood.py`
+- Run Demo 05: `ros2 run companion_head_demos demo_05_mood`
+- Automated Verification Suite: [`ros2_companion_head_kit/scripts/test_companion_head_kit.py`](../../Ros2%20learning%20kits/ros2_companion_head_kit/scripts/test_companion_head_kit.py)

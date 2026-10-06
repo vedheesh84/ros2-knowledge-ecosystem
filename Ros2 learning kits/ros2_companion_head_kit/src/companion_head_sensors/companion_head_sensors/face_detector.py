@@ -19,6 +19,7 @@ TOPICS:
     - /gaze/target (geometry_msgs/PointStamped): Primary face position
 """
 
+import os
 import json
 import cv2
 import numpy as np
@@ -57,8 +58,26 @@ class FaceDetector(Node):
         self.bridge = CvBridge()
 
         # Load Haar cascade
-        cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
-        self.face_cascade = cv2.CascadeClassifier(cascade_path)
+        cascade_path = None
+        if hasattr(cv2, 'data') and hasattr(cv2.data, 'haarcascades') and cv2.data.haarcascades:
+            candidate = os.path.join(cv2.data.haarcascades, 'haarcascade_frontalface_default.xml')
+            if os.path.exists(candidate):
+                cascade_path = candidate
+        if not cascade_path:
+            candidates = [
+                '/usr/share/opencv4/haarcascades/haarcascade_frontalface_default.xml',
+                '/usr/share/opencv/haarcascades/haarcascade_frontalface_default.xml',
+                '/usr/local/share/opencv4/haarcascades/haarcascade_frontalface_default.xml'
+            ]
+            for p in candidates:
+                if os.path.exists(p):
+                    cascade_path = p
+                    break
+
+        if cascade_path:
+            self.face_cascade = cv2.CascadeClassifier(cascade_path)
+        else:
+            self.face_cascade = cv2.CascadeClassifier()
 
         if self.face_cascade.empty():
             self.get_logger().error('Failed to load Haar cascade!')

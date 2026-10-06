@@ -37,6 +37,7 @@ from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
@@ -60,11 +61,14 @@ def generate_launch_description():
 
     # Robot description
     urdf_file = os.path.join(pkg_description, 'urdf', 'companion_head.urdf.xacro')
-    robot_description = Command([
-        'xacro ', urdf_file,
-        ' use_sim:=true',
-        ' use_fake_hardware:=false'
-    ])
+    robot_description = ParameterValue(
+        Command([
+            'xacro ', urdf_file,
+            ' use_sim:=true',
+            ' use_fake_hardware:=false'
+        ]),
+        value_type=str
+    )
 
     # World file
     world_file = os.path.join(pkg_gazebo, 'worlds', 'companion_room.world')

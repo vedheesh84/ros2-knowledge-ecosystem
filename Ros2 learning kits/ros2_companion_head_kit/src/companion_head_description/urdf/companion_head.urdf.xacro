@@ -40,6 +40,8 @@
   <!-- ==================== ARGUMENTS ==================== -->
   <xacro:arg name="use_sim" default="false"/>
   <xacro:arg name="use_fake_hardware" default="true"/>
+  <xacro:arg name="serial_port" default="/dev/ttyUSB0"/>
+  <xacro:arg name="baud_rate" default="115200"/>
 
   <!-- ==================== PROPERTIES ==================== -->
   <!-- Base/Pedestal -->

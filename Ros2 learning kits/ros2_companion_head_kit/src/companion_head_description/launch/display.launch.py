@@ -21,6 +21,7 @@ from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import Command, LaunchConfiguration
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
@@ -42,11 +43,14 @@ def generate_launch_description():
 
     # Get URDF via xacro
     urdf_file = os.path.join(pkg_dir, 'urdf', 'companion_head.urdf.xacro')
-    robot_description = Command([
-        'xacro ', urdf_file,
-        ' use_sim:=false',
-        ' use_fake_hardware:=true'
-    ])
+    robot_description = ParameterValue(
+        Command([
+            'xacro ', urdf_file,
+            ' use_sim:=false',
+            ' use_fake_hardware:=true'
+        ]),
+        value_type=str
+    )
 
     # Robot state publisher
     robot_state_publisher = Node(

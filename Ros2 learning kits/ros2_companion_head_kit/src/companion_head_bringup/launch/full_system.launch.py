@@ -14,25 +14,25 @@ def generate_launch_description():
     
     face_detector_node = Node(
         package='companion_head_sensors',
-        executable='face_detector.py',
+        executable='face_detector',
         name='face_detector'
     )
     
     gaze_controller_node = Node(
         package='companion_head_control',
-        executable='gaze_controller.py',
+        executable='gaze_controller',
         name='gaze_controller'
     )
     
     mood_engine_node = Node(
         package='companion_head_behaviors',
-        executable='mood_engine.py',
+        executable='mood_engine',
         name='mood_engine'
     )
     
     renderer_node = Node(
         package='companion_head_expression',
-        executable='expression_renderer.py',
+        executable='expression_renderer',
         name='expression_renderer'
     )
 

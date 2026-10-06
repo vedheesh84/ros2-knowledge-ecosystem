@@ -60,12 +60,49 @@ cd ros2_companion_head_kit
 colcon build --symlink-install
 source install/setup.bash
 
-# Visualize Head URDF (no simulation)
-ros2 launch companion_head_description display.launch.py
+# Visualize Head URDF (no physics)
+ros2 launch companion_head_description display.launch.py use_rviz:=true
 
 # Launch Full Simulated Companion Head System
+ros2 launch companion_head_bringup simulation.launch.py
+
+# Launch Full Autonomous Social Perception & Behavior System
 ros2 launch companion_head_bringup full_system.launch.py
+
+# Run with Physical Hardware (Arduino Uno / Nano / ESP32 for 2-DOF PWM servos)
+ros2 launch companion_head_bringup hardware.launch.py serial_port:=/dev/ttyUSB0
+
+# Run with Desktop Pseudo-Hardware Emulator (No physical microcontrollers required)
+python3 scripts/pseudo_companion_head_emulator.py --serial-port /tmp/tty_companion_head
+# In a separate terminal:
+ros2 launch companion_head_bringup hardware.launch.py serial_port:=/tmp/tty_companion_head
+
+# Run Complete Automated Verification Test Suite
+python3 scripts/test_companion_head_kit.py
+
+# Run Progressive Demo 01
+ros2 run companion_head_demos demo_01_expressions
 ```
+
+### Hardware Firmware & Emulation Architecture
+
+1. **Physical Microcontroller Sketch (`arduino/companion_head_controller/`)**:
+   - Implements 2-DOF PWM Servo control on pins 9 and 10 (pan & tilt).
+   - Decodes motion commands: `SERVO <pan_deg> <tilt_deg>\n`.
+   - Streams 50 Hz position telemetry feedback: `SERVO_POS <pan_deg> <tilt_deg>\n`.
+   - Includes standalone loopback `#define SIMULATION_MODE` for benchtop testing directly on an Arduino without servos attached.
+2. **Desktop Pseudo Hardware Emulator (`scripts/pseudo_companion_head_emulator.py`)**:
+   - Opens pseudo-terminal (`pty`) pairs symlinked to `/tmp/tty_companion_head`.
+   - Emulates 50 Hz first-order low-pass servo dynamics with smooth trajectory tracking and feedback streaming.
+3. **Hardware Interface Plugin (`companion_head_hardware/ServoInterface`)**:
+   - C++ `hardware_interface::SystemInterface` plugin for `ros2_control`.
+   - Provides position command and position/velocity state interfaces for `neck_pan_joint` and `neck_tilt_joint`.
+4. **Automated Test Suite (`scripts/test_companion_head_kit.py`)**:
+   - Validates face detection, 3D base_link projection, and audio wake/tone events.
+   - Validates 8D vector cartoon face rendering and continuous Valence-Arousal-Engagement mood engine.
+   - Validates 2-DOF analytical inverse kinematics and behavior state machine transitions.
+   - Validates `ros2_control` multi-controller stack (`joint_state_broadcaster`, `joint_trajectory_controller`) with desktop hardware emulation.
+   - Validates progressive demos and intentional fault injection breakers (`break_servo`, `break_camera`, `break_audio`, `break_display`).
 
 ---
 

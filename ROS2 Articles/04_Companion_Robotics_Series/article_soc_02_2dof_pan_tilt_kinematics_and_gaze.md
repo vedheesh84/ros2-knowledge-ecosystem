@@ -55,4 +55,8 @@ $$q_{\text{tilt, error}} = \text{atan2}(-y_c, \sqrt{x_c^2 + z_c^2})$$
 
 #### 1. Gaze Controller Source Code:
 - Gaze Controller: [`ros2_companion_head_kit/src/companion_head_control/companion_head_control/gaze_controller.py`](../../Ros2%20learning%20kits/ros2_companion_head_kit/src/companion_head_control/companion_head_control/gaze_controller.py)
-- Run Demo 02: `ros2 run companion_head_demos demo_02_servo_control.py`
+- Run Demo 02: `ros2 run companion_head_demos demo_02_servo_control`
+- Physical Microcontroller Firmware: [`ros2_companion_head_kit/arduino/companion_head_controller/companion_head_controller.ino`](../../Ros2%20learning%20kits/ros2_companion_head_kit/arduino/companion_head_controller/companion_head_controller.ino)
+- Desktop Pseudo-Hardware Emulator: [`ros2_companion_head_kit/scripts/pseudo_companion_head_emulator.py`](../../Ros2%20learning%20kits/ros2_companion_head_kit/scripts/pseudo_companion_head_emulator.py)
+- Hardware Interface Plugin: [`ros2_companion_head_kit/src/companion_head_hardware/`](../../Ros2%20learning%20kits/ros2_companion_head_kit/src/companion_head_hardware/)
+- Automated Verification Suite: [`ros2_companion_head_kit/scripts/test_companion_head_kit.py`](../../Ros2%20learning%20kits/ros2_companion_head_kit/scripts/test_companion_head_kit.py)

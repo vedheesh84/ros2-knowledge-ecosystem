@@ -40,8 +40,8 @@
       <xacro:unless value="$(arg use_fake_hardware)">
         <hardware>
           <plugin>companion_head_hardware/ServoInterface</plugin>
-          <param name="serial_port">/dev/ttyUSB0</param>
-          <param name="baud_rate">115200</param>
+          <param name="serial_port">$(arg serial_port)</param>
+          <param name="baud_rate">$(arg baud_rate)</param>
         </hardware>
       </xacro:unless>
     </xacro:unless>
