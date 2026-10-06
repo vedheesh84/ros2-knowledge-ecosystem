@@ -11,8 +11,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
-from launch.conditions import IfCondition
+from launch.conditions import LaunchConfigurationEquals
 from launch_ros.actions import Node
 
 
@@ -39,15 +38,44 @@ def generate_launch_description():
             parameters=[config_file]
         ),
 
-        # Station keeping (default mode)
+        # Station keeping mode
         Node(
             package='reef_drone_control',
             executable='station_keeping',
             name='station_keeping',
             output='screen',
             parameters=[config_file],
-            condition=IfCondition(
-                "$(eval \"'$(var mode)' == 'station_keeping'\")"
-            )
+            condition=LaunchConfigurationEquals('mode', 'station_keeping')
+        ),
+
+        # Depth control mode
+        Node(
+            package='reef_drone_control',
+            executable='depth_controller',
+            name='depth_controller',
+            output='screen',
+            parameters=[config_file],
+            condition=LaunchConfigurationEquals('mode', 'depth')
+        ),
+
+        # Heading control mode
+        Node(
+            package='reef_drone_control',
+            executable='heading_controller',
+            name='heading_controller',
+            output='screen',
+            parameters=[config_file],
+            condition=LaunchConfigurationEquals('mode', 'heading')
+        ),
+
+        # Velocity control mode
+        Node(
+            package='reef_drone_control',
+            executable='velocity_controller',
+            name='velocity_controller',
+            output='screen',
+            parameters=[config_file],
+            condition=LaunchConfigurationEquals('mode', 'velocity')
         ),
     ])
+

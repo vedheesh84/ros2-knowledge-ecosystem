@@ -58,11 +58,12 @@ class Demo07SurveyMission(Node):
         self.get_logger().info('  1. Descend to 10m')
         self.get_logger().info('  2. Execute lawnmower survey')
         self.get_logger().info('  3. Return and surface')
-        self.get_logger().info('')
-        self.get_logger().info('Starting mission in 5 seconds...')
+        self.declare_parameter('start_delay', 1.0)
+        start_delay = self.get_parameter('start_delay').value
+        self.get_logger().info(f'Starting mission in {start_delay:.1f} seconds...')
 
         # Start mission after delay
-        self.create_timer(5.0, self.start_mission)
+        self.create_timer(start_delay, self.start_mission)
         self.mission_started = False
 
     def start_mission(self):
@@ -82,9 +83,16 @@ class Demo07SurveyMission(Node):
 def main(args=None):
     rclpy.init(args=args)
     node = Demo07SurveyMission()
-    rclpy.spin(node)
-    node.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.spin(node)
+    except (KeyboardInterrupt, rclpy.executors.ExternalShutdownException, Exception):
+        pass
+    finally:
+        try:
+            node.destroy_node()
+            rclpy.shutdown()
+        except Exception:
+            pass
 
 
 if __name__ == '__main__':

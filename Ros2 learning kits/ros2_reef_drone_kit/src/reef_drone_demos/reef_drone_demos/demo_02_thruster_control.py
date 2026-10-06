@@ -52,10 +52,22 @@ class Demo02ThrusterControl(Node):
         self.get_logger().info('Watch the robot\'s motion in Gazebo/RViz.')
         self.get_logger().info('')
 
-        # Run demo sequence
-        self.run_demo_sequence()
+        # Run demo sequence via timer
+        self._started = False
+        self.timer = self.create_timer(0.5, self._start_sequence)
 
-    def send_thrust(self, thrusts: list, description: str, duration: float = 3.0):
+    def _start_sequence(self):
+        if not self._started:
+            self._started = True
+            self.timer.cancel()
+            try:
+                self.run_demo_sequence()
+            except Exception as e:
+                self.get_logger().info(f'Sequence ended: {e}')
+            finally:
+                rclpy.shutdown()
+
+    def send_thrust(self, thrusts: list, description: str, duration: float = 1.0):
         """Send thrust command and hold for duration."""
         self.get_logger().info(f'>>> {description}')
         self.get_logger().info(f'    Thrusts: {thrusts}')
@@ -63,15 +75,16 @@ class Demo02ThrusterControl(Node):
         msg = Float64MultiArray()
         end_time = time.time() + duration
 
-        while time.time() < end_time:
+        while time.time() < end_time and rclpy.ok():
             msg.data = thrusts
             self.thruster_pub.publish(msg)
             time.sleep(0.1)
 
         # Zero thrust
-        msg.data = [0.0] * 6
-        self.thruster_pub.publish(msg)
-        time.sleep(1.0)  # Pause between tests
+        if rclpy.ok():
+            msg.data = [0.0] * 6
+            self.thruster_pub.publish(msg)
+            time.sleep(0.2)  # Pause between tests
 
     def run_demo_sequence(self):
         """Run through thruster test sequence."""
@@ -102,9 +115,19 @@ class Demo02ThrusterControl(Node):
 def main(args=None):
     rclpy.init(args=args)
     node = Demo02ThrusterControl()
-    node.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.spin(node)
+    except (KeyboardInterrupt, rclpy.executors.ExternalShutdownException, Exception):
+        pass
+    finally:
+        try:
+            node.destroy_node()
+            if rclpy.ok():
+                rclpy.shutdown()
+        except Exception:
+            pass
 
 
 if __name__ == '__main__':
     main()
+

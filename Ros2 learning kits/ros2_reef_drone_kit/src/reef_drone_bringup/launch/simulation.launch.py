@@ -23,6 +23,7 @@ from launch.conditions import IfCondition
 from launch.substitutions import Command, LaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
@@ -48,10 +49,10 @@ def generate_launch_description():
     urdf_file = os.path.join(description_dir, 'urdf', 'reef_drone.urdf.xacro')
     gazebo_xacro = os.path.join(description_dir, 'urdf', 'gazebo.xacro')
 
-    robot_description = Command([
+    robot_description = ParameterValue(Command([
         'xacro ', urdf_file,
         ' gazebo_xacro:=', gazebo_xacro
-    ])
+    ]), value_type=str)
 
     # World file
     world_file = os.path.join(gazebo_dir, 'worlds', 'ocean.world')

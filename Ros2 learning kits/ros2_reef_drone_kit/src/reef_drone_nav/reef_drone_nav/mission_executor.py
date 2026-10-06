@@ -144,22 +144,31 @@ class MissionExecutor(Node):
 
         for i in range(num_lines):
             y = start_y + i * spacing
+            heading = 0.0 if direction == 1 else np.pi
 
-            if direction == 1:
-                x = start_x + length
-            else:
-                x = start_x
+            x_start = start_x if direction == 1 else start_x + length
+            x_end = start_x + length if direction == 1 else start_x
 
+            # Leg start waypoint
             waypoints.append({
-                'x': x,
+                'x': x_start,
                 'y': y,
                 'z': depth,
-                'heading': 0.0 if direction == 1 else np.pi
+                'heading': heading
+            })
+
+            # Leg end waypoint
+            waypoints.append({
+                'x': x_end,
+                'y': y,
+                'z': depth,
+                'heading': heading
             })
 
             direction *= -1
 
         return waypoints
+
 
     def state_machine(self):
         """Execute state machine logic."""
@@ -245,9 +254,16 @@ class MissionExecutor(Node):
 def main(args=None):
     rclpy.init(args=args)
     node = MissionExecutor()
-    rclpy.spin(node)
-    node.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.spin(node)
+    except (KeyboardInterrupt, rclpy.executors.ExternalShutdownException, Exception):
+        pass
+    finally:
+        try:
+            node.destroy_node()
+            rclpy.shutdown()
+        except Exception:
+            pass
 
 
 if __name__ == '__main__':

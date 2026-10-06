@@ -16,7 +16,8 @@ Usage:
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.substitutions import LaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 
@@ -28,12 +29,31 @@ def generate_launch_description():
     control_dir = get_package_share_directory('reef_drone_control')
     nav_dir = get_package_share_directory('reef_drone_nav')
 
+    use_rviz_arg = DeclareLaunchArgument(
+        'use_rviz',
+        default_value='true',
+        description='Launch RViz visualization'
+    )
+
+    use_gui_arg = DeclareLaunchArgument(
+        'use_gui',
+        default_value='true',
+        description='Launch Gazebo GUI'
+    )
+
     return LaunchDescription([
+        use_rviz_arg,
+        use_gui_arg,
+
         # Simulation (Gazebo + robot)
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
                 os.path.join(bringup_dir, 'launch', 'simulation.launch.py')
             ]),
+            launch_arguments={
+                'use_rviz': LaunchConfiguration('use_rviz'),
+                'use_gui': LaunchConfiguration('use_gui'),
+            }.items(),
         ),
 
         # Sensors

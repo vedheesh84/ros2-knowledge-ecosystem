@@ -168,9 +168,16 @@ class Magnetometer(Node):
 def main(args=None):
     rclpy.init(args=args)
     node = Magnetometer()
-    rclpy.spin(node)
-    node.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.spin(node)
+    except (KeyboardInterrupt, rclpy.executors.ExternalShutdownException, Exception):
+        pass
+    finally:
+        try:
+            node.destroy_node()
+            rclpy.shutdown()
+        except Exception:
+            pass
 
 
 if __name__ == '__main__':

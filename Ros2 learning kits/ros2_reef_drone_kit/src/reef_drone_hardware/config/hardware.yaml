@@ -1,0 +1,3 @@
+port: "/tmp/ttyAUV_SIM"
+baudrate: 115200
+timeout: 0.1

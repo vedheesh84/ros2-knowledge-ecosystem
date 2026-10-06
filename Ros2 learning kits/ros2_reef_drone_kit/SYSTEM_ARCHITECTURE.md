@@ -429,3 +429,47 @@ Asynchronous: Each measurement triggers independent Kalman update
 - Simulation studies
 - Control theory research
 - Mission planning development
+
+---
+
+## 11. Hardware Layer & Testing Sandbox Architecture
+
+### Overview
+To bridge pure simulation and physical hardware, `ros2_reef_drone_kit` features an integrated Hardware Abstraction Layer and an isolated desktop Testing Sandbox:
+
+```
+ros2_reef_drone_kit/
+├── arduino/
+│   └── reef_drone_controller/
+│       └── reef_drone_controller.ino  # Physical Arduino/ESP32 firmware (6 ESC PWM, I2C MS5837)
+├── scripts/
+│   ├── pseudo_reef_drone_emulator.py  # Desktop PTY virtual serial bridge (100% offline twin)
+│   └── test_reef_drone_kit.py         # 8-phase automated regression test harness
+├── src/
+│   └── reef_drone_hardware/           # ROS 2 hardware bridge node
+├── ERROR_DIAGNOSIS_AND_SOLUTIONS.md   # Exhaustive error & solution registry
+└── COHERENCE_AUDIT_REPORT.md          # First-principles pedagogical audit
+```
+
+### Hardware Communication Protocol
+- **Transport**: Serial UART / USB CDC @ 115200 baud (device path `/tmp/ttyAUV_SIM` in sandbox emulation).
+- **Thruster Command Packet (ROS 2 -> Microcontroller)**:
+  `"<T1,T2,T3,T4,T5,T6>\n"`
+  Where $T_i \in [-1.0, 1.0]$. The microcontroller maps normalized floats to ESC pulse widths ($1100\,\mu\text{s}$ full reverse, $1500\,\mu\text{s}$ neutral, $1900\,\mu\text{s}$ full forward).
+- **Sensor Telemetry Packet (Microcontroller -> ROS 2)**:
+  `"$TELEM,DEPTH:<m>,PRESS:<Pa>,TEMP:<C>,STATUS:<ARMED/FAILSAFE>\n"`
+  Streamed at 20 Hz, parsed by `flight_bridge_node` into `/depth`, `/pressure`, and `/hardware/status`.
+- **Failsafe Watchdog**:
+  A 500ms deadman timer on the microcontroller disarms all thrusters to neutral ($1500\,\mu\text{s}$) if serial heartbeat commands cease.
+
+### Testing Sandbox Harness
+The automated test runner (`test_reef_drone_kit.py`) exercises 8 distinct validation layers:
+1. `test_01_urdf_and_kinematics`: Verifies URDF Xacro tree, 12 links, 6 thruster joints, and $+0.02\,\text{m}$ metacentric height.
+2. `test_02_thrust_allocation_matrix`: Verifies rank-5 configuration matrix $B$ and $B^+$ pseudoinverse mapping.
+3. `test_03_sensor_simulation`: Verifies DVL bottom lock, hydrostatic pressure gradient, and magnetometer compass.
+4. `test_04_ekf_estimation`: Verifies 12-state Kalman prediction, sensor corrections, and positive-definite covariance.
+5. `test_05_controllers`: Verifies depth hold, heading regulation, velocity tracking, and cascaded station keeping.
+6. `test_06_navigation_and_mission`: Verifies lawnmower transect pattern generation and state machine transitions.
+7. `test_07_demos_and_breakers`: Verifies progressive educational demos and fault injection breakers.
+8. `test_08_hardware_bridge_and_emulator`: Verifies bidirectional PTY serial exchange and failsafe watchdog disarming.
+

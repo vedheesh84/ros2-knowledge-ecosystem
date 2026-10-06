@@ -80,6 +80,7 @@ ros2_reef_drone_kit/src/
 ├── reef_drone_control/      # PID controllers, thruster allocation
 ├── reef_drone_estimation/   # EKF sensor fusion
 ├── reef_drone_nav/          # 3D waypoint navigation
+├── reef_drone_hardware/     # Serial hardware bridge node
 ├── reef_drone_bringup/      # Launch files, ocean world
 └── reef_drone_demos/        # 7 demos + failure injection
 ```
@@ -94,18 +95,26 @@ cd ros2_reef_drone_kit
 colcon build --symlink-install
 source install/setup.bash
 
-# Visualize robot (no physics)
+# Run Automated Regression Test Suite (100% Offline / Headless)
+python3 scripts/test_reef_drone_kit.py
+
+# Visualize robot in RViz (no physics required)
 ros2 launch reef_drone_description display.launch.py
 
-# Run simulation
+# Run simulation (Gazebo physics + plugins)
 ros2 launch reef_drone_bringup simulation.launch.py
 
-# Run full system
+# Run full system (Simulation + Sensors + EKF + Control + Nav)
 ros2 launch reef_drone_bringup full_system.launch.py
+
+# Run with Desktop Hardware Emulator (PTY Loopback)
+python3 scripts/pseudo_reef_drone_emulator.py &
+ros2 launch reef_drone_hardware hardware_bridge.launch.py
 
 # Start with Demo 01
 ros2 run reef_drone_demos demo_01_buoyancy
 ```
+
 
 ---
 
